@@ -1,0 +1,9 @@
+syntax="proto3";
+
+package emailcode;
+option go_package = "github.com/Enfariches/gym/protogen";
+
+service EmailCode{
+    rpc CreateCode(CreateCodeRequest) returns (CreateCodeResponse);
+    rpc ConfirmCode (ConfirmCodeRequest) returns (ConfirmCodeResponse);
+}

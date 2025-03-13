@@ -1,4 +1,5 @@
-gym-server/.env
 gym-admin-panel/.env
 .idea
 .database
+.env
+/protogen
