@@ -1,91 +1,154 @@
 <template>
-  <div class="q-pa-md">
-    <h4>Расписание видео</h4>
+  <div class="content">
+    <h1 class="page-title">Управление расписанием</h1>
+    
+    <div class="schedule-toolbar">
+      <div class="filter-container">
+        <select class="btn btn-outline">
+          <option>Все отделы</option>
+          <option>Разработчики</option>
+          <option>Финансовый отдел</option>
+          <option>Маркетинг</option>
+          <option>HR</option>
+        </select>
+        <select class="btn btn-outline">
+          <option>Все видео</option>
+          <option v-for="video in videos" :key="video.ID">{{ video.Name }}</option>
+        </select>
+      </div>
+    </div>
 
-    <div class="schedule-container">
-      <div class="schedule-element" v-for="(day, idx) in days" :key="idx">
-        <div class="schedule-element__head">
-          <div>{{day.name}}</div>
-        </div>
-        <div class="schedule-element__body">
-          <div v-if="day.items.length === 0" class="body__empty">
-            <div>Нет видео на этот день</div>
+    <div class="calendar-container">
+      <div class="schedule-sidebar">
+        <h3 class="sidebar-title">Отделы</h3>
+        <div class="department-list">
+          <div class="department-item">
+            <label class="checkbox-container">
+              <input type="checkbox" checked>
+              <span class="checkmark"></span>
+              <span class="department-name">Все отделы</span>
+            </label>
           </div>
-          <div v-else class="body__list">
-            <ul v-for="(schedule, idx) in day.items" :key="idx" class="">
-              <li v-bind:class = "(idx%2 === 0)?'li-even':'li-odd'">
-                <div class="body__video_wrapper">
-                    <div class="video__name">
-                      <div class="video__label">
-                        Видео
-                      </div>
-                      <span>
-                        {{getVideoNameById(schedule.VideoID)}}
-                      </span>
+          <div class="department-item">
+            <label class="checkbox-container">
+              <input type="checkbox">
+              <span class="checkmark"></span>
+              <span class="department-name">Разработчики</span>
+            </label>
+          </div>
+          <div class="department-item">
+            <label class="checkbox-container">
+              <input type="checkbox">
+              <span class="checkmark"></span>
+              <span class="department-name">Финансовый отдел</span>
+            </label>
+          </div>
+          <div class="department-item">
+            <label class="checkbox-container">
+              <input type="checkbox">
+              <span class="checkmark"></span>
+              <span class="department-name">Маркетинг</span>
+            </label>
+          </div>
+          <div class="department-item">
+            <label class="checkbox-container">
+              <input type="checkbox">
+              <span class="checkmark"></span>
+              <span class="department-name">HR</span>
+            </label>
+          </div>
+        </div>
+        
+        <h3 class="sidebar-title">Видео</h3>
+        <div class="department-list">
+          <div class="department-item">
+            <label class="checkbox-container">
+              <input type="checkbox" checked>
+              <span class="checkmark"></span>
+              <span class="department-name">Все видео</span>
+            </label>
+          </div>
+          <div v-for="video in videos" :key="video.ID" class="department-item">
+            <label class="checkbox-container">
+              <input type="checkbox">
+              <span class="checkmark"></span>
+              <span class="department-name">{{ video.Name }}</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="schedule-grid">
+        <div class="schedule-element" v-for="(day, idx) in days" :key="idx">
+          <div class="schedule-element__head">
+            <div>{{day.name}}</div>
+          </div>
+          <div class="schedule-element__body">
+            <div v-if="day.items.length === 0" class="body__empty">
+              <div>Нет видео на этот день</div>
+            </div>
+            <div v-else class="body__list">
+              <div v-for="(schedule, idx) in day.items" :key="idx" class="schedule-item" :class="{'schedule-item-odd': idx % 2 !== 0}">
+                <div class="schedule-item__content">
+                  <div class="schedule-item__title">
+                    <div class="video__label">Видео</div>
+                    <span>{{getVideoNameById(schedule.VideoID)}}</span>
                   </div>
-                  <div class="video__time">
-                    <div>
-                       <div class="time__label">
-                          Время
-                      </div>
-                      <span>
-                          {{ schedule.Time }}
-                      </span>
-                    </div>
-                     <div class="body__video_buttons">
-                      <q-btn
-                        icon="edit"
-                        flat
-                        class="video__edit_btn"
-                        @click="onEdit(getVideoNameById(schedule.VideoID), schedule.VideoID, day.order); isEditModalOpen = true; index = schedule.ID"
-                      />
-                      <button class="video__delete" @click="index = schedule.ID; _removeSchedule()">
-                        &times;
-                      </button>
-                    </div>
+                  <div class="schedule-item__time">
+                    <div class="time__label">Время</div>
+                    <span>{{ schedule.Time }}</span>
+                  </div>
+                  <div class="schedule-item__actions">
+                    <button class="action-btn edit" title="Редактировать" @click="onEdit(getVideoNameById(schedule.VideoID), schedule.VideoID, day.order); isEditModalOpen = true; index = schedule.ID">
+                      <i class="fas fa-edit"></i>
+                      <span class="action-tooltip">Редактировать</span>
+                    </button>
+                    <button class="action-btn delete" title="Удалить" @click="index = schedule.ID; _removeSchedule()">
+                      <i class="fas fa-trash"></i>
+                      <span class="action-tooltip">Удалить</span>
+                    </button>
                   </div>
                 </div>
-              </li>
-            </ul>
+              </div>
+            </div>
+            <button class="btn btn-primary add-schedule" @click="onAdd(day.order); isEditModalOpen = true;">
+              <i class="fas fa-plus"></i> Добавить видео
+            </button>
           </div>
-          <button class="body__add-btn" @click="onAdd(day.order); isEditModalOpen = true;">
-            Добавить +
-          </button>
         </div>
       </div>
     </div>
   </div>
 
   <q-dialog v-model="isEditModalOpen">
-    <q-card style=" min-width: 400px; min-height: 200px; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 20px">
-      <q-select
-        v-model="newVideoName"
-        label="Название видео"
-        style="width: 80%"
-        placeholder="Выберите видео"
-        :display-value="newVideoName ? `${newVideoName}` : `Выберите видео`"
-        :options="videos.map((el:any) => el.Name)"
-        @update:model-value="onSelectedVideoChange"
-      />
-      <span>Выберите время показа</span>
-      <q-time
-        v-model="timeWithSeconds"
-        landscape
-        @update:model-value="onSelectedTimeChange"
-      />
-      <div style="width: 80%; display: flex; gap: 20px; margin-bottom: 20px;">
-        <q-btn
-          label="Сохранить"
-          color="positive"
-          style="width: 50%"
-          @click="onSave"
+    <q-card class="edit-modal">
+      <h3 class="modal-title">{{ index ? 'Редактировать расписание' : 'Добавить расписание' }}</h3>
+      <div class="form-group">
+        <label>Выберите видео</label>
+        <q-select
+          v-model="newVideoName"
+          class="video-select"
+          :options="videos.map((el:any) => el.Name)"
+          @update:model-value="onSelectedVideoChange"
+          :display-value="newVideoName ? newVideoName : 'Выберите видео'"
         />
-        <q-btn
-          label="Отмена"
-          color="negative"
-          style="width: 50%"
-          @click="onDecline"
+      </div>
+      <div class="form-group">
+        <label>Выберите время показа</label>
+        <input
+          type="text"
+          v-model="timeWithSeconds"
+          class="time-input"
+          placeholder="ЧЧ:ММ (например, 09:00)"
+          @input="validateTime"
         />
+        <div v-if="timeError" class="error-message">
+          {{ timeError }}
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-outline" @click="onDecline">Отмена</button>
+        <button class="btn btn-primary" @click="onSave">Сохранить</button>
       </div>
     </q-card>
   </q-dialog>
@@ -120,6 +183,7 @@ const videoToSchedule = ref({
   time: '',
   videoid: ''
 })
+const timeError = ref('')
 
 type videoData = {
   ID:string,
@@ -130,12 +194,14 @@ type videoData = {
   archived:boolean
 }
 
+const API_URL = process.env.QUASAR_API_URL || 'http://localhost:8083/api/v1'
+
 const init = () => {
   const token = localStorage.getItem('token');
 
   days.value.forEach(async (day, idx) => {
     setTimeout(async () => {
-      await fetch(`http://localhost:8083/api/v1/schedule/${idx}`, {
+      await fetch(`${API_URL}/schedule/${idx}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -150,7 +216,7 @@ const init = () => {
 
 onMounted(async () => {
   init()
-  await fetch(`http://localhost:8083/api/v1/videos`, {
+  await fetch(`${API_URL}/videos`, {
     method: 'GET',
   }).then(async (res) => {
     if (res.ok) {
@@ -162,7 +228,7 @@ onMounted(async () => {
 
 const _removeSchedule = async () => {
   const token = localStorage.getItem('token');
-  await fetch(`http://localhost:8083/api/v1/schedule/${index.value}`, {
+  await fetch(`${API_URL}/schedule/${index.value}`, {
     method: 'DELETE',
     headers: {
       'Authorization': `Bearer ${token}`,
@@ -192,7 +258,7 @@ const updateSchedule = async () =>{
   if(videoToSchedule.value.videoid === '' || videoToSchedule.value.time === '' || videoToSchedule.value.dayofweek === '')
     return
 
-  await fetch(`http://localhost:8083/api/v1/schedule`, {
+  await fetch(`${API_URL}/schedule`, {
     method: 'PUT',
     headers: {
       'Authorization': `Bearer ${token}`,
@@ -209,7 +275,26 @@ const updateSchedule = async () =>{
   })
 }
 
+const validateTime = () => {
+  const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/
+  
+  if (!timeWithSeconds.value) {
+    timeError.value = 'Время не может быть пустым'
+    return false
+  }
+
+  if (!timeRegex.test(timeWithSeconds.value)) {
+    timeError.value = 'Неверный формат времени. Используйте формат ЧЧ:ММ (например, 09:00)'
+    return false
+  }
+
+  timeError.value = ''
+  videoToSchedule.value.time = timeWithSeconds.value
+  return true
+}
+
 const onSave = () => {
+  if (!validateTime()) return
   updateSchedule().then(
     () => onDecline()
   )
@@ -221,11 +306,7 @@ const onDecline = () => {
   videoToSchedule.value.videoid =''
   isEditModalOpen.value = false
   newVideoName.value=''
-}
-
-const onSelectedTimeChange = (value: string | null) =>{
-  if(value)
-    videoToSchedule.value.time = value
+  timeWithSeconds.value = ''
 }
 
 const onAdd = (dayOfWeek:number) =>{
@@ -252,112 +333,364 @@ const getVideoNameById = (id:string) => {
 }
 
 </script>
-<style>
-  .schedule-container{
-    display:flex;
-    flex-wrap: wrap;
-    width: 100%;
-    justify-content: start;
-    gap:10px;
-  }
-  .body__video_wrapper{
-    width: 100%;
-  }
-  .schedule-element{
-    flex:1;
-    min-width: 155px;
-    display: flex;
-    flex-direction: column;
-    justify-content: start;
-    border-radius:5px;
-    border: 2px solid #161e43;
-  }
-  .schedule-element__head{
-    padding: 10px;
-    color:#fff;
-    background: #161e43;
-  }
-  .body__empty{
-    margin-top: auto;
-  }
-  .schedule-element__head > div,
-  .body__empty > div{
-    margin: 0 auto;
-    width: max-content;
-  }
 
-  .schedule-element__body{
-    background: #72779f;
-    height: 100%;
-    min-height: 200px;
+<style scoped>
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', sans-serif;
+}
 
-    display: flex;
-    flex-direction: column;
-  }
-  .body__add-btn{
-    margin-top: auto;
-    width: 100%;
-    background: #161e43;
-    padding: 10px;
-    color:#fff;
-    border: none;
-  }
-  .body__add-btn:hover{
-    cursor: pointer;
-    background: #1d2753;
-  }
-  .body__add-btn:active{
-    background: #161e43;
-  }
+.content {
+  padding: 20px 40px;
+  background-color: #f8f9fc;
+}
 
-  .body__list > ul{
-    margin: 0;
-    padding: 0;
-    list-style-type: none;
-    display: flex;
-    flex-direction: column;
-  }
-  .body__list > ul > li{
-    display: flex;
-    flex-direction: row;
-    padding: 0 10px;
-    justify-content: space-between;
-    align-items: center;
-  }
+.page-title {
+  color: rgba(90,92,105,1);
+  font-weight: bold;
+  font-size: 32px;
+  margin-bottom: 20px;
+}
 
-  .time__label,
-  .video__label{
-    font-size: 12px;
-    opacity: .8;
-  }
+.schedule-toolbar {
+  background: white;
+  border: 2px solid rgba(227,230,240,1);
+  border-radius: 6px;
+  padding: 15px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 
-  .video__time{
-    display: flex;
-    justify-content: space-between;
-  }
-  .body__video_buttons{
-    display: flex;
-    align-items: center;
-    gap:5px;
-  }
+.btn {
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: bold;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
 
-  .video__delete{
-    width: 25px;
-    aspect-ratio: 1/1;
-    background: none;
-    border: 2px solid #161e43;
-    border-radius: 3px;
-  }
-  .video__delete:hover{
-    cursor: pointer;
-    background: #161e43;
-    color:#fff;
-  }
-  .video__edit_btn{
-    padding: 0;
-  }
-  .li-odd{
-    background: #676c8e;
-  }
+.btn-primary {
+  background-color: rgba(78,115,223,1);
+  color: white;
+}
 
+.btn-outline {
+  background-color: white;
+  border: 2px solid rgba(78,115,223,1);
+  color: rgba(78,115,223,1);
+}
+
+.filter-container {
+  display: flex;
+  gap: 15px;
+}
+
+.calendar-container {
+  display: flex;
+  gap: 20px;
+}
+
+.schedule-sidebar {
+  flex: 0 0 250px;
+  background: white;
+  border: 2px solid rgba(227,230,240,1);
+  border-radius: 6px;
+  padding: 15px;
+}
+
+.sidebar-title {
+  font-size: 18px;
+  font-weight: bold;
+  color: rgba(90,92,105,1);
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(227,230,240,1);
+}
+
+.department-list {
+  margin-bottom: 30px;
+}
+
+.department-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 0;
+  cursor: pointer;
+}
+
+.checkbox-container {
+  display: flex;
+  align-items: center;
+  position: relative;
+  padding-left: 30px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.checkbox-container input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+.checkmark {
+  position: absolute;
+  left: 0;
+  height: 18px;
+  width: 18px;
+  border: 2px solid rgba(78,115,223,1);
+  border-radius: 3px;
+  background-color: white;
+}
+
+.checkbox-container:hover input ~ .checkmark {
+  background-color: rgba(78,115,223,0.1);
+}
+
+.checkbox-container input:checked ~ .checkmark {
+  background-color: rgba(78,115,223,1);
+}
+
+.checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+}
+
+.checkbox-container input:checked ~ .checkmark:after {
+  display: block;
+}
+
+.checkbox-container .checkmark:after {
+  left: 5px;
+  top: 1px;
+  width: 4px;
+  height: 9px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.department-name {
+  font-size: 14px;
+  color: rgba(90,92,105,1);
+  margin-left: 5px;
+}
+
+.schedule-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  align-items: start;
+}
+
+.schedule-element {
+  flex: 1;
+  background: white;
+  border: 2px solid rgba(227,230,240,1);
+  border-radius: 6px;
+  overflow: hidden;
+  height: 100%;
+}
+
+.schedule-element__head {
+  background: rgba(78,115,223,1);
+  color: white;
+  padding: 12px;
+  font-size: 16px;
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.schedule-element__body {
+  padding: 15px;
+  min-height: 150px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.body__empty {
+  text-align: center;
+  color: rgba(108,117,125,1);
+  margin: auto;
+}
+
+.schedule-item {
+  background-color: white;
+  border: 1px solid rgba(227,230,240,1);
+  padding: 12px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  transition: all 0.3s ease;
+}
+
+.schedule-item:hover {
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.schedule-item-odd {
+  background-color: rgba(78,115,223,0.02);
+}
+
+.schedule-item__content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.schedule-item__title {
+  flex: 1;
+}
+
+.video__label, .time__label {
+  font-size: 12px;
+  color: rgba(108,117,125,1);
+  margin-bottom: 5px;
+}
+
+.schedule-item__time {
+  margin: 0 15px;
+  min-width: 80px;
+}
+
+.schedule-item__actions {
+  display: flex;
+  gap: 10px;
+}
+
+.action-btn {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.action-tooltip {
+  position: absolute;
+  background: rgba(0,0,0,0.8);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s ease;
+  margin-bottom: 5px;
+}
+
+.action-btn:hover .action-tooltip {
+  opacity: 1;
+  visibility: visible;
+}
+
+.action-btn.edit {
+  background-color: rgba(78,115,223,1);
+  color: white;
+}
+
+.action-btn.edit:hover {
+  background-color: rgba(78,115,223,0.8);
+}
+
+.action-btn.delete {
+  background-color: rgba(231,74,59,1);
+  color: white;
+}
+
+.action-btn.delete:hover {
+  background-color: rgba(231,74,59,0.8);
+}
+
+.edit-modal {
+  background: white;
+  padding: 20px;
+  min-width: 350px;
+}
+
+.modal-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: rgba(90,92,105,1);
+  margin-bottom: 15px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 14px;
+  font-weight: bold;
+  color: rgba(90,92,105,1);
+  margin-bottom: 8px;
+}
+
+.video-select {
+  width: 100%;
+}
+
+.time-input {
+  width: 100%;
+  padding: 8px;
+  font-size: 14px;
+  border: 2px solid rgba(227,230,240,1);
+  border-radius: 4px;
+}
+
+.time-input:focus {
+  outline: none;
+  border-color: rgba(78,115,223,1);
+}
+
+.error-message {
+  color: rgba(231,74,59,1);
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.add-schedule {
+  width: 100%;
+  justify-content: center;
+  gap: 8px;
+  margin-top: auto;
+  background-color: rgba(78,115,223,1);
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.add-schedule:hover {
+  background-color: rgba(78,115,223,0.8);
+}
 </style>

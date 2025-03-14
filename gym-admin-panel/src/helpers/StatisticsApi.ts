@@ -1,3 +1,5 @@
+const API_URL = process.env.QUASAR_API_URL || 'http://localhost:8083/api/v1'
+
 export type IResponseItem={
   created_at: string,
   id: number,
@@ -26,7 +28,7 @@ export const getStatisticByViewType = async (viewType:string) => {
 const fetchData = async () : Promise<IResponse | undefined> => {
   let result;
 
-  await fetch(`http://localhost:8083/api/v1/stats`, {
+  await fetch(`${API_URL}/stats`, {
     method: 'GET'
   }).then(async (res) => {
     if(res.ok)

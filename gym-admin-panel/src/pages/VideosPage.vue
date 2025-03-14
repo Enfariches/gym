@@ -1,37 +1,22 @@
 <template>
-  <q-page class="flex flex-center">
-    <q-card v-if="videos.length" style="width: 80%; padding: 20px 40px; display: flex; gap: 20px; flex-wrap: wrap;">
-      <q-card
-        v-for="video in videos"
-        :key="video.ID"
-        style="background-color: rgb(22, 30, 67); width: min-content; padding: 10px 20px;
-        color: gray; text-wrap: nowrap; display: flex; justify-content: space-between; align-items: center; gap: 5px"
-      >
-        <span>
-          Название: {{ video.Name }}
-        </span>
-        <q-btn icon="edit" flat size="10px" @click="isModalChangeNameVideo = true; index = video.ID"/>
-        <q-btn icon="delete" flat size="10px" @click="index = video.ID; removeVideo()" />
-      </q-card>
-    </q-card>
-    <div class="upload-wrapper">
-      <div class="upload-container" @click="handleContainerClick">
-        <div class="upload-header">
-          <q-icon name="video_library" size="50px" color="primary" />
-          <h2 class="upload-title">Загрузите ваше видео</h2>
-          <p class="upload-description">
-            Выберите видео в формате MP4 (до 500 МБ).
-          </p>
-        </div>
+  <div>
+    <div class="content">
+      <h1 class="page-title">Управление видео</h1>
 
-        <q-btn label="Выберите видео" color="primary" class="upload-btn" />
-        <input
-          type="file"
-          ref="fileInput"
-          accept="video/mp4"
-          @change="handleFileChange"
-          style="display: none"
-        />
+      <div class="upload-section">
+        <h2 style="font-size: 32px; color: rgba(90,92,105,1); margin-bottom: 20px;">Загрузить новое видео</h2>
+        <div class="upload-area" @click="handleContainerClick">
+          <div class="upload-icon">+</div>
+          <div class="upload-text">Перетащите файл видео сюда или нажмите для выбора</div>
+          <button class="btn btn-primary">Выбрать файл</button>
+          <input
+            type="file"
+            ref="fileInput"
+            accept="video/mp4"
+            @change="handleFileChange"
+            style="display: none"
+          />
+        </div>
 
         <div v-if="errorMessage" class="error-message q-mt-md">
           {{ errorMessage }}
@@ -61,39 +46,86 @@
             />
           </div>
         </div>
+
+        <button 
+          class="btn btn-primary" 
+          style="margin-top: 20px;"
+          :disabled="isUploading"
+          @click="uploadFiles"
+        >
+          Загрузить видео
+        </button>
       </div>
 
-      <q-btn
-        label="Отправить"
-        color="secondary"
-        :disabled="isUploading"
-        class="upload-btn q-mt-md"
-        style="width: 80%"
-        @click="uploadFiles"
-      />
+      <div class="video-toolbar">
+        <div class="search-container">
+          <input type="text" class="search-input" placeholder="Поиск видео по названию, категории...">
+        </div>
+        <div class="filter-container">
+          <select class="btn btn-outline">
+            <option>Все категории</option>
+            <option>Утренняя</option>
+            <option>Офисная</option>
+            <option>Спина</option>
+            <option>Глаза</option>
+          </select>
+          <select class="btn btn-outline">
+            <option>Сортировка</option>
+            <option>По просмотрам</option>
+            <option>По дате</option>
+            <option>По названию</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="video-grid" v-if="videos.length">
+        <div class="video-card" v-for="video in videos" :key="video.ID">
+          <div class="video-thumbnail">
+            <div class="video-duration">00:00</div>
+          </div>
+          <div class="video-info">
+            <div class="video-title">{{ video.Name }}</div>
+            <div class="video-meta">
+              <span>Просмотры: 0</span>
+              <span>Добавлено: сегодня</span>
+            </div>
+            <div>
+              <span class="tag">Видео</span>
+            </div>
+            <div class="video-actions">
+              <button class="action-btn edit" @click="isModalChangeNameVideo = true; index = video.ID">
+                Редактировать
+              </button>
+              <button class="action-btn delete" @click="index = video.ID; removeVideo()">
+                Удалить
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-  </q-page>
+  </div>
+
   <q-dialog v-model="isModalChangeNameVideo">
-    <q-card style="min-width: 400px; min-height: 200px; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 20px">
-      <q-input
-        v-model="newVideoName"
-        label="Название видео"
-        placeholer="Введите новое название видео"
-        style="width: 80%"
-      />
-      <div style="width: 80%; display: flex; gap: 20px;">
-        <q-btn
-          label="Отмена"
-          color="positive"
-          style="width: 50%"
-          @click="isModalChangeNameVideo = false"
+    <q-card class="edit-modal">
+      <div class="form-group">
+        <label>Название видео</label>
+        <input
+          v-model="newVideoName"
+          type="text"
+          placeholder="Введите новое название видео"
         />
-        <q-btn
-          label="Сохранить"
-          color="negative"
-          style="width: 50%"
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-outline" @click="isModalChangeNameVideo = false">
+          Отмена
+        </button>
+        <button 
+          class="btn btn-primary" 
           @click="changeVideoName(index); isModalChangeNameVideo = false"
-        />
+        >
+          Сохранить
+        </button>
       </div>
     </q-card>
   </q-dialog>
@@ -114,6 +146,7 @@ export default defineComponent({
     const isModalChangeNameVideo = ref(false)
     const newVideoName = ref('')
     const index = ref()
+    const API_URL = process.env.QUASAR_API_URL || 'http://localhost:8083/api/v1'
 
     /** Триггерим выбор файла */
     const triggerFileInput = () => {
@@ -172,7 +205,7 @@ export default defineComponent({
       }
 
       try {
-        await fetch('http://localhost:8083/api/v1/videos', {
+        await fetch(`${API_URL}/videos`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -192,7 +225,7 @@ export default defineComponent({
       isUploading.value = false;
     };
     const init = async () => {
-      await fetch(`http://localhost:8083/api/v1/videos`, {
+      await fetch(`${API_URL}/videos`, {
         method: 'GET',
       }).then(async (res) => {
         if (res.ok) {
@@ -204,7 +237,7 @@ export default defineComponent({
 
     const changeVideoName = async (idx: number) => {
       const token = localStorage.getItem('token');
-      await fetch(`http://localhost:8083/api/v1/videos/${idx}`, {
+      await fetch(`${API_URL}/videos/${idx}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -218,7 +251,7 @@ export default defineComponent({
 
     const removeVideo = async () => {
       const token = localStorage.getItem('token');
-      await fetch(`http://localhost:8083/api/v1/videos/${index.value}`, {
+      await fetch(`${API_URL}/videos/${index.value}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -257,97 +290,260 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.upload-wrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', sans-serif;
 }
 
-.upload-container {
-  width: 80%;
-  padding: 30px;
-  border: 2px dashed #1976d2;
-  border-radius: 12px;
-  text-align: center;
-  position: relative;
-  background-color: #f1f8ff;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease-in-out;
+.content {
+  padding: 20px 40px;
+  background-color: #f8f9fc;
 }
 
-.upload-container:hover {
-  transform: translateY(-5px);
-}
-
-.upload-header {
+.page-title {
+  color: rgba(90,92,105,1);
+  font-weight: bold;
+  font-size: 32px;
   margin-bottom: 20px;
 }
 
-.upload-title {
-  font-size: 24px;
-  font-weight: bold;
-  color: #1976d2;
-  margin: 10px 0;
+.video-toolbar {
+  background: white;
+  border: 2px solid rgba(227,230,240,1);
+  border-radius: 6px;
+  padding: 15px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.upload-description {
-  font-size: 14px;
-  color: #5a5a5a;
+.search-container {
+  flex: 0 0 60%;
+  position: relative;
 }
 
-.upload-btn {
+.search-input {
   width: 100%;
-  padding: 12px;
-  font-size: 16px;
-  border-radius: 8px;
-  transition: background-color 0.3s ease;
+  padding: 8px 15px;
+  font-size: 14px;
+  border: 1px solid rgba(227,230,240,1);
+  border-radius: 4px;
 }
 
-.upload-btn:hover {
-  background-color: #1565c0;
+.btn {
+  padding: 8px 15px;
+  font-size: 14px;
+  font-weight: bold;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.btn-primary {
+  background-color: rgba(78,115,223,1);
+  color: white;
+}
+
+.btn-outline {
+  background-color: white;
+  border: 1px solid rgba(78,115,223,1);
+  color: rgba(78,115,223,1);
+}
+
+.filter-container {
+  display: flex;
+  gap: 10px;
+}
+
+.video-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.video-card {
+  background: white;
+  border: 2px solid rgba(227,230,240,1);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.video-thumbnail {
+  width: 100%;
+  height: 160px;
+  background-color: #ccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 14px;
+  position: relative;
+}
+
+.video-duration {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  background: rgba(0,0,0,0.7);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 3px;
+  font-size: 12px;
+}
+
+.video-info {
+  padding: 15px;
+}
+
+.video-title {
+  font-size: 16px;
+  font-weight: bold;
+  color: rgba(90,92,105,1);
+  margin-bottom: 8px;
+}
+
+.video-meta {
+  display: flex;
+  justify-content: space-between;
+  color: rgba(108,117,125,1);
+  margin-bottom: 10px;
+  font-size: 12px;
+}
+
+.tag {
+  display: inline-block;
+  background-color: rgba(78,115,223,0.1);
+  color: rgba(78,115,223,1);
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 12px;
+  margin-right: 6px;
+  margin-bottom: 6px;
+}
+
+.video-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+  gap: 8px;
+}
+
+.action-btn {
+  padding: 6px 12px;
+  font-size: 12px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  flex: 1;
+}
+
+.action-btn.edit {
+  background-color: rgba(78,115,223,1);
+  color: white;
+}
+
+.action-btn.delete {
+  background-color: rgba(231,74,59,1);
+  color: white;
+}
+
+.upload-section {
+  background: white;
+  border: 2px solid rgba(227,230,240,1);
+  border-radius: 6px;
+  padding: 20px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.upload-section h2 {
+  font-size: 24px !important;
+  color: rgba(90,92,105,1);
+  margin-bottom: 15px !important;
+}
+
+.upload-area {
+  border: 2px dashed rgba(78,115,223,0.5);
+  border-radius: 6px;
+  padding: 20px;
+  margin: 15px 0;
+  background-color: rgba(78,115,223,0.05);
+  cursor: pointer;
+}
+
+.upload-icon {
+  font-size: 40px;
+  color: rgba(78,115,223,0.7);
+  margin-bottom: 15px;
+}
+
+.upload-text {
+  font-size: 16px;
+  color: rgba(90,92,105,1);
+  margin-bottom: 15px;
+}
+
+.edit-modal {
+  min-width: 300px;
+  padding: 20px;
+  background: white;
+}
+
+.form-group {
+  margin-bottom: 15px;
+  text-align: left;
+}
+
+.form-group label {
+  display: block;
+  font-size: 14px;
+  font-weight: bold;
+  color: rgba(90,92,105,1);
+  margin-bottom: 6px;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 8px;
+  font-size: 14px;
+  border: 1px solid rgba(227,230,240,1);
+  border-radius: 4px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
 }
 
 .error-message {
   color: red;
-  font-size: 14px;
+  font-size: 12px;
+  margin-top: 8px;
 }
 
 .progress-container {
-  margin-top: 20px;
+  margin-top: 15px;
 }
 
 .uploaded-files {
-  margin-top: 20px;
+  margin-top: 15px;
   text-align: left;
-  max-height: 150px;
-  overflow-y: auto;
 }
 
 .uploaded-file {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 10px;
   align-items: center;
-  padding: 8px;
-  background-color: #e3f2fd;
-  border-radius: 8px;
-}
-
-.uploaded-file span {
-  font-size: 14px;
-  color: #1976d2;
-}
-
-.uploaded-file q-btn {
-  padding: 0;
-}
-
-.q-mt-lg {
-  margin-top: 30px;
-}
-
-.q-mt-md {
-  margin-top: 20px;
+  padding: 6px;
+  background-color: rgba(78,115,223,0.1);
+  border-radius: 4px;
+  margin-bottom: 8px;
+  font-size: 12px;
 }
 </style>
