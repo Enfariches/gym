@@ -1,12 +1,6 @@
-.SILENCE
 
-# Сборка гимнастики
-.build
-	#Установить Golang
-	#Brew install protoc
-	#Brew install grpc
-	#go install from grpc.io
-	#export PATH="$PATH:$(go env GOPATH)/bin"
-	#protoc -I api api/proto/auth.proto --go_out=./protoc-gen/ --go_opt=paths=source_relative \
-	 --go-grpc_out=./protoc-gen/ --go-grpc_opt=paths=source_relative
-	#go mod tidy
+# Генерация grpc кода, для работы на Go
+gen:
+	mkdir -p protogen
+	protoc -I api api/proto/auth/auth.proto --go_out=./protogen/ --go_opt=paths=source_relative \
+	--go-grpc_out=./protogen/ --go-grpc_opt=paths=source_relative
