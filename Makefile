@@ -12,4 +12,5 @@ gen:
 # 2) С помощью env CONFIG_PATH, который экспортируется перед запуском make
 # Если flag не указан, используется путь из env.
 bundle:
+	cd ./gym-server && go mod tidy
 	go -C ./gym-server run ./cmd/gymserver/main.go --config=./config/dev.yaml

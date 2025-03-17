@@ -31,7 +31,7 @@ func MustLoad() *Config{
 	if _, err := os.Stat(path); os.IsNotExist(err){
 		panic("config file does not exist: " + path)
 	}
-	
+
 	err := cleanenv.ReadConfig(path, &cfg)
 	if err != nil{
 		panic("failed to reaf config")
@@ -42,7 +42,7 @@ func MustLoad() *Config{
 
 func fetchConfigPath() string{
 	var path string
-	
+
 	flag.StringVar(&path, "config", "", "path to config file")
 	flag.Parse()
 
