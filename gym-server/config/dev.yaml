@@ -1,0 +1,6 @@
+env: "dev"
+storage: "postgresql://postgres:root@localhost:5432/healthdb"
+token_ttl: 1h # Срок жизни токена
+grpc:
+  port: 9090
+  timeout: 5s
