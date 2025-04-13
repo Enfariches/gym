@@ -29,25 +29,10 @@
     </div>
     
     <div class="stats-container">
-      <div class="stat-card">
-        <div class="stat-title">Всего просмотров</div>
-        <div class="stat-value">3,842</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-title">Просмотрено до конца</div>
-        <div class="stat-value">76%</div>
-        <div class="stat-description">2,920 завершенных просмотров</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-title">Уникальных пользователей</div>
-        <div class="stat-value">945</div>
-        <div class="stat-description">75.8% от всех пользователей</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-title">Среднее время просмотра</div>
-        <div class="stat-value">8:24</div>
-        <div class="stat-description">мин:сек</div>
-      </div>
+      <SmallCard title="Всего просмотров" value="3,842" icon="visibility" />
+      <SmallCard title="Просмотрено до конца" value="76%" icon="check_circle" />
+      <SmallCard title="Уникальных пользователей" value="945" icon="people" />
+      <SmallCard title="Среднее время просмотра" value="8:24" icon="timer" />
     </div>
     
     <div class="dashboard-row">
@@ -108,7 +93,8 @@
 
 <script lang="ts" setup>
 import { ref } from 'vue'
-import StatisticsChartComponent from 'components/StatisticsChartComponent.vue'
+import StatisticsChartComponent from 'src/components/statPage/StatisticsChartComponent.vue'
+import SmallCard from '../components/SmallCard.vue'
 
 interface errorWithMessage {
   isError: boolean
