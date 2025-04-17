@@ -4,9 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/jackc/pgx/v5"
-	"gorm.io/gorm"
 	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 type Storage struct {
@@ -28,8 +27,6 @@ func New(databaseURL string) (*Storage, error) {
 
 func (s *Storage) SaveAdmin(ctx context.Context, email string, passHash []byte) error {
 	const op = "postgres.SaveAdmin"
-	
-	
 
 	return nil
 }
