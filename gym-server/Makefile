@@ -1,12 +1,18 @@
 export CONFIG_PATH=$(shell pwd)/gym-server/config/dev.yaml
+PROTO_FILES = $(shell find ../api/v1 -name '*.proto')
 
-# TODO: Сделать pretty тесты и логи.
+
+# TODO: Сделать pretty тесты и логи. 
+# Очень долго загружается golang:alpine [75 mb], go mod download
 
 # Генерация grpc кода, для работы c Go
 gen:
 	mkdir -p ./protogen
-	protoc -I ../api ../api/v1/auth/auth.proto --go_out=./protogen/ --go_opt=paths=source_relative \
-	--go-grpc_out=./protogen/ --go-grpc_opt=paths=source_relative
+	protoc -I ../api $(PROTO_FILES) \
+	 --go_out=./protogen/ \
+	  --go_opt=paths=source_relative \
+	--go-grpc_out=./protogen/ \
+	 --go-grpc_opt=paths=source_relative
 
 # Путь конфига указывается двумя способами:
 # 1) flag --config=./config/dev.yaml
@@ -21,3 +27,6 @@ bundle:
 test:
 	go mod tidy
 	go test health/lib/jwt
+
+migrate:
+	go run ./cmd/migrator/migrator.go --storage-url=postgres:root@localhost:5436/health?sslmode=disable --migrations-path=migrations

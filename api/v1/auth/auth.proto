@@ -3,19 +3,34 @@ syntax="proto3";
 package auth;
 option go_package = "github.com/Enfariches/gym/protogen";
 
-service Auth {
+// Сервис для аутентификации и регистрации пользователей.
+service AuthService {
+
+    // Регистрирует нового пользователя.
     rpc Register(AuthRequest) returns (RegisterResponse);
+
+    // Аутентифицирует пользователя.
     rpc Login(AuthRequest) returns (LoginResponse);
 }
 
+// Запрос на аутентификацию или регистрацию.
 message AuthRequest {
+    // Электронная почта пользователя.
     string email = 1;
+    
+    // Пароль пользователя.
     string password = 2;
 }
 
+// Ответ на аутентификацию.
 message LoginResponse {
+    //JWT-токен, используемый для последующих запросов.
     string token = 1;
 }
 
-message RegisterResponse {}
+// Ответ на регистрацию пользователя.
+message RegisterResponse {
+    // При успешной регистрации возвращает OK (code 0).
+    // При ошибке возвращает Internal (code 13).
+}
     

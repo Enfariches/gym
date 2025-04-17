@@ -1,0 +1,1281 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <title>Protocol Documentation</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Ubuntu:400,700,400italic"/>
+    <style>
+      body {
+        width: 60em;
+        margin: 1em auto;
+        color: #222;
+        font-family: "Ubuntu", sans-serif;
+        padding-bottom: 4em;
+      }
+
+      h1 {
+        font-weight: normal;
+        border-bottom: 1px solid #aaa;
+        padding-bottom: 0.5ex;
+      }
+
+      h2 {
+        border-bottom: 1px solid #aaa;
+        padding-bottom: 0.5ex;
+        margin: 1.5em 0;
+      }
+
+      h3 {
+        font-weight: normal;
+        border-bottom: 1px solid #aaa;
+        padding-bottom: 0.5ex;
+      }
+
+      a {
+        text-decoration: none;
+        color: #567e25;
+      }
+
+      table {
+        width: 100%;
+        font-size: 80%;
+        border-collapse: collapse;
+      }
+
+      thead {
+        font-weight: 700;
+        background-color: #dcdcdc;
+      }
+
+      tbody tr:nth-child(even) {
+        background-color: #fbfbfb;
+      }
+
+      td {
+        border: 1px solid #ccc;
+        padding: 0.5ex 2ex;
+      }
+
+      td p {
+        text-indent: 1em;
+        margin: 0;
+      }
+
+      td p:nth-child(1) {
+        text-indent: 0;  
+      }
+
+       
+      .field-table td:nth-child(1) {  
+        width: 10em;
+      }
+      .field-table td:nth-child(2) {  
+        width: 10em;
+      }
+      .field-table td:nth-child(3) {  
+        width: 6em;
+      }
+      .field-table td:nth-child(4) {  
+        width: auto;
+      }
+
+       
+      .extension-table td:nth-child(1) {  
+        width: 10em;
+      }
+      .extension-table td:nth-child(2) {  
+        width: 10em;
+      }
+      .extension-table td:nth-child(3) {  
+        width: 10em;
+      }
+      .extension-table td:nth-child(4) {  
+        width: 5em;
+      }
+      .extension-table td:nth-child(5) {  
+        width: auto;
+      }
+
+       
+      .enum-table td:nth-child(1) {  
+        width: 10em;
+      }
+      .enum-table td:nth-child(2) {  
+        width: 10em;
+      }
+      .enum-table td:nth-child(3) {  
+        width: auto;
+      }
+
+       
+      .scalar-value-types-table tr {
+        height: 3em;
+      }
+
+       
+      #toc-container ul {
+        list-style-type: none;
+        padding-left: 1em;
+        line-height: 180%;
+        margin: 0;
+      }
+      #toc > li > a {
+        font-weight: bold;
+      }
+
+       
+      .file-heading {
+        width: 100%;
+        display: table;
+        border-bottom: 1px solid #aaa;
+        margin: 4em 0 1.5em 0;
+      }
+      .file-heading h2 {
+        border: none;
+        display: table-cell;
+      }
+      .file-heading a {
+        text-align: right;
+        display: table-cell;
+      }
+
+       
+      .badge {
+        width: 1.6em;
+        height: 1.6em;
+        display: inline-block;
+
+        line-height: 1.6em;
+        text-align: center;
+        font-weight: bold;
+        font-size: 60%;
+
+        color: #89ba48;
+        background-color: #dff0c8;
+
+        margin: 0.5ex 1em 0.5ex -1em;
+        border: 1px solid #fbfbfb;
+        border-radius: 1ex;
+      }
+    </style>
+
+    
+    <link rel="stylesheet" type="text/css" href="stylesheet.css"/>
+  </head>
+
+  <body>
+
+    <h1 id="title">Protocol Documentation</h1>
+
+    <h2>Table of Contents</h2>
+
+    <div id="toc-container">
+      <ul id="toc">
+        
+          
+          <li>
+            <a href="#api%2fv1%2fschedule%2fschedule.proto">api/v1/schedule/schedule.proto</a>
+            <ul>
+              
+                <li>
+                  <a href="#schedule.CreateScheduleRequest"><span class="badge">M</span>CreateScheduleRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#schedule.DeleteScheduleRequest"><span class="badge">M</span>DeleteScheduleRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#schedule.GetScheduleRequest"><span class="badge">M</span>GetScheduleRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#schedule.ListScheduleRequest"><span class="badge">M</span>ListScheduleRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#schedule.ListScheduleResponse"><span class="badge">M</span>ListScheduleResponse</a>
+                </li>
+              
+                <li>
+                  <a href="#schedule.Schedule"><span class="badge">M</span>Schedule</a>
+                </li>
+              
+                <li>
+                  <a href="#schedule.UpdateScheduleRequest"><span class="badge">M</span>UpdateScheduleRequest</a>
+                </li>
+              
+              
+              
+              
+                <li>
+                  <a href="#schedule.ScheduleService"><span class="badge">S</span>ScheduleService</a>
+                </li>
+              
+            </ul>
+          </li>
+        
+          
+          <li>
+            <a href="#api%2fv1%2fauth%2fauth.proto">api/v1/auth/auth.proto</a>
+            <ul>
+              
+                <li>
+                  <a href="#auth.AuthRequest"><span class="badge">M</span>AuthRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#auth.LoginResponse"><span class="badge">M</span>LoginResponse</a>
+                </li>
+              
+                <li>
+                  <a href="#auth.RegisterResponse"><span class="badge">M</span>RegisterResponse</a>
+                </li>
+              
+              
+              
+              
+                <li>
+                  <a href="#auth.AuthService"><span class="badge">S</span>AuthService</a>
+                </li>
+              
+            </ul>
+          </li>
+        
+          
+          <li>
+            <a href="#api%2fv1%2fuser%2femployee.proto">api/v1/user/employee.proto</a>
+            <ul>
+              
+                <li>
+                  <a href="#employee.DeleteUserRequest"><span class="badge">M</span>DeleteUserRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#employee.GetUserRequest"><span class="badge">M</span>GetUserRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#employee.UpdateUserRequest"><span class="badge">M</span>UpdateUserRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#employee.User"><span class="badge">M</span>User</a>
+                </li>
+              
+              
+              
+              
+                <li>
+                  <a href="#employee.EmployeeService"><span class="badge">S</span>EmployeeService</a>
+                </li>
+              
+            </ul>
+          </li>
+        
+          
+          <li>
+            <a href="#api%2fv1%2fuser%2fadmin.proto">api/v1/user/admin.proto</a>
+            <ul>
+              
+                <li>
+                  <a href="#admin.Admin"><span class="badge">M</span>Admin</a>
+                </li>
+              
+                <li>
+                  <a href="#admin.DeleteAdminRequest"><span class="badge">M</span>DeleteAdminRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#admin.GetAdminRequest"><span class="badge">M</span>GetAdminRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#admin.IsAdminRequest"><span class="badge">M</span>IsAdminRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#admin.IsAdminResponse"><span class="badge">M</span>IsAdminResponse</a>
+                </li>
+              
+                <li>
+                  <a href="#admin.UpdateAdminRequest"><span class="badge">M</span>UpdateAdminRequest</a>
+                </li>
+              
+              
+              
+              
+                <li>
+                  <a href="#admin.AdminService"><span class="badge">S</span>AdminService</a>
+                </li>
+              
+            </ul>
+          </li>
+        
+        <li><a href="#scalar-value-types">Scalar Value Types</a></li>
+      </ul>
+    </div>
+
+    
+      
+      <div class="file-heading">
+        <h2 id="api/v1/schedule/schedule.proto">api/v1/schedule/schedule.proto</h2><a href="#title">Top</a>
+      </div>
+      <p></p>
+
+      
+        <h3 id="schedule.CreateScheduleRequest">CreateScheduleRequest</h3>
+        <p>Запрос на создание расписания.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>schedules</td>
+                  <td><a href="#schedule.Schedule">Schedule</a></td>
+                  <td>repeated</td>
+                  <td><p>Расписания, которые необходимо создать. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>force</td>
+                  <td><a href="#bool">bool</a></td>
+                  <td></td>
+                  <td><p>Флаг повторения расписания вновь и вновь. </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="schedule.DeleteScheduleRequest">DeleteScheduleRequest</h3>
+        <p>Запрос на удаление расписания.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>schedule_id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>ID расписания, которое необходимо удалить. </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="schedule.GetScheduleRequest">GetScheduleRequest</h3>
+        <p>Запрос на получение расписания.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>schedule_id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>ID расписания, которое необходимо получить. </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="schedule.ListScheduleRequest">ListScheduleRequest</h3>
+        <p>Запрос на получение списка расписаний.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>schedule_ids</td>
+                  <td><a href="#string">string</a></td>
+                  <td>repeated</td>
+                  <td><p>ID расписания, которое необходимо получить. </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="schedule.ListScheduleResponse">ListScheduleResponse</h3>
+        <p>Ответ на запрос списка расписаний.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>schedules</td>
+                  <td><a href="#schedule.Schedule">Schedule</a></td>
+                  <td>repeated</td>
+                  <td><p>Список расписаний. </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="schedule.Schedule">Schedule</h3>
+        <p>Струкутура расписания.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>ID расписания. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>departament_id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>ID отдела, для которого предназначено расписание. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>day_of_week</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p>День недели (0 - воскресенье, 1 - понедельник, ..., 6 - суббота). </p></td>
+                </tr>
+              
+                <tr>
+                  <td>hour</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p>Час времени. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>minute</td>
+                  <td><a href="#int32">int32</a></td>
+                  <td></td>
+                  <td><p>Минуты времени. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>video_id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>ID видео, которое необходимо воспроизвести по расписанию. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>create_at</td>
+                  <td><a href="#google.protobuf.Timestamp">google.protobuf.Timestamp</a></td>
+                  <td></td>
+                  <td><p>Время создания расписания. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>update_at</td>
+                  <td><a href="#google.protobuf.Timestamp">google.protobuf.Timestamp</a></td>
+                  <td></td>
+                  <td><p>Время обновления расписания. </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="schedule.UpdateScheduleRequest">UpdateScheduleRequest</h3>
+        <p>Запрос на обновление расписания.</p><p>Нужно согласовать какие поля расписания можно менять.</p>
+
+        
+
+        
+      
+
+      
+
+      
+
+      
+        <h3 id="schedule.ScheduleService">ScheduleService</h3>
+        <p>Сервис для управления расписанием.</p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Method Name</td><td>Request Type</td><td>Response Type</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>CreateSchedule</td>
+                <td><a href="#schedule.CreateScheduleRequest">CreateScheduleRequest</a></td>
+                <td><a href="#schedule.Schedule">Schedule</a></td>
+                <td><p>Создает новое расписание.</p></td>
+              </tr>
+            
+              <tr>
+                <td>GetSchedule</td>
+                <td><a href="#schedule.GetScheduleRequest">GetScheduleRequest</a></td>
+                <td><a href="#schedule.Schedule">Schedule</a></td>
+                <td><p>Получает расписание.</p></td>
+              </tr>
+            
+              <tr>
+                <td>ListSchedule</td>
+                <td><a href="#schedule.ListScheduleRequest">ListScheduleRequest</a></td>
+                <td><a href="#schedule.ListScheduleResponse">ListScheduleResponse</a></td>
+                <td><p>Получает список расписание.</p></td>
+              </tr>
+            
+              <tr>
+                <td>UpdateSchedule</td>
+                <td><a href="#schedule.UpdateScheduleRequest">UpdateScheduleRequest</a></td>
+                <td><a href="#schedule.Schedule">Schedule</a></td>
+                <td><p>Обновляет расписание.</p></td>
+              </tr>
+            
+              <tr>
+                <td>DeleteSchedule</td>
+                <td><a href="#schedule.DeleteScheduleRequest">DeleteScheduleRequest</a></td>
+                <td><a href="#google.protobuf.Empty">.google.protobuf.Empty</a></td>
+                <td><p>Удаляет расписание.</p></td>
+              </tr>
+            
+          </tbody>
+        </table>
+
+        
+    
+      
+      <div class="file-heading">
+        <h2 id="api/v1/auth/auth.proto">api/v1/auth/auth.proto</h2><a href="#title">Top</a>
+      </div>
+      <p></p>
+
+      
+        <h3 id="auth.AuthRequest">AuthRequest</h3>
+        <p>Запрос на аутентификацию или регистрацию.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>email</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Электронная почта пользователя. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>password</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Пароль пользователя. </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="auth.LoginResponse">LoginResponse</h3>
+        <p>Ответ на аутентификацию.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>token</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>JWT-токен, используемый для последующих запросов. </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="auth.RegisterResponse">RegisterResponse</h3>
+        <p>Ответ на регистрацию пользователя.</p><p>При успешной регистрации возвращает OK (code 0).</p><p>При ошибке возвращает Internal (code 13).</p>
+
+        
+
+        
+      
+
+      
+
+      
+
+      
+        <h3 id="auth.AuthService">AuthService</h3>
+        <p>Сервис для аутентификации и регистрации пользователей.</p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Method Name</td><td>Request Type</td><td>Response Type</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>Register</td>
+                <td><a href="#auth.AuthRequest">AuthRequest</a></td>
+                <td><a href="#auth.RegisterResponse">RegisterResponse</a></td>
+                <td><p>Регистрирует нового пользователя.</p></td>
+              </tr>
+            
+              <tr>
+                <td>Login</td>
+                <td><a href="#auth.AuthRequest">AuthRequest</a></td>
+                <td><a href="#auth.LoginResponse">LoginResponse</a></td>
+                <td><p>Аутентифицирует пользователя.</p></td>
+              </tr>
+            
+          </tbody>
+        </table>
+
+        
+    
+      
+      <div class="file-heading">
+        <h2 id="api/v1/user/employee.proto">api/v1/user/employee.proto</h2><a href="#title">Top</a>
+      </div>
+      <p></p>
+
+      
+        <h3 id="employee.DeleteUserRequest">DeleteUserRequest</h3>
+        <p>Запрос на удаление пользователя.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>employee_id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>ID пользователя. </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="employee.GetUserRequest">GetUserRequest</h3>
+        <p>Запрос на получение пользователя.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>employee_id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>ID пользователя. </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="employee.UpdateUserRequest">UpdateUserRequest</h3>
+        <p>Запрос на обновление пользователя.</p><p>Нужно согласовать какие поля расписания можно менять.</p>
+
+        
+
+        
+      
+        <h3 id="employee.User">User</h3>
+        <p>Структура пользователя.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>ID пользователя. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Имя пользователя. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>secondName</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Отчество пользователя. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>surname</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Фамилия пользователя. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>email</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Электронная почта пользователя. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>age</td>
+                  <td><a href="#uint32">uint32</a></td>
+                  <td></td>
+                  <td><p>Возраст пользователя. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>sex</td>
+                  <td><a href="#bool">bool</a></td>
+                  <td></td>
+                  <td><p>Пол пользователя. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>number</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Номер телефона пользователя. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>departament</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Отдел пользователя. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>post</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Должность пользователя. </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+
+      
+
+      
+
+      
+        <h3 id="employee.EmployeeService">EmployeeService</h3>
+        <p>Сервис для управления пользователями.</p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Method Name</td><td>Request Type</td><td>Response Type</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>GetUser</td>
+                <td><a href="#employee.GetUserRequest">GetUserRequest</a></td>
+                <td><a href="#employee.User">User</a></td>
+                <td><p>Получает пользователя.</p></td>
+              </tr>
+            
+              <tr>
+                <td>UpdateAdmin</td>
+                <td><a href="#employee.UpdateUserRequest">UpdateUserRequest</a></td>
+                <td><a href="#employee.User">User</a></td>
+                <td><p>Обновляет пользователя.</p></td>
+              </tr>
+            
+              <tr>
+                <td>DeleteAdmin</td>
+                <td><a href="#employee.DeleteUserRequest">DeleteUserRequest</a></td>
+                <td><a href="#google.protobuf.Empty">.google.protobuf.Empty</a></td>
+                <td><p>Удаляет пользователя.</p></td>
+              </tr>
+            
+          </tbody>
+        </table>
+
+        
+    
+      
+      <div class="file-heading">
+        <h2 id="api/v1/user/admin.proto">api/v1/user/admin.proto</h2><a href="#title">Top</a>
+      </div>
+      <p></p>
+
+      
+        <h3 id="admin.Admin">Admin</h3>
+        <p>Структура администратора.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>ID администратора. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>name</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Имя администратора. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>surname</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Фамилия администратора. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>email</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Электронная почта администратора. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>departament</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Отдел за котором закреплен администратор. </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="admin.DeleteAdminRequest">DeleteAdminRequest</h3>
+        <p>Запрос на удаление администратора.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>admin_id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="admin.GetAdminRequest">GetAdminRequest</h3>
+        <p>Запрос на получение администратора.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>admin_id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="admin.IsAdminRequest">IsAdminRequest</h3>
+        <p>Запрос на проверку администратора.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>admin_id</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="admin.IsAdminResponse">IsAdminResponse</h3>
+        <p>Ответ на запрос проверки администратора.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>IsAdmin</td>
+                  <td><a href="#bool">bool</a></td>
+                  <td></td>
+                  <td><p>Флаг, является ли пользователь администратором. </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="admin.UpdateAdminRequest">UpdateAdminRequest</h3>
+        <p>Запрос на обновление администратора.</p><p>Нужно согласовать какие поля расписания можно менять.</p>
+
+        
+
+        
+      
+
+      
+
+      
+
+      
+        <h3 id="admin.AdminService">AdminService</h3>
+        <p>Сервис для управления администраторами.</p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Method Name</td><td>Request Type</td><td>Response Type</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>GetAdmin</td>
+                <td><a href="#admin.GetAdminRequest">GetAdminRequest</a></td>
+                <td><a href="#admin.Admin">Admin</a></td>
+                <td><p>Получает администратора.</p></td>
+              </tr>
+            
+              <tr>
+                <td>UpdateAdmin</td>
+                <td><a href="#admin.UpdateAdminRequest">UpdateAdminRequest</a></td>
+                <td><a href="#admin.Admin">Admin</a></td>
+                <td><p>Обновляет администратора.</p></td>
+              </tr>
+            
+              <tr>
+                <td>DeleteAdmin</td>
+                <td><a href="#admin.DeleteAdminRequest">DeleteAdminRequest</a></td>
+                <td><a href="#google.protobuf.Empty">.google.protobuf.Empty</a></td>
+                <td><p>Удаляет администратора.</p></td>
+              </tr>
+            
+              <tr>
+                <td>IsAdmin</td>
+                <td><a href="#admin.IsAdminRequest">IsAdminRequest</a></td>
+                <td><a href="#admin.IsAdminResponse">IsAdminResponse</a></td>
+                <td><p>Проверяет, является ли пользователь администратором.</p></td>
+              </tr>
+            
+          </tbody>
+        </table>
+
+        
+    
+
+    <h2 id="scalar-value-types">Scalar Value Types</h2>
+    <table class="scalar-value-types-table">
+      <thead>
+        <tr><td>.proto Type</td><td>Notes</td><td>C++</td><td>Java</td><td>Python</td><td>Go</td><td>C#</td><td>PHP</td><td>Ruby</td></tr>
+      </thead>
+      <tbody>
+        
+          <tr id="double">
+            <td>double</td>
+            <td></td>
+            <td>double</td>
+            <td>double</td>
+            <td>float</td>
+            <td>float64</td>
+            <td>double</td>
+            <td>float</td>
+            <td>Float</td>
+          </tr>
+        
+          <tr id="float">
+            <td>float</td>
+            <td></td>
+            <td>float</td>
+            <td>float</td>
+            <td>float</td>
+            <td>float32</td>
+            <td>float</td>
+            <td>float</td>
+            <td>Float</td>
+          </tr>
+        
+          <tr id="int32">
+            <td>int32</td>
+            <td>Uses variable-length encoding. Inefficient for encoding negative numbers – if your field is likely to have negative values, use sint32 instead.</td>
+            <td>int32</td>
+            <td>int</td>
+            <td>int</td>
+            <td>int32</td>
+            <td>int</td>
+            <td>integer</td>
+            <td>Bignum or Fixnum (as required)</td>
+          </tr>
+        
+          <tr id="int64">
+            <td>int64</td>
+            <td>Uses variable-length encoding. Inefficient for encoding negative numbers – if your field is likely to have negative values, use sint64 instead.</td>
+            <td>int64</td>
+            <td>long</td>
+            <td>int/long</td>
+            <td>int64</td>
+            <td>long</td>
+            <td>integer/string</td>
+            <td>Bignum</td>
+          </tr>
+        
+          <tr id="uint32">
+            <td>uint32</td>
+            <td>Uses variable-length encoding.</td>
+            <td>uint32</td>
+            <td>int</td>
+            <td>int/long</td>
+            <td>uint32</td>
+            <td>uint</td>
+            <td>integer</td>
+            <td>Bignum or Fixnum (as required)</td>
+          </tr>
+        
+          <tr id="uint64">
+            <td>uint64</td>
+            <td>Uses variable-length encoding.</td>
+            <td>uint64</td>
+            <td>long</td>
+            <td>int/long</td>
+            <td>uint64</td>
+            <td>ulong</td>
+            <td>integer/string</td>
+            <td>Bignum or Fixnum (as required)</td>
+          </tr>
+        
+          <tr id="sint32">
+            <td>sint32</td>
+            <td>Uses variable-length encoding. Signed int value. These more efficiently encode negative numbers than regular int32s.</td>
+            <td>int32</td>
+            <td>int</td>
+            <td>int</td>
+            <td>int32</td>
+            <td>int</td>
+            <td>integer</td>
+            <td>Bignum or Fixnum (as required)</td>
+          </tr>
+        
+          <tr id="sint64">
+            <td>sint64</td>
+            <td>Uses variable-length encoding. Signed int value. These more efficiently encode negative numbers than regular int64s.</td>
+            <td>int64</td>
+            <td>long</td>
+            <td>int/long</td>
+            <td>int64</td>
+            <td>long</td>
+            <td>integer/string</td>
+            <td>Bignum</td>
+          </tr>
+        
+          <tr id="fixed32">
+            <td>fixed32</td>
+            <td>Always four bytes. More efficient than uint32 if values are often greater than 2^28.</td>
+            <td>uint32</td>
+            <td>int</td>
+            <td>int</td>
+            <td>uint32</td>
+            <td>uint</td>
+            <td>integer</td>
+            <td>Bignum or Fixnum (as required)</td>
+          </tr>
+        
+          <tr id="fixed64">
+            <td>fixed64</td>
+            <td>Always eight bytes. More efficient than uint64 if values are often greater than 2^56.</td>
+            <td>uint64</td>
+            <td>long</td>
+            <td>int/long</td>
+            <td>uint64</td>
+            <td>ulong</td>
+            <td>integer/string</td>
+            <td>Bignum</td>
+          </tr>
+        
+          <tr id="sfixed32">
+            <td>sfixed32</td>
+            <td>Always four bytes.</td>
+            <td>int32</td>
+            <td>int</td>
+            <td>int</td>
+            <td>int32</td>
+            <td>int</td>
+            <td>integer</td>
+            <td>Bignum or Fixnum (as required)</td>
+          </tr>
+        
+          <tr id="sfixed64">
+            <td>sfixed64</td>
+            <td>Always eight bytes.</td>
+            <td>int64</td>
+            <td>long</td>
+            <td>int/long</td>
+            <td>int64</td>
+            <td>long</td>
+            <td>integer/string</td>
+            <td>Bignum</td>
+          </tr>
+        
+          <tr id="bool">
+            <td>bool</td>
+            <td></td>
+            <td>bool</td>
+            <td>boolean</td>
+            <td>boolean</td>
+            <td>bool</td>
+            <td>bool</td>
+            <td>boolean</td>
+            <td>TrueClass/FalseClass</td>
+          </tr>
+        
+          <tr id="string">
+            <td>string</td>
+            <td>A string must always contain UTF-8 encoded or 7-bit ASCII text.</td>
+            <td>string</td>
+            <td>String</td>
+            <td>str/unicode</td>
+            <td>string</td>
+            <td>string</td>
+            <td>string</td>
+            <td>String (UTF-8)</td>
+          </tr>
+        
+          <tr id="bytes">
+            <td>bytes</td>
+            <td>May contain any arbitrary sequence of bytes.</td>
+            <td>string</td>
+            <td>ByteString</td>
+            <td>str</td>
+            <td>[]byte</td>
+            <td>ByteString</td>
+            <td>string</td>
+            <td>String (ASCII-8BIT)</td>
+          </tr>
+        
+      </tbody>
+    </table>
+  </body>
+</html>
+
