@@ -23,11 +23,18 @@ services:
     image: envoyproxy/envoy:v1.28.0
     container_name: envoy
     ports:
-      - "9901:9901"  # Админ-панель Envoy
       - "8085:8085"  # HTTP вход
       - "8443:8443"  # HTTPS вход
     volumes:
       - ./envoyproxy/envoy.yaml:/etc/envoy/envoy.yaml  # Подключаем конфиг
+
+  gym-docs:
+    image: nginx:alpine
+    container_name: gym-docs
+    volumes:
+      - ./docs:/usr/share/nginx/html:ro
+    ports:
+      - "8083:80"
 
   gym-server:
     container_name: gym-server

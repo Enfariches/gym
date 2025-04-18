@@ -2,11 +2,11 @@ package models
 
 import (
 	"fmt"
-	"github.com/joho/godotenv"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
 	"log"
 	"os"
+
+	"github.com/joho/godotenv"
+	"gorm.io/gorm"
 )
 
 var Db *gorm.DB
@@ -25,20 +25,5 @@ func init() {
 
 	dbURI := fmt.Sprintf("host=%s user=%s dbname=%s sslmode=disable password=%s", dbHost, username, dbName, password)
 	fmt.Println(dbURI)
-
-	Conn, err := gorm.Open(postgres.Open(dbURI), &gorm.Config{})
-	if err != nil {
-		log.Println(err)
-	}
-
-	Db = Conn
-	err = Conn.Debug().AutoMigrate(
-		&Video{}, &Stat{}, &Shedule{},
-		&Session{}, &EmailConfirm{},
-		&Admin{}, &Username{}, &PublicStat{},
-		&User{})
-	if err != nil {
-		log.Fatal(err)
-	}
 
 }

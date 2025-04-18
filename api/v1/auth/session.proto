@@ -1,8 +1,0 @@
-syntax="proto3";
-
-package session;
-option go_package = "github.com/Enfariches/gym/protogen";
-
-service Session{
-    rpc GetSession(GetSessionRequest) returns (GetSessionResponse);
-}

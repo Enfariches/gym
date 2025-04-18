@@ -1,0 +1,69 @@
+syntax="proto3";
+
+package employee;
+option go_package = "github.com/Enfariches/gym/protogen";
+
+import "google/protobuf/empty.proto";
+
+// Сервис для управления пользователями.
+service EmployeeService {
+
+    // Получает пользователя.
+    rpc GetUser (GetUserRequest) returns (User);
+
+    // Обновляет пользователя.
+    rpc UpdateAdmin (UpdateUserRequest) returns (User);
+
+    // Удаляет пользователя.
+    rpc DeleteAdmin (DeleteUserRequest) returns (google.protobuf.Empty);
+}
+
+// Запрос на получение пользователя.
+message GetUserRequest {
+    // ID пользователя.
+    string employee_id = 1;
+}
+
+// Запрос на обновление пользователя.
+message UpdateUserRequest {
+    // Нужно согласовать какие поля расписания можно менять.
+}
+
+// Запрос на удаление пользователя.
+message DeleteUserRequest {
+    // ID пользователя.
+    string employee_id = 1;
+}
+
+// Структура пользователя.
+message User {
+    // ID пользователя.
+    string id = 1;
+
+    // Имя пользователя.
+    string name = 2;
+
+    // Отчество пользователя.
+    string secondName = 3;
+
+    // Фамилия пользователя.
+    string surname = 4;
+
+    // Электронная почта пользователя.
+    string email = 5;
+
+    // Возраст пользователя.
+    uint32 age = 6;
+
+    // Пол пользователя.
+    bool sex = 7;
+
+    // Номер телефона пользователя.
+    string number = 8;
+
+    // Отдел пользователя.
+    string departament = 9;
+
+    // Должность пользователя.
+    string post = 10;
+}

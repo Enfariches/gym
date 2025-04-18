@@ -1,0 +1,92 @@
+syntax="proto3";
+
+package schedule;
+option go_package = "github.com/Enfariches/gym/protogen";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+// Сервис для управления расписанием.
+service ScheduleService {
+
+    // Создает новое расписание.
+    rpc CreateSchedule(CreateScheduleRequest) returns (Schedule);
+
+    // Получает расписание.
+    rpc GetSchedule(GetScheduleRequest) returns (Schedule);
+
+    // Получает список расписание.
+    rpc ListSchedule(ListScheduleRequest) returns (ListScheduleResponse);
+
+    // Обновляет расписание.
+    rpc UpdateSchedule(UpdateScheduleRequest) returns (Schedule);
+
+    // Удаляет расписание.
+    rpc DeleteSchedule(DeleteScheduleRequest) returns (google.protobuf.Empty);
+}
+
+// Запрос на создание расписания.
+message CreateScheduleRequest {
+    // Расписания, которые необходимо создать.
+    repeated Schedule schedules = 1;
+
+    // Флаг повторения расписания вновь и вновь.
+    bool force = 2;
+}
+
+//Запрос на получение расписания.
+message GetScheduleRequest {
+    // ID расписания, которое необходимо получить.
+    string schedule_id = 1;
+}
+
+// Запрос на получение списка расписаний.
+message ListScheduleRequest {
+    // ID расписания, которое необходимо получить.
+    repeated string schedule_ids = 1;
+}
+
+// Ответ на запрос списка расписаний.
+message ListScheduleResponse {
+    // Список расписаний.
+    repeated Schedule schedules = 1;
+}
+
+// Запрос на обновление расписания.
+message UpdateScheduleRequest {
+    // Нужно согласовать какие поля расписания можно менять.
+}
+
+// Запрос на удаление расписания.
+message DeleteScheduleRequest {
+    // ID расписания, которое необходимо удалить.
+    string schedule_id = 1;
+}
+
+// Струкутура расписания.
+message Schedule {
+    // ID расписания.
+    string id = 1;
+
+    // ID отдела, для которого предназначено расписание.
+    string departament_id = 2;
+
+    // День недели (0 - воскресенье, 1 - понедельник, ..., 6 - суббота).
+    int32 day_of_week = 3;
+
+    // Час времени.
+    int32 hour = 4;
+
+    // Минуты времени.
+    int32 minute = 5;
+
+    // ID видео, которое необходимо воспроизвести по расписанию.
+    string video_id = 6;
+
+    // Время создания расписания.
+    google.protobuf.Timestamp create_at = 7;
+
+    // Время обновления расписания.
+    google.protobuf.Timestamp update_at = 8;
+}
+    

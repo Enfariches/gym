@@ -13,22 +13,22 @@ import (
 
 var validate *validator.Validate
 
-type Auth interface{
+type Auth interface {
 	RegisterNewUser(email, password string) (err error)
 	Login(email, password string) (token string, err error)
 }
 
 type AuthServerManagmentApi struct {
 	auth Auth
-	pb.UnimplementedAuthServer
+	pb.UnimplementedAuthServiceServer
 }
 
 func RegisterGRPCServer(gRPC *grpc.Server) {
-	pb.RegisterAuthServer(gRPC, &AuthServerManagmentApi{})
+	pb.RegisterAuthServiceServer(gRPC, &AuthServerManagmentApi{})
 }
 
 func (s *AuthServerManagmentApi) Register(ctx context.Context, r *pb.AuthRequest) (*pb.RegisterResponse, error) {
-	
+
 	if err := validateAuth(r); err != nil {
 		return nil, err
 	}
@@ -59,7 +59,7 @@ func validateAuth(r *pb.AuthRequest) error {
 	if r.Password == "" {
 		return status.Error(codes.InvalidArgument, "password is required")
 	}
-	
+
 	if r.Email == "" {
 		return status.Error(codes.InvalidArgument, "email is required")
 	}

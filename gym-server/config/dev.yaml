@@ -1,5 +1,5 @@
 env: "dev"
-storage: "postgresql://postgres:root@localhost:5432/healthdb"
+storage: "postgresql://postgres:root@postgres:5436/health"
 token_ttl: 1h # Срок жизни токена
 grpc:
   port: 9090
