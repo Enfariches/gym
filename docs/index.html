@@ -233,6 +233,10 @@
                   <a href="#auth.RegisterResponse"><span class="badge">M</span>RegisterResponse</a>
                 </li>
               
+                <li>
+                  <a href="#auth.VerifyEmailRequest"><span class="badge">M</span>VerifyEmailRequest</a>
+                </li>
+              
               
               
               
@@ -649,9 +653,51 @@
         
       
         <h3 id="auth.RegisterResponse">RegisterResponse</h3>
-        <p>Ответ на регистрацию пользователя.</p><p>При успешной регистрации возвращает OK (code 0).</p><p>При ошибке возвращает Internal (code 13).</p>
+        <p>Ответ на регистрацию пользователя.</p>
 
         
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>auth_token</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>JWT-токен для подтверждения регистрации. Включает в себя email и хэш пароля.
+Так же отправляется на почту линк с потверждением. </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="auth.VerifyEmailRequest">VerifyEmailRequest</h3>
+        <p></p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>auth_token</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>JWT-токен для подтверждения регистрации. Включает в себя email и хэш пароля. </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
 
         
       
@@ -681,6 +727,21 @@
                 <td><a href="#auth.AuthRequest">AuthRequest</a></td>
                 <td><a href="#auth.LoginResponse">LoginResponse</a></td>
                 <td><p>Аутентифицирует пользователя.</p></td>
+              </tr>
+            
+              <tr>
+                <td>ResetPassword</td>
+                <td><a href="#auth.AuthRequest">AuthRequest</a></td>
+                <td><a href="#auth.RegisterResponse">RegisterResponse</a></td>
+                <td><p>Сбрасывает пароль пользователя.</p></td>
+              </tr>
+            
+              <tr>
+                <td>VerifyEmail</td>
+                <td><a href="#auth.VerifyEmailRequest">VerifyEmailRequest</a></td>
+                <td><a href="#auth.RegisterResponse">RegisterResponse</a></td>
+                <td><p>Подтверждает регистрацию пользователя по токену.
+Токен отправляется на почту пользователя.</p></td>
               </tr>
             
           </tbody>

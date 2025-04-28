@@ -12,12 +12,22 @@ type Config struct {
 	Env     string     `yaml:"env" env-default:"dev"`
 	Storage string     `yaml:"storage" env-required:"true"`
 	TokenTTL time.Duration `yaml:"token_ttl" env-required:"true"`
+	AuthTokenTTL time.Duration `yaml:"auth_token_ttl" env-required:"true"`
+	SMTP SMTPConfig `yaml:"smtp" env-required:"true"`
 	GRPC    GRPCConfig `yaml:"grpc" env-required:"true"`
 }
 
 type GRPCConfig struct {
 	Port    int           `yaml:"port"`
 	Timeout time.Duration `yaml:"timeout"`
+}
+
+type SMTPConfig struct {
+	EmailSender string `yaml:"email_sender"`
+	EmailPassword string `yaml:"email_password"`
+	Username string `yaml:"username"`
+	Host string `yaml:"host"`
+	Port int `yaml:"port"`
 }
 
 var cfg Config
@@ -34,7 +44,7 @@ func MustLoad() *Config{
 
 	err := cleanenv.ReadConfig(path, &cfg)
 	if err != nil{
-		panic("failed to reaf config")
+		panic(err)
 	}
 
 	return &cfg
