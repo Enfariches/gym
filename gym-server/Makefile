@@ -2,9 +2,10 @@ export CONFIG_PATH=$(shell pwd)/gym-server/config/dev.yaml
 PROTO_FILES = $(shell find ../api/v1 -name '*.proto')
 
 
-# TODO: Сделать pretty тесты. 
-# Очень долго загружается golang:alpine [75 mb ~ 2min], go mod download
+# TODO: Сделать тесты.
+# Добавить docker volumes для сервера, чтобы не перебилдить каждый раз
 # Исправить кроссплатформенность в make
+# Наладить envoy
 
 # Написать тесты на SMTP; Auth
 # Добавить Password Reset
@@ -26,7 +27,6 @@ gen:
 bundle:
 	go mod tidy
 	go run ./cmd/gymserver/main.go --config=./config/dev.yaml
-
 
 # go test ./... - для поиска тестов во всех пакетах
 test:

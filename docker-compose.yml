@@ -27,6 +27,10 @@ services:
       - "8443:8443"  # HTTPS вход
     volumes:
       - ./envoyproxy/envoy.yaml:/etc/envoy/envoy.yaml  # Подключаем конфиг
+    depends_on:
+      - gym-server
+    networks:
+      - gym-network  
 
   gym-docs:
     image: nginx:alpine
@@ -41,11 +45,11 @@ services:
     build: ./gym-server
     ports:
       - 9090:9090
+    environment:
+      DB_URL: "postgres:root@postgres:5432/health?sslmode=disable"  
     depends_on:
       postgres:
         condition: service_healthy
-    env_file: 
-      - gym-server/.env
     networks:
       - gym-network
 

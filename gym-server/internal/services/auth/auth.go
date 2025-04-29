@@ -26,11 +26,11 @@ type Auth struct {
 }
 
 type UserSaver interface {
-	SaveUser(ctx context.Context, authUser *models.AuthUser) (err error)
+	SaveUser(ctx context.Context, authUser *models.AuthUser) error
 }
 
 type UserChecker interface {
-	CheckUser(ctx context.Context, authUser *models.AuthUser) bool
+	CheckUser(ctx context.Context, authUser *models.AuthUser) error
 }
 
 type UserProvider interface {
@@ -70,17 +70,19 @@ func (a *Auth) RegisterNewUser(ctx context.Context, email, password, source stri
 		return "", fmt.Errorf("%s: %w", op, err)
 	}
 
-	log.Warn("password hash", slog.String("hash", string(passHash)))
-
 	authUser := models.AuthUser{
 		Email:    email,
 		PassHash: passHash,
 		Source:   source,
 	}
 
-	if exists := a.userChecker.CheckUser(ctx, &authUser); exists {
-		log.Warn(storage.ErrUserExists.Error())
-		return "", fmt.Errorf("%s: %w", op, storage.ErrUserExists)
+	if err := a.userChecker.CheckUser(ctx, &authUser); err != nil {
+		if errors.Is(err, storage.ErrUserExists) {
+			log.Warn(storage.ErrUserExists.Error(), sl.Err(err))
+			return "", fmt.Errorf("%s: %w", op, storage.ErrUserExists)
+		}
+		log.Warn("failed to check user", sl.Err(err))
+		return "", fmt.Errorf("%s: %w", op, err)
 	}
 
 	authToken, err := jwt.NewAuthToken(authUser, a.authTokenTTL)
@@ -166,10 +168,12 @@ func (a *Auth) ResetPassword(ctx context.Context, email, source string) (string,
 
 	log := a.log.With(slog.String("op", op), slog.String("email", email))
 
-	exists := a.userChecker.CheckUser(ctx, &models.AuthUser{Email: email, Source: source})
-	if exists {
-		log.Warn(storage.ErrUserExists.Error())
-		return "", fmt.Errorf("%s: %w", op, storage.ErrUserExists)
+	if err := a.userChecker.CheckUser(ctx, &models.AuthUser{Email: email, Source: source}); err != nil {
+		if errors.Is(err, storage.ErrUserExists) {
+			log.Warn(storage.ErrUserExists.Error(), sl.Err(err))
+			return "", fmt.Errorf("%s: %w", op, storage.ErrUserExists)
+		}
+		return "", fmt.Errorf("%s: %w", op, err)
 	}
 
 	resetToken, err := jwt.NewResetToken(email, source, a.authTokenTTL)
