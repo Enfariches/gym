@@ -2,10 +2,15 @@ export CONFIG_PATH=$(shell pwd)/gym-server/config/dev.yaml
 PROTO_FILES = $(shell find ../api/v1 -name '*.proto')
 
 
-# TODO: Сделать pretty тесты и логи. 
-# Очень долго загружается golang:alpine [75 mb], go mod download
+# TODO: Сделать pretty тесты. 
+# Очень долго загружается golang:alpine [75 mb ~ 2min], go mod download
+# Исправить кроссплатформенность в make
 
-# Генерация grpc кода, для работы c Go
+# Написать тесты на SMTP; Auth
+# Добавить Password Reset
+# Подумать как разграничить методы на уровне БД
+
+# Генерация gRPC Go Интерфейсов.
 gen:
 	mkdir -p ./protogen
 	protoc -I ../api $(PROTO_FILES) \

@@ -3,6 +3,6 @@ package storage
 import "errors"
 
 var (
-	ErrAdminExists = errors.New("admin already exists")
-	ErrAdminNotFound = errors.New("admin not found")
+	ErrUserExists = errors.New("user already exists")
+	ErrUserNotFound = errors.New("user not found")
 )

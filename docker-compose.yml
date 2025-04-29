@@ -48,7 +48,6 @@ services:
       - gym-server/.env
     networks:
       - gym-network
-    restart: always
 
   gym-admin:
     container_name: gym-admin-panel

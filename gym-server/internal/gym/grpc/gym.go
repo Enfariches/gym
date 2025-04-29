@@ -15,10 +15,10 @@ type Gym struct {
 	port       int
 }
 
-func New(log *slog.Logger, port int) *Gym {
+func New(log *slog.Logger, authService authgrpc.AuthService, port int) *Gym {
 	gRPCServer := grpc.NewServer()
 
-	authgrpc.RegisterGRPCServer(gRPCServer)
+	authgrpc.RegisterGRPCServer(gRPCServer, authService)
 
 	return &Gym{
 		log:        log,

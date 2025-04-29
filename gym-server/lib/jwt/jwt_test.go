@@ -17,9 +17,9 @@ var (
 func TestNewToken_ValidToken(t *testing.T) {
 	timeDuration := time.Duration(time.Minute * 1)
 
-	f := func(rAdmin models.Admin, duration time.Duration) {
-		claims := wantMapClaims(rAdmin, duration)
-		tokenString, err := NewToken(rAdmin, time.Hour)
+	f := func(reqUser models.AuthUser, duration time.Duration) {
+		claims := wantMapClaims(reqUser, duration)
+		tokenString, err := NewToken(reqUser, time.Hour)
 
 		assert.NoError(t, err, "Failed to generate token")
 
@@ -34,8 +34,8 @@ func TestNewToken_ValidToken(t *testing.T) {
 	}
 
 	// Корректный случай
-	f(models.Admin{
-		ID:       "1",
+	f(models.AuthUser{
+		Id:       1,
 		Email:    "test@example.ru",
 		PassHash: wantPassHash,
 	}, timeDuration)
@@ -44,9 +44,9 @@ func TestNewToken_ValidToken(t *testing.T) {
 func TestNewToken_InvalidToken(t *testing.T) {
 	timeDuration := time.Duration(time.Nanosecond)
 
-	f := func(rAdmin models.Admin, duration time.Duration) {
-		claims := wantMapClaims(rAdmin, duration)
-		tokenString, err := NewToken(rAdmin, duration)
+	f := func(reqUser models.AuthUser, duration time.Duration) {
+		claims := wantMapClaims(reqUser, duration)
+		tokenString, err := NewToken(reqUser, duration)
 
 		assert.NoError(t, err, "Failed to generate token")
 
@@ -63,17 +63,17 @@ func TestNewToken_InvalidToken(t *testing.T) {
 	}
 
 	// Корректный случай
-	f(models.Admin{
-		ID:       "2",
+	f(models.AuthUser{
+		Id:       2,
 		Email:    "admin@yandex.ru",
 		PassHash: wantPassHash,
 	}, timeDuration)
 }
 
-func wantMapClaims(admin models.Admin, duration time.Duration) jwt.MapClaims {
+func wantMapClaims(user models.AuthUser, duration time.Duration) jwt.MapClaims {
 	return jwt.MapClaims{
-		"uid":   admin.ID,
-		"email": admin.Email,
+		"uid":   user.Id,
+		"email": user.Email,
 		"exp":   time.Now().Add(duration).Unix(),
 	}
 }
