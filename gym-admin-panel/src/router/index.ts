@@ -1,35 +1,20 @@
 import { createRouter, createWebHistory } from 'vue-router';
-
-import { api } from 'src/boot/axios';
 import routes from './routes';
+import { useAuthStore } from '../stores/auth';
 
 const router = createRouter({
   history: createWebHistory(),
-  routes,
+  routes
 });
 
-router.beforeEach(async (to, from, next) => {
-  const token = localStorage.getItem('token');
-  if (!token && to.path !== '/login' && to.path !== '/confirm-code') {
+router.beforeEach((to, from, next) => {
+  const authStore = useAuthStore();
+  const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
+
+  if (requiresAuth && !authStore.token) {
     next('/login');
-  } else if (token) {
-    try {
-      const response = await api.get('/session', {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-      if (response.data.token === token) {
-        next();
-      } else {
-        localStorage.removeItem('token');
-        next('/login');
-      }
-    } catch (error) {
-      console.error('Token validation error:', error);
-      localStorage.removeItem('token');
-      next('/login');
-    }
+  } else if (!requiresAuth && authStore.token) {
+    next('/');
   } else {
     next();
   }

@@ -36,18 +36,18 @@ services:
     ports:
       - "8083:80"
 
-  gym-server:
-    container_name: gym-server
-    build: ./gym-server
-    ports:
-      - 9090:9090
-    depends_on:
-      postgres:
-        condition: service_healthy
-    env_file: 
-      - gym-server/.env
-    networks:
-      - gym-network
+  # gym-server:
+  #   container_name: gym-server
+  #   build: ./gym-server
+  #   ports:
+  #     - 9090:9090
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #   env_file: 
+  #     - gym-server/.env
+  #   networks:
+  #     - gym-network
 
   gym-admin:
     container_name: gym-admin-panel
@@ -55,8 +55,8 @@ services:
       context: ./gym-admin-panel
     ports:
       - 8080:80
-    depends_on:
-      - gym-server
+    # depends_on:
+    #   - gym-server
     networks:
       - gym-network
 

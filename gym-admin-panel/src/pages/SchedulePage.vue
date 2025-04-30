@@ -1,14 +1,14 @@
 <template>
   <div class="content">
     <h1 class="page-title">Управление расписанием</h1>
-    
+
     <ScheduleFilters :videos="videos" @departmentChange="onDepartmentChange" @videoChange="onVideoChange" />
 
     <div class="calendar-container">
-      <ScheduleSidebar 
-        :departments="departments" 
-        :videos="videos" 
-        :selectedVideos="selectedVideos" 
+      <ScheduleSidebar
+        :departments="departments"
+        :videos="videos"
+        :selectedVideos="selectedVideos"
         :allVideosChecked="allVideosChecked"
         @departmentToggle="onDepartmentToggle"
         @videoToggle="onVideoToggle"
@@ -16,8 +16,8 @@
       />
 
       <div class="schedule-grid">
-        <ScheduleCard 
-          v-for="(day, idx) in days" 
+        <ScheduleCard
+          v-for="(day, idx) in days"
           :key="idx"
           :dayName="day.name"
           :dayOrder="day.order"
@@ -30,7 +30,7 @@
       </div>
     </div>
 
-    <ScheduleEditModal 
+    <ScheduleEditModal
       v-model:isOpen="isEditModalOpen"
       :videos="videos"
       :scheduleId="index"
@@ -160,7 +160,7 @@ const updateSchedule = async () =>{
 
 const validateTime = () => {
   const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/
-  
+
   if (!timeWithSeconds.value) {
     timeError.value = 'Время не может быть пустым'
     return false
