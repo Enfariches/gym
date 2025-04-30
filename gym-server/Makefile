@@ -20,9 +20,10 @@ else
 	MAKE_DIR = mkdir -p ./protogen
 endif
 
-# TODO: Сделать pretty тесты. 
-# Очень долго загружается golang:alpine [75 mb ~ 2min], go mod download
+# TODO: Сделать тесты.
+# Добавить docker volumes для сервера, чтобы не перебилдить каждый раз
 # Исправить кроссплатформенность в make
+# Наладить envoy
 
 # Написать тесты на SMTP; Auth
 # Добавить Password Reset
@@ -47,7 +48,6 @@ clean:
 bundle:
 	go mod tidy
 	go run ./cmd/gymserver/main.go --config=./config/dev.yaml
-
 
 # go test ./... - для поиска тестов во всех пакетах
 test:

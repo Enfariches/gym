@@ -1,5 +1,5 @@
 env: "dev"
-storage: "postgres://postgres:root@localhost:5436/health?sslmode=disable" # Если Go код будет выполняться из контейнера, то нужно @localhost:5436/health"
+storage: "postgres://postgres:root@postgres:5432/health?sslmode=disable" # Если Go код будет выполняться из контейнера, то нужно @localhost:5436/health"
 token_ttl: 1h # Срок жизни токена сервиса
 auth_token_ttl: 15m # Срок жизни токена аутентификации
 grpc:

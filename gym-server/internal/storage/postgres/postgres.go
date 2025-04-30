@@ -48,7 +48,9 @@ func (s *Storage) SaveUser(ctx context.Context, authUser *models.AuthUser) error
 	return nil
 }
 
-func (s *Storage) CheckUser(ctx context.Context, authUser *models.AuthUser) (bool) {
+func (s *Storage) CheckUser(ctx context.Context, authUser *models.AuthUser) error {
+	const op = "postgres.CheckUser"
+
 	query, args, _ := goqu.From(authUser.Source).
 		Select("id").
 		Where(goqu.Ex{"email": authUser.Email}).
@@ -60,12 +62,12 @@ func (s *Storage) CheckUser(ctx context.Context, authUser *models.AuthUser) (boo
 	err := s.db.QueryRow(query, args...).Scan(&id)
 	if err != nil {
 		if HandleDBError(err) == storage.ErrUserNotFound {
-			return false // пользователь не найден
+			return nil // пользователь не найден
 		}
-		return false
+		return err
 	}
 
-	return true
+	return storage.ErrUserExists // пользователь найден
 }
 
 func (s *Storage) User(ctx context.Context, email, source string) (models.AuthUser, error) {

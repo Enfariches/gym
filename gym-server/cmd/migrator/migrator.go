@@ -40,7 +40,6 @@ func main() {
 
 			return
 		}
-
 		panic(err)
 	}
 
