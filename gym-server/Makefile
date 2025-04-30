@@ -1,6 +1,24 @@
-export CONFIG_PATH=$(shell pwd)/gym-server/config/dev.yaml
-PROTO_FILES = $(shell find ../api/v1 -name '*.proto')
+ifeq ($(OS),Windows_NT)
+    SHELL_TYPE = windows
+else
+    UNAME_S := $(shell uname -s)
+    ifeq ($(UNAME_S),Linux)
+        SHELL_TYPE = linux
+    endif
+    ifeq ($(UNAME_S),Darwin)
+        SHELL_TYPE = darwin
+    endif
+endif
 
+ifeq ($(SHELL_TYPE),windows)
+    export CONFIG_PATH=$(CURDIR)/gym-server/config/dev.yaml
+	PROTO_FILES = ../api/v1/auth/auth.proto ../api/v1/user/admin.proto ../api/v1/user/employee.proto ../api/v1/schedule/schedule.proto
+	MAKE_DIR = mkdir protogen
+else
+    export CONFIG_PATH=$(CURDIR)/gym-server/config/dev.yaml
+	PROTO_FILES = '$(shell find ../api/v1 -name '*.proto')'
+	MAKE_DIR = mkdir -p ./protogen
+endif
 
 # TODO: Сделать тесты.
 # Добавить docker volumes для сервера, чтобы не перебилдить каждый раз
@@ -13,12 +31,15 @@ PROTO_FILES = $(shell find ../api/v1 -name '*.proto')
 
 # Генерация gRPC Go Интерфейсов.
 gen:
-	mkdir -p ./protogen
+	$(MAKE_DIR)
 	protoc -I ../api $(PROTO_FILES) \
 	 --go_out=./protogen/ \
 	  --go_opt=paths=source_relative \
 	--go-grpc_out=./protogen/ \
 	 --go-grpc_opt=paths=source_relative
+
+clean:
+	if exist protogen rmdir /s /q protogen
 
 # Путь конфига указывается двумя способами:
 # 1) flag --config=./config/dev.yaml

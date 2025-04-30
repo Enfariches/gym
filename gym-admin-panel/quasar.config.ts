@@ -12,7 +12,8 @@ export default defineConfig((/* ctx */) => {
     // --> boot files are part of "main.js"
     // https://v2.quasar.dev/quasar-cli-vite/boot-files
     boot: [
-      'axios'
+      'axios',
+      'responsive'
     ],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#css
@@ -32,13 +33,15 @@ export default defineConfig((/* ctx */) => {
 
       'roboto-font', // optional, you are not bound to it
       'material-icons', // optional, you are not bound to it
+      'material-icons-outlined',
+      'mdi-v7',
     ],
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#build
     build: {
       target: {
-        browser: [ 'es2022', 'firefox115', 'chrome115', 'safari14' ],
-        node: 'node20'
+        browser: ['es2019', 'edge88', 'firefox78', 'chrome87', 'safari13.1'],
+        node: 'node16'
       },
 
       typescript: {
@@ -59,9 +62,8 @@ export default defineConfig((/* ctx */) => {
       // env: {},
       // rawDefine: {}
       // ignorePublicFolder: true,
-      // minify: false,
-      // polyfillModulePreload: true,
-      // distDir
+      minify: true,
+      sourceMap: false,
 
       // extendViteConf (viteConf) {},
       // viteVuePluginOptions: {},
@@ -85,7 +87,11 @@ export default defineConfig((/* ctx */) => {
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#framework
     framework: {
-      config: {},
+      config: {
+        dark: 'auto',
+        loading: {},
+        notify: {},
+      },
 
       // iconSet: 'material-icons', // Quasar icon set
       // lang: 'en-US', // Quasar language pack
@@ -93,17 +99,51 @@ export default defineConfig((/* ctx */) => {
       // For special cases outside of where the auto-import strategy can have an impact
       // (like functional components as one of the examples),
       // you can manually specify Quasar components/directives to be available everywhere:
-      //
-      // components: [],
-      // directives: [],
+      components: [
+        'QLayout',
+        'QHeader',
+        'QDrawer',
+        'QPageContainer',
+        'QPage',
+        'QToolbar',
+        'QToolbarTitle',
+        'QBtn',
+        'QIcon',
+        'QList',
+        'QItem',
+        'QItemSection',
+        'QItemLabel',
+        'QCard',
+        'QCardSection',
+        'QCardActions',
+        'QInput',
+        'QForm',
+        'QSpinner',
+        'QTable',
+        'QTh',
+        'QTr',
+        'QTd',
+        'QSelect',
+        'QDialog',
+        'QSpace'
+      ],
 
-      // Quasar plugins
-      plugins: []
+      directives: [
+        'Ripple',
+        'ClosePopup'
+      ],
+
+      plugins: [
+        'Notify',
+        'Dialog',
+        'Loading',
+        'Meta'
+      ]
     },
 
     // animations: 'all', // --- includes all animations
     // https://v2.quasar.dev/options/animations
-    animations: [],
+    animations: 'all',
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#sourcefiles
     // sourceFiles: {
@@ -144,25 +184,59 @@ export default defineConfig((/* ctx */) => {
 
     // https://v2.quasar.dev/quasar-cli-vite/developing-pwa/configuring-pwa
     pwa: {
-      workboxMode: 'GenerateSW' // 'GenerateSW' or 'InjectManifest'
-      // swFilename: 'sw.js',
-      // manifestFilename: 'manifest.json',
-      // extendManifestJson (json) {},
-      // useCredentialsForManifestTag: true,
-      // injectPwaMetaTags: false,
-      // extendPWACustomSWConf (esbuildConf) {},
-      // extendGenerateSWOptions (cfg) {},
-      // extendInjectManifestOptions (cfg) {}
+      workboxMode: 'GenerateSW',
+      injectPwaMetaTags: true,
+      swFilename: 'sw.js',
+      manifestFilename: 'manifest.json',
+      useCredentialsForManifestTag: false,
+      manifest: {
+        name: 'Производственная Гимнастика',
+        short_name: 'Гимнастика',
+        description: 'Производственная гимнастика для сотрудников',
+        display: 'standalone',
+        orientation: 'portrait',
+        background_color: '#ffffff',
+        theme_color: '#161e43',
+        icons: [
+          {
+            src: 'icons/heart.png',
+            sizes: '128x128',
+            type: 'image/png'
+          },
+          {
+            src: 'icons/heart.png',
+            sizes: '192x192',
+            type: 'image/png'
+          },
+          {
+            src: 'icons/heart.png',
+            sizes: '256x256',
+            type: 'image/png'
+          },
+          {
+            src: 'icons/heart.png',
+            sizes: '384x384',
+            type: 'image/png'
+          },
+          {
+            src: 'icons/heart.png',
+            sizes: '512x512',
+            type: 'image/png'
+          }
+        ]
+      }
     },
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/developing-cordova-apps/configuring-cordova
     cordova: {
-      // noIosLegacyBuildFlag: true, // uncomment only if you know what you are doing
+      noIosLegacyBuildFlag: true,
+      backButtonExit: true
     },
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/developing-capacitor-apps/configuring-capacitor
     capacitor: {
-      hideSplashscreen: true
+      hideSplashscreen: true,
+      iosStatusBarPadding: true,
     },
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/developing-electron-apps/configuring-electron

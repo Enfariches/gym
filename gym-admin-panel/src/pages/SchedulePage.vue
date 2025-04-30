@@ -1,161 +1,54 @@
 <template>
   <div class="content">
     <h1 class="page-title">Управление расписанием</h1>
-    
-    <div class="schedule-toolbar">
-      <div class="filter-container">
-        <select class="btn btn-outline">
-          <option>Все отделы</option>
-          <option>Разработчики</option>
-          <option>Финансовый отдел</option>
-          <option>Маркетинг</option>
-          <option>HR</option>
-        </select>
-        <select class="btn btn-outline">
-          <option>Все видео</option>
-          <option v-for="video in videos" :key="video.ID">{{ video.Name }}</option>
-        </select>
-      </div>
-    </div>
+
+    <ScheduleFilters :videos="videos" @departmentChange="onDepartmentChange" @videoChange="onVideoChange" />
 
     <div class="calendar-container">
-      <div class="schedule-sidebar">
-        <h3 class="sidebar-title">Отделы</h3>
-        <div class="department-list">
-          <div class="department-item">
-            <label class="checkbox-container">
-              <input type="checkbox" checked>
-              <span class="checkmark"></span>
-              <span class="department-name">Все отделы</span>
-            </label>
-          </div>
-          <div class="department-item">
-            <label class="checkbox-container">
-              <input type="checkbox">
-              <span class="checkmark"></span>
-              <span class="department-name">Разработчики</span>
-            </label>
-          </div>
-          <div class="department-item">
-            <label class="checkbox-container">
-              <input type="checkbox">
-              <span class="checkmark"></span>
-              <span class="department-name">Финансовый отдел</span>
-            </label>
-          </div>
-          <div class="department-item">
-            <label class="checkbox-container">
-              <input type="checkbox">
-              <span class="checkmark"></span>
-              <span class="department-name">Маркетинг</span>
-            </label>
-          </div>
-          <div class="department-item">
-            <label class="checkbox-container">
-              <input type="checkbox">
-              <span class="checkmark"></span>
-              <span class="department-name">HR</span>
-            </label>
-          </div>
-        </div>
-        
-        <h3 class="sidebar-title">Видео</h3>
-        <div class="department-list">
-          <div class="department-item">
-            <label class="checkbox-container">
-              <input type="checkbox" checked>
-              <span class="checkmark"></span>
-              <span class="department-name">Все видео</span>
-            </label>
-          </div>
-          <div v-for="video in videos" :key="video.ID" class="department-item">
-            <label class="checkbox-container">
-              <input type="checkbox">
-              <span class="checkmark"></span>
-              <span class="department-name">{{ video.Name }}</span>
-            </label>
-          </div>
-        </div>
-      </div>
+      <ScheduleSidebar
+        :departments="departments"
+        :videos="videos"
+        :selectedVideos="selectedVideos"
+        :allVideosChecked="allVideosChecked"
+        @departmentToggle="onDepartmentToggle"
+        @videoToggle="onVideoToggle"
+        @allVideosToggle="onAllVideosToggle"
+      />
 
       <div class="schedule-grid">
-        <div class="schedule-element" v-for="(day, idx) in days" :key="idx">
-          <div class="schedule-element__head">
-            <div>{{day.name}}</div>
-          </div>
-          <div class="schedule-element__body">
-            <div v-if="day.items.length === 0" class="body__empty">
-              <div>Нет видео на этот день</div>
-            </div>
-            <div v-else class="body__list">
-              <div v-for="(schedule, idx) in day.items" :key="idx" class="schedule-item" :class="{'schedule-item-odd': idx % 2 !== 0}">
-                <div class="schedule-item__content">
-                  <div class="schedule-item__title">
-                    <div class="video__label">Видео</div>
-                    <span>{{getVideoNameById(schedule.VideoID)}}</span>
-                  </div>
-                  <div class="schedule-item__time">
-                    <div class="time__label">Время</div>
-                    <span>{{ schedule.Time }}</span>
-                  </div>
-                  <div class="schedule-item__actions">
-                    <button class="action-btn edit" title="Редактировать" @click="onEdit(getVideoNameById(schedule.VideoID), schedule.VideoID, day.order); isEditModalOpen = true; index = schedule.ID">
-                      <i class="fas fa-edit"></i>
-                      <span class="action-tooltip">Редактировать</span>
-                    </button>
-                    <button class="action-btn delete" title="Удалить" @click="index = schedule.ID; _removeSchedule()">
-                      <i class="fas fa-trash"></i>
-                      <span class="action-tooltip">Удалить</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <button class="btn btn-primary add-schedule" @click="onAdd(day.order); isEditModalOpen = true;">
-              <i class="fas fa-plus"></i> Добавить видео
-            </button>
-          </div>
-        </div>
+        <ScheduleCard
+          v-for="(day, idx) in days"
+          :key="idx"
+          :dayName="day.name"
+          :dayOrder="day.order"
+          :items="day.items"
+          :videos="videos"
+          @edit="onEdit"
+          @delete="_removeSchedule"
+          @add="onAdd"
+        />
       </div>
     </div>
-  </div>
 
-  <q-dialog v-model="isEditModalOpen">
-    <q-card class="edit-modal">
-      <h3 class="modal-title">{{ index ? 'Редактировать расписание' : 'Добавить расписание' }}</h3>
-      <div class="form-group">
-        <label>Выберите видео</label>
-        <q-select
-          v-model="newVideoName"
-          class="video-select"
-          :options="videos.map((el:any) => el.Name)"
-          @update:model-value="onSelectedVideoChange"
-          :display-value="newVideoName ? newVideoName : 'Выберите видео'"
-        />
-      </div>
-      <div class="form-group">
-        <label>Выберите время показа</label>
-        <input
-          type="text"
-          v-model="timeWithSeconds"
-          class="time-input"
-          placeholder="ЧЧ:ММ (например, 09:00)"
-          @input="validateTime"
-        />
-        <div v-if="timeError" class="error-message">
-          {{ timeError }}
-        </div>
-      </div>
-      <div class="modal-actions">
-        <button class="btn btn-outline" @click="onDecline">Отмена</button>
-        <button class="btn btn-primary" @click="onSave">Сохранить</button>
-      </div>
-    </q-card>
-  </q-dialog>
+    <ScheduleEditModal
+      v-model:isOpen="isEditModalOpen"
+      :videos="videos"
+      :scheduleId="index"
+      :initialVideoName="newVideoName"
+      :initialTime="timeWithSeconds"
+      :dayOrder="videoToSchedule.dayofweek"
+      @save="onSave"
+    />
+  </div>
 </template>
 
 <script lang="ts" setup>
 import { onMounted, ref } from 'vue'
+import ScheduleFilters from '../components/schedulePage/ScheduleFilters.vue'
+import ScheduleSidebar from '../components/schedulePage/ScheduleSidebar.vue'
+import ScheduleCard from '../components/schedulePage/ScheduleCard.vue'
+import ScheduleEditModal from '../components/schedulePage/ScheduleEditModal.vue'
+
 const mondayVideos: { ID: string, Time: string, VideoID: string, Name: string }[] = []
 const tuesdayVideos: { ID: string, Time: string, VideoID: string, Name: string }[] = []
 const wednesdayVideos: { ID: string, Time: string, VideoID: string, Name: string }[] = []
@@ -185,14 +78,16 @@ const videoToSchedule = ref({
 })
 const timeError = ref('')
 
-type videoData = {
-  ID:string,
-  created_at:string,
-  updated_at:string,
-  deleted_at:string,
-  Name:string,
-  archived:boolean
-}
+const departments = ref([
+  { id: 'all', name: 'Все отделы', checked: true },
+  { id: 'dev', name: 'Разработчики', checked: false },
+  { id: 'finance', name: 'Финансовый отдел', checked: false },
+  { id: 'marketing', name: 'Маркетинг', checked: false },
+  { id: 'hr', name: 'HR', checked: false },
+])
+
+const selectedVideos = ref<string[]>([])
+const allVideosChecked = ref(true)
 
 const API_URL = process.env.QUASAR_API_URL || 'http://localhost:8083/api/v1'
 
@@ -240,18 +135,6 @@ const _removeSchedule = async () => {
   })
 }
 
-// const addSchedule = async (id: number) => {
-//   const token = localStorage.getItem('token');
-//   await fetch(`http://localhost:8083/api/v1/schedule/${id + 1}`, {
-//     method: 'POST',
-//     headers: {
-//       'Authorization': `Bearer ${token}`,
-//     },
-//     }).then(async () => {
-//       init()
-//   })
-// }
-
 const updateSchedule = async () =>{
   const token = localStorage.getItem('token');
 
@@ -277,7 +160,7 @@ const updateSchedule = async () =>{
 
 const validateTime = () => {
   const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/
-  
+
   if (!timeWithSeconds.value) {
     timeError.value = 'Время не может быть пустым'
     return false
@@ -309,27 +192,42 @@ const onDecline = () => {
   timeWithSeconds.value = ''
 }
 
-const onAdd = (dayOfWeek:number) =>{
-  videoToSchedule.value.dayofweek = dayOfWeek.toString()
-}
-const onEdit = (videoName:string, videoID:string, dayOfWeek:number) => {
-  newVideoName.value = videoName
-  videoToSchedule.value.videoid = videoID.toString()
-  videoToSchedule.value.dayofweek = dayOfWeek.toString()
-}
-
-const onSelectedVideoChange = (value:string) =>{
-  const [video] = getVideoIdByName(value)
-  videoToSchedule.value.videoid = video.ID.toString()
+const onEdit = ({ videoName, videoId, scheduleId, dayOrder }: { videoName: string; videoId: string; scheduleId: string; dayOrder: number }) => {
+  newVideoName.value = videoName;
+  videoToSchedule.value.videoid = videoId;
+  videoToSchedule.value.dayofweek = dayOrder.toString();
+  index.value = scheduleId;
+  isEditModalOpen.value = true;
 }
 
-const getVideoIdByName = (name:string) => {
-  return videos.value.filter((video:videoData) => video.Name === name)
+const onAdd = (dayOrder: number) => {
+  videoToSchedule.value.dayofweek = dayOrder.toString();
+  isEditModalOpen.value = true;
 }
 
-const getVideoNameById = (id:string) => {
-  const filtered = videos.value.filter((video:videoData) => video.ID === id)
-  return filtered.length > 0 ? filtered[0].Name : `There's no video with such ID`;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const onDepartmentChange = (value: string) => {
+  // Логика изменения отдела
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const onVideoChange = (value: string) => {
+  // Логика изменения видео
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const onDepartmentToggle = (id: string) => {
+  // Логика переключения отдела
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const onVideoToggle = (id: string) => {
+  // Логика переключения видео
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const onAllVideosToggle = () => {
+  // Логика переключения всех видео
 }
 
 </script>
