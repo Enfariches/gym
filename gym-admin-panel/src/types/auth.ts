@@ -28,10 +28,6 @@ export interface LoginResponse {
   token: string;
 }
 
-export interface RegisterResponse {
-  auth_token: string;
-}
-
 export interface ResetPasswordResponse {
   reset_token: string;
 }

@@ -1,79 +1,111 @@
-import axios from 'axios';
+import { AuthServiceClient } from '../../protogen/v1/auth/AuthServiceClientPb';
 import type {
-  AuthRequest,
-  LoginResponse,
   RegisterResponse,
-  ResetPasswordRequest,
+  LoginResponse,
   ResetPasswordResponse,
-  ChangePasswordRequest,
   ChangePasswordResponse,
-  VerifyRegisterRequest,
-  VerifyRegisterResponse} from '../types/auth';
+  VerifyRegisterResponse} from '../../protogen/v1/auth/auth_pb';
 import {
-  AppSource
-} from '../types/auth';
+  AuthRequest,
+  ResetPasswordRequest,
+  ChangePasswordRequest,
+  VerifyRegisterRequest
+} from '../../protogen/v1/auth/auth_pb';
 
-const ENVOY_URL = process.env.VITE_ENVOY_URL || 'http://localhost:8085';
+// Конфигурация gRPC-Web клиента
+const authService = new AuthServiceClient(
+  'http://localhost:8085', // Замените на адрес вашего gRPC-сервера
+  null,
+  null
+);
 
-class AuthService {
-  private client = axios.create({
-    baseURL: ENVOY_URL,
-    headers: {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json'
-    }
+// Регистрация пользователя
+export const register = async (email: string, password: string): Promise<RegisterResponse> => {
+  const request = new AuthRequest();
+  request.setEmail(email);
+  request.setPassword(password);
+  request.setSource(2); // ADMIN (AppSource.ADMIN)
+
+  return new Promise((resolve, reject) => {
+    authService.register(request, {}, (err, response) => {
+      if (err) {
+        console.error('gRPC register error:', err);
+        reject(err);
+        return;
+      }
+      resolve(response);
+    });
   });
+};
 
-  async register(email: string, password: string): Promise<RegisterResponse> {
-    const request: AuthRequest = {
-      email,
-      password,
-      source: AppSource.ADMIN
-    };
+// Аутентификация пользователя
+export const login = async (email: string, password: string): Promise<LoginResponse> => {
+  const request = new AuthRequest();
+  request.setEmail(email);
+  request.setPassword(password);
+  request.setSource(2); // ADMIN (AppSource.ADMIN)
 
-    const response = await this.client.post('/auth.AuthService/Register', request);
-    return response.data;
-  }
+  return new Promise((resolve, reject) => {
+    authService.login(request, {}, (err, response) => {
+      if (err) {
+        console.error('gRPC login error:', err);
+        reject(err);
+        return;
+      }
+      resolve(response);
+    });
+  });
+};
 
-  async login(email: string, password: string): Promise<LoginResponse> {
-    const request: AuthRequest = {
-      email,
-      password,
-      source: AppSource.ADMIN
-    };
+// Сброс пароля
+export const resetPassword = async (email: string): Promise<ResetPasswordResponse> => {
+  const request = new ResetPasswordRequest();
+  request.setEmail(email);
+  request.setSource(2); // ADMIN (AppSource.ADMIN)
 
-    const response = await this.client.post('/auth.AuthService/Login', request);
-    return response.data;
-  }
+  return new Promise((resolve, reject) => {
+    authService.resetPassword(request, {}, (err, response) => {
+      if (err) {
+        console.error('gRPC resetPassword error:', err);
+        reject(err);
+        return;
+      }
+      resolve(response);
+    });
+  });
+};
 
-  async resetPassword(email: string): Promise<ResetPasswordResponse> {
-    const request: ResetPasswordRequest = {
-      email,
-      source: AppSource.ADMIN
-    };
+// Подтверждение сброса пароля
+export const changePassword = async (resetToken: string, newPassword: string): Promise<ChangePasswordResponse> => {
+  const request = new ChangePasswordRequest();
+  request.setResetToken(resetToken);
+  request.setNewPassword(newPassword);
 
-    const response = await this.client.post('/auth.AuthService/ResetPassword', request);
-    return response.data;
-  }
+  return new Promise((resolve, reject) => {
+    authService.changePassword(request, {}, (err, response) => {
+      if (err) {
+        console.error('gRPC changePassword error:', err);
+        reject(err);
+        return;
+      }
+      resolve(response);
+    });
+  });
+};
 
-  async changePassword(resetToken: string, newPassword: string): Promise<ChangePasswordResponse> {
-    const request: ChangePasswordRequest = {
-      reset_token: resetToken,
-      new_password: newPassword
-    };
+// Подтверждение регистрации
+export const verifyRegister = async (authToken: string): Promise<VerifyRegisterResponse> => {
+  const request = new VerifyRegisterRequest();
+  request.setAuthToken(authToken);
 
-    const response = await this.client.post('/auth.AuthService/ChangePassword', request);
-    return response.data;
-  }
-
-  async verifyRegister(authToken: string): Promise<VerifyRegisterResponse> {
-    const request: VerifyRegisterRequest = {
-      auth_token: authToken
-    };
-
-    const response = await this.client.post('/auth.AuthService/VerifyRegister', request);
-    return response.data;
-  }
-}
-
-export const authService = new AuthService();
+  return new Promise((resolve, reject) => {
+    authService.verifyRegister(request, {}, (err, response) => {
+      if (err) {
+        console.error('gRPC verifyRegister error:', err);
+        reject(err);
+        return;
+      }
+      resolve(response);
+    });
+  });
+};

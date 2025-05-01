@@ -1,114 +1,87 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { defineStore } from 'pinia';
-import { ref } from 'vue';
-import { authService } from '../services/authService';
-import type {
+import {
+  register,
+  login,
+  resetPassword,
+  changePassword,
+  verifyRegister,
+} from '../services/authService';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import {
   RegisterResponse,
+  LoginResponse,
   ResetPasswordResponse,
   ChangePasswordResponse,
-  VerifyRegisterResponse
-} from '../types/auth';
+  VerifyRegisterResponse,
+} from '../../protogen/v1/auth/auth_pb';
 
-export const useAuthStore = defineStore('auth', () => {
-  const token = ref<string | null>(localStorage.getItem('token'));
-  const loading = ref(false);
-  const error = ref<string | null>(null);
+export const useAuthStore = defineStore('auth', {
+  state: () => ({
+    isAuthenticated: false,
+    token: null as string | null,
+  }),
 
-  const isAuthenticated = ref(!!token.value);
+  actions: {
+    // Регистрация
+    async register(email: string, password: string): Promise<RegisterResponse> {
+      try {
+        const response = await register(email, password);
+        return response;
+      } catch (error) {
+        throw new Error('Registration failed');
+      }
+    },
 
-  const setToken = (newToken: string | null) => {
-    token.value = newToken;
-    isAuthenticated.value = !!newToken;
-    if (newToken) {
-      localStorage.setItem('token', newToken);
-    } else {
-      localStorage.removeItem('token');
-    }
-  };
+    // Аутентификация
+    async login(email: string, password: string): Promise<LoginResponse> {
+      try {
+        const response = await login(email, password);
+        this.isAuthenticated = true;
+        this.token = response.getToken();
+        localStorage.setItem('auth_token', this.token!); // Сохраняем токен
+        return response;
+      } catch (error) {
+        throw new Error('Login failed');
+      }
+    },
 
-  const register = async (email: string, password: string): Promise<RegisterResponse> => {
-    try {
-      loading.value = true;
-      error.value = null;
-      const response = await authService.register(email, password);
-      return response;
-    } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Registration failed';
-      throw err;
-    } finally {
-      loading.value = false;
-    }
-  };
+    // Сброс пароля
+    async resetPassword(email: string): Promise<ResetPasswordResponse> {
+      try {
+        const response = await resetPassword(email);
+        return response;
+      } catch (error) {
+        throw new Error('Reset password failed');
+      }
+    },
 
-  const login = async (email: string, password: string): Promise<void> => {
-    try {
-      loading.value = true;
-      error.value = null;
-      const response = await authService.login(email, password);
-      setToken(response.token);
-    } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Login failed';
-      throw err;
-    } finally {
-      loading.value = false;
-    }
-  };
+    // Подтверждение сброса пароля
+    async changePassword(resetToken: string, newPassword: string): Promise<ChangePasswordResponse> {
+      try {
+        const response = await changePassword(resetToken, newPassword);
+        return response;
+      } catch (error) {
+        throw new Error('Change password failed');
+      }
+    },
 
-  const logout = () => {
-    setToken(null);
-  };
+    // Подтверждение регистрации
+    async verifyRegister(authToken: string): Promise<VerifyRegisterResponse> {
+      try {
+        const response = await verifyRegister(authToken);
+        this.isAuthenticated = true;
+        return response;
+      } catch (error) {
+        throw new Error('Verification failed');
+      }
+    },
 
-  const resetPassword = async (email: string): Promise<ResetPasswordResponse> => {
-    try {
-      loading.value = true;
-      error.value = null;
-      const response = await authService.resetPassword(email);
-      return response;
-    } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Password reset failed';
-      throw err;
-    } finally {
-      loading.value = false;
-    }
-  };
-
-  const changePassword = async (resetToken: string, newPassword: string): Promise<ChangePasswordResponse> => {
-    try {
-      loading.value = true;
-      error.value = null;
-      const response = await authService.changePassword(resetToken, newPassword);
-      return response;
-    } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Password change failed';
-      throw err;
-    } finally {
-      loading.value = false;
-    }
-  };
-
-  const verifyRegister = async (authToken: string): Promise<VerifyRegisterResponse> => {
-    try {
-      loading.value = true;
-      error.value = null;
-      const response = await authService.verifyRegister(authToken);
-      return response;
-    } catch (err) {
-      error.value = err instanceof Error ? err.message : 'Verification failed';
-      throw err;
-    } finally {
-      loading.value = false;
-    }
-  };
-
-  return {
-    token,
-    loading,
-    error,
-    isAuthenticated,
-    register,
-    login,
-    logout,
-    resetPassword,
-    changePassword,
-    verifyRegister
-  };
+    // Выход из системы
+    logout() {
+      this.isAuthenticated = false;
+      this.token = null;
+      localStorage.removeItem('auth_token');
+    },
+  },
 });

@@ -16,10 +16,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@grpc/grpc-js": "^1.13.3",
     "@master/theme-mode.vue": "^1.1.1",
     "@quasar/extras": "^1.16.17",
     "axios": "^1.9.0",
     "chart.js": "^4.4.9",
+    "google-protobuf": "^3.21.4",
+    "grpc-web": "^1.5.0",
     "gym-admin-panel": "file:",
     "gymnastic": "file:",
     "pinia": "^3.0.2",
@@ -31,6 +34,7 @@
   "devDependencies": {
     "@eslint/js": "^9.25.1",
     "@quasar/app-vite": "^2.2.0",
+    "@types/google-protobuf": "^3.15.12",
     "@types/node": "^22.15.3",
     "@typescript-eslint/eslint-plugin": "^8.31.1",
     "@typescript-eslint/parser": "^8.31.1",

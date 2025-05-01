@@ -2,5 +2,5 @@
   "extends": "./.quasar/tsconfig.json",
   "compilerOptions": {
     "lib": [ "es2015" , "ESNext", "DOM", "DOM.Iterable"]
-  }
+  },
 }
