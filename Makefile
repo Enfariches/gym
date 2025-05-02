@@ -12,3 +12,15 @@ docs:
 	protoc --doc_out=./docs --doc_opt=html,index.html $(PROTO_FILES)
 	docker compose up gym-docs -d --no-deps
 	@echo "Документация доступна по адресу: http://localhost:8083"
+
+clean-volumes:
+	docker compose down --volumes --remove-orphans
+
+rebundle:
+	docker compose down
+	docker compose build
+	docker compose up
+
+rebundle-admin:
+	docker compose build gym-admin
+	docker compose up -d --no-deps gym-admin
