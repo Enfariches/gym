@@ -5,16 +5,15 @@ import {
   login,
   resetPassword,
   changePassword,
-  verifyRegister,
+  verifyRegister
 } from '../services/authService';
-// eslint-disable-next-line @typescript-eslint/consistent-type-imports
-import {
+import type {
   RegisterResponse,
   LoginResponse,
   ResetPasswordResponse,
   ChangePasswordResponse,
-  VerifyRegisterResponse,
-} from '../../protogen/v1/auth/auth_pb';
+  VerifyRegisterResponse
+} from '../../protogen/v1/auth/auth';
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
@@ -38,7 +37,7 @@ export const useAuthStore = defineStore('auth', {
       try {
         const response = await login(email, password);
         this.isAuthenticated = true;
-        this.token = response.getToken();
+        this.token = response.token;
         localStorage.setItem('auth_token', this.token!); // Сохраняем токен
         return response;
       } catch (error) {

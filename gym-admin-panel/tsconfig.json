@@ -1,6 +1,15 @@
 {
   "extends": "./.quasar/tsconfig.json",
   "compilerOptions": {
-    "lib": [ "es2015" , "ESNext", "DOM", "DOM.Iterable"]
+    "lib": [ "es2015" , "ESNext", "DOM", "DOM.Iterable"],
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true
   },
+  "include": ["src"],
+  "exclude": [
+  "node_modules",
+  "protogen"
+  ]
+  
 }

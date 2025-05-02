@@ -18,13 +18,13 @@ else
 	MAKE_DIR = mkdir -p ./protogen
 endif
 
-# Генерация gRPC JS Интерфейсов.
+# Генерация gRPC TypeScript Интерфейсов. 
 gen:
 	$(MAKE_DIR)
-	protoc -I ../api $(PROTO_FILES) \
-	--js_out=import_style=commonjs,binary:./protogen/ \
-	--grpc-web_out=import_style=typescript,mode=grpcwebtext:./protogen/ \
-	--ts_out=./protogen/
+	npx protoc -I ../api $(PROTO_FILES) \
+    --ts_out ./protogen \
+    --ts_opt ts_nocheck \
+    --ts_opt eslint_disable \
 
 clean:
 	if exist protogen rmdir /s /q protogen
