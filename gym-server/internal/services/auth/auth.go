@@ -38,7 +38,7 @@ type UserProvider interface {
 }
 
 var (
-	ErrInvalidCredentials = errors.New("invalid credentials")
+	ErrInvalidCredentials  = errors.New("invalid credentials")
 	ErrPasswordIsIncorrect = errors.New("password is incorrect")
 )
 

@@ -19,7 +19,7 @@ clean-volumes:
 rebundle:
 	docker compose down
 	docker compose build
-	docker compose up -d
+	docker compose up
 
 rebundle-admin:
 	docker compose build gym-admin
