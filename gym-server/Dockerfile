@@ -1,25 +1,15 @@
-FROM golang:alpine AS builder
+FROM golang:alpine
 
-WORKDIR /gym-server
-COPY go.mod go.sum ./
+WORKDIR /gym
 
-RUN go mod download
-COPY . .
-RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-w -s" -o main ./cmd/gymserver/main.go
+RUN apk add --no-cache git bash
 
-RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-w -s" -o migrate ./cmd/migrator/migrator.go
-
-# Final stage
-FROM alpine:latest
-
-WORKDIR /root/
-COPY --from=builder /gym-server/main .
-COPY --from=builder /gym-server/migrate .
-
+# Скопируем только необходимые ресурсы (остальное монтируется с volume)
 COPY config ./config
 COPY migrations ./migrations
+COPY entrypoint.sh ./entrypoint.sh
 
-COPY entrypoint.sh ./
-RUN chmod +x entrypoint.sh
+RUN chmod +x ./entrypoint.sh
 
 ENTRYPOINT ["./entrypoint.sh"]
+

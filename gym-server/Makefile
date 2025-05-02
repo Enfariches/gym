@@ -3,9 +3,7 @@ PROTO_FILES = $(shell find ../api/v1 -name '*.proto')
 
 
 # TODO: Сделать тесты.
-# Добавить docker volumes для сервера, чтобы не перебилдить каждый раз
 # Исправить кроссплатформенность в make
-# Наладить envoy
 
 # Написать тесты на SMTP; Auth
 # Добавить Password Reset
@@ -25,8 +23,8 @@ gen:
 # 2) С помощью env CONFIG_PATH, который экспортируется перед запуском make
 # Если flag не указан, используется путь из env.
 bundle:
-	go mod tidy
-	go run ./cmd/gymserver/main.go --config=./config/dev.yaml
+	docker compose down gym-server
+	docker compose up gym-server
 
 # go test ./... - для поиска тестов во всех пакетах
 test:

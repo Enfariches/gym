@@ -12,11 +12,11 @@ service AuthService {
     // Аутентифицирует пользователя.
     rpc Login(AuthRequest) returns (LoginResponse);
 
-    // Сбрасывает пароль пользователя.
-    rpc ResetPassword(ResetPasswordRequest) returns (ResetPasswordResponse);
-
-    // подтверждает сброс пароля пользователя по токену.
+    // Обновляет пароль пользователя.
     rpc ChangePassword(ChangePasswordRequest) returns (ChangePasswordResponse);
+
+    // Подтверждает смену пароля пользователя по токену.
+    rpc VerifyChangePassword(VerifyChangePasswordRequest) returns (VerifyChangePasswordResponse);
 
     // Подтверждает регистрацию пользователя по токену.
     // Токен отправляется на почту пользователя.
@@ -35,8 +35,8 @@ message AuthRequest {
     AppSource source = 3;
 }
 
-// Запрос на сброс пароля пользователя.
-message ResetPasswordRequest {
+// Запрос на смену пароля пользователя.
+message ChangePasswordRequest {
     // Электронная почта пользователя.
     string email = 1;
 
@@ -44,24 +44,24 @@ message ResetPasswordRequest {
     AppSource source = 2;
 }
 
-// Ответ на сброс пароля.
-message ResetPasswordResponse {
+// Ответ на смену пароля.
+message ChangePasswordResponse {
     // Токен для сброса пароля.
     string reset_token = 1;
 }
 
-// Запрос на подтверждение сброса пароля.
-message ChangePasswordRequest {
-    // Токен для сброса пароля.
+// Запрос на подтверждение смены пароля.
+message VerifyChangePasswordRequest {
+    // Токен для смены пароля.
     string reset_token = 1;
 
     // Новый пароль пользователя.
     string new_password = 2;
 }
 
-message ChangePasswordResponse {
-    // Возвращает OK, если сброс пароля прошёл успешно.
-    // Возвращает ERROR, если сброс пароля не прошёл.
+message VerifyChangePasswordResponse {
+    // Возвращает OK, если смена пароля прошёл успешно.
+    // Возвращает ERROR, если смена пароля не прошёл.
 }
 
 message VerifyRegisterRequest {

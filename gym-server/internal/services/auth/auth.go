@@ -17,39 +17,36 @@ import (
 
 type Auth struct {
 	log          *slog.Logger
-	userSaver    UserSaver
-	userChecker  UserChecker
 	userProvider UserProvider
+	userManager  UserManager
+
 	smtpConfig   config.SMTPConfig
 	tokenTTL     time.Duration
 	authTokenTTL time.Duration
 }
 
-type UserSaver interface {
+type UserManager interface {
 	SaveUser(ctx context.Context, authUser *models.AuthUser) error
-}
-
-type UserChecker interface {
 	CheckUser(ctx context.Context, authUser *models.AuthUser) error
+	UpdateUserPassword(ctx context.Context, authUser *models.AuthUser) error
 }
-
 type UserProvider interface {
 	User(ctx context.Context, email, source string) (models.AuthUser, error)
 }
 
 var (
-	ErrInvalidCredentials = errors.New("invalid credentials")
+	ErrInvalidCredentials  = errors.New("invalid credentials")
 	ErrPasswordIsIncorrect = errors.New("password is incorrect")
 )
 
 // New возвращает инстанс Auth сервиса
-func New(log *slog.Logger, userSaver UserSaver, userChecker UserChecker, userProvider UserProvider,
+func New(log *slog.Logger, userProvider UserProvider, userManager UserManager,
 	smtpConfig config.SMTPConfig, tokenTTL, authTokenTTL time.Duration) *Auth {
 	return &Auth{
 		log:          log,
-		userSaver:    userSaver,
-		userChecker:  userChecker,
+		userManager:  userManager,
 		userProvider: userProvider,
+
 		smtpConfig:   smtpConfig,
 		tokenTTL:     tokenTTL,
 		authTokenTTL: authTokenTTL,
@@ -76,10 +73,11 @@ func (a *Auth) RegisterNewUser(ctx context.Context, email, password, source stri
 		Source:   source,
 	}
 
-	if err := a.userChecker.CheckUser(ctx, &authUser); err != nil {
+	if err := a.userManager.CheckUser(ctx, &authUser); err != nil {
 		if errors.Is(err, storage.ErrUserExists) {
 			log.Warn(storage.ErrUserExists.Error(), sl.Err(err))
-			return "", fmt.Errorf("%s: %w", op, storage.ErrUserExists)
+
+			return "", fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
 		}
 		log.Warn("failed to check user", sl.Err(err))
 		return "", fmt.Errorf("%s: %w", op, err)
@@ -114,7 +112,7 @@ func (a *Auth) Login(ctx context.Context, email, password, source string) (strin
 		if errors.Is(err, storage.ErrUserNotFound) {
 			log.Warn(storage.ErrUserNotFound.Error(), sl.Err(err))
 
-			return "", fmt.Errorf("%s: %w", op, storage.ErrUserNotFound)
+			return "", fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
 		}
 
 		log.Error("failed to get user", sl.Err(err))
@@ -142,18 +140,18 @@ func (a *Auth) VerifyRegister(ctx context.Context, authToken string) error {
 
 	authUser, err := jwt.ParseAuthToken(authToken)
 	if err != nil {
-		log.Error("failed to parse token or token has expired", sl.Err(err))
+		log.Error("failed to parse auth token or token has expired", sl.Err(err))
 		return fmt.Errorf("%s: %w", op, err)
 	}
 
 	log = log.With(slog.String("email", authUser.Email), slog.String("source", authUser.Source))
 
-	err = a.userSaver.SaveUser(ctx, authUser)
+	err = a.userManager.SaveUser(ctx, authUser)
 	if err != nil {
 		if errors.Is(err, storage.ErrUserExists) {
 			log.Warn(storage.ErrUserExists.Error(), sl.Err(err))
 
-			return fmt.Errorf("%s: %w", op, storage.ErrUserExists)
+			return fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
 		}
 		log.Error("failed to save user in system", sl.Err(err))
 		return fmt.Errorf("%s: %w", op, err)
@@ -163,17 +161,17 @@ func (a *Auth) VerifyRegister(ctx context.Context, authToken string) error {
 	return nil
 }
 
-func (a *Auth) ResetPassword(ctx context.Context, email, source string) (string, error) {
-	const op = "auth.ResetPassword"
+func (a *Auth) ChangePassword(ctx context.Context, email, source string) (string, error) {
+	const op = "auth.ChangePassword"
 
 	log := a.log.With(slog.String("op", op), slog.String("email", email))
 
-	if err := a.userChecker.CheckUser(ctx, &models.AuthUser{Email: email, Source: source}); err != nil {
-		if errors.Is(err, storage.ErrUserExists) {
-			log.Warn(storage.ErrUserExists.Error(), sl.Err(err))
-			return "", fmt.Errorf("%s: %w", op, storage.ErrUserExists)
+	if err := a.userManager.CheckUser(ctx, &models.AuthUser{Email: email, Source: source}); err != nil {
+		if !errors.Is(err, storage.ErrUserExists) {
+			log.Warn(storage.ErrUserNotFound.Error(), sl.Err(err))
+
+			return "", fmt.Errorf("%s: %w", op, err)
 		}
-		return "", fmt.Errorf("%s: %w", op, err)
 	}
 
 	resetToken, err := jwt.NewResetToken(email, source, a.authTokenTTL)
@@ -191,6 +189,29 @@ func (a *Auth) ResetPassword(ctx context.Context, email, source string) (string,
 	return resetToken, nil
 }
 
-func (a *Auth) ChangePassword(ctx context.Context, resetToken, newPassword string) error {
+func (a *Auth) VerifyChangePassword(ctx context.Context, resetToken, newPassword string) error {
+	const op = "auth.VerifyChangePassword"
+
+	log := a.log.With(slog.String("op", op))
+
+	authUser, err := jwt.ParseResetToken(resetToken)
+	if err != nil {
+		log.Error("failed to parse reset token or token has expired", sl.Err(err))
+		return fmt.Errorf("%s: %w", op, err)
+	}
+
+	passHash, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.DefaultCost)
+	if err != nil {
+		log.Error("failed to generate hash password", sl.Err(err))
+		return fmt.Errorf("%s: %w", op, err)
+	}
+
+	authUser.PassHash = passHash
+	err = a.userManager.UpdateUserPassword(ctx, authUser)
+	if err != nil {
+		return fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
+	}
+
+	log.Info("changed password for user", slog.String("email", authUser.Email))
 	return nil
 }

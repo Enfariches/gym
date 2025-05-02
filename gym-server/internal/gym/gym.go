@@ -22,7 +22,7 @@ func New(log *slog.Logger, grpcPort int, storagePath string,
 		log.Error("failed to create storage", slog.String("path", storagePath))
 	}
 
-	authService := auth.New(log, storage, storage, storage, smtpConfig, tokenTTL, authTokenTLL)
+	authService := auth.New(log, storage, storage, smtpConfig, tokenTTL, authTokenTLL)
 
 	grpcGym := grpcgym.New(log, authService, grpcPort)
 
