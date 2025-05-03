@@ -1,9 +1,9 @@
 <template>
-  <div class="login-page">
-    <q-card class="login-card">
+  <div class="register-page">
+    <q-card class="register-card">
       <q-card-section>
-        <h4 class="text-h4 q-mb-md">Login</h4>
-        <q-form @submit="handleLogin" class="q-gutter-md">
+        <h4 class="text-h4 q-mb-md">Register</h4>
+        <q-form @submit="handleRegister" class="q-gutter-md">
           <q-input
             v-model="email"
             label="Email"
@@ -15,14 +15,21 @@
             v-model="password"
             label="Password"
             type="password"
-            :rules="[val => !!val || 'Password is required']"
+            :rules="[val => !!val || 'Password is required', val => val.length >= 8 || 'Password must be at least 8 characters']"
+            required
+          />
+          <q-input
+            v-model="confirmPassword"
+            label="Confirm Password"
+            type="password"
+            :rules="[val => !!val || 'Please confirm your password', val => val === password || 'Passwords do not match']"
             required
           />
           <div class="row q-mt-lg">
             <q-btn
               type="submit"
               color="primary"
-              label="Login"
+              label="Register"
               :loading="loading"
               class="full-width"
             />
@@ -31,40 +38,32 @@
             <q-btn
               flat
               color="primary"
-              label="Forgot Password?"
-              @click="showResetPassword = true"
-            />
-          </div>
-          <div class="row q-mt-sm">
-            <q-btn
-              flat
-              color="primary"
-              label="Don't have an account? Register"
-              to="/register"
+              label="Already have an account? Login"
+              to="/login"
             />
           </div>
         </q-form>
       </q-card-section>
     </q-card>
 
-    <q-dialog v-model="showResetPassword">
+    <q-dialog v-model="showVerificationDialog">
       <q-card>
         <q-card-section>
-          <h4 class="text-h4 q-mb-md">Reset Password</h4>
-          <q-form @submit="handleResetPassword" class="q-gutter-md">
+          <h4 class="text-h4 q-mb-md">Verify Registration</h4>
+          <p class="q-mb-md">Please check your email for the verification link. If you haven't received it, you can enter the verification token below:</p>
+          <q-form @submit="handleVerification" class="q-gutter-md">
             <q-input
-              v-model="resetEmail"
-              label="Email"
-              type="email"
-              :rules="[val => !!val || 'Email is required', val => /.+@.+\..+/.test(val) || 'Email must be valid']"
+              v-model="verificationToken"
+              label="Verification Token"
+              :rules="[val => !!val || 'Token is required']"
               required
             />
             <div class="row q-mt-lg">
               <q-btn
                 type="submit"
                 color="primary"
-                label="Reset Password"
-                :loading="loading"
+                label="Verify"
+                :loading="verifying"
                 class="full-width"
               />
             </div>
@@ -87,24 +86,28 @@ const authStore = useAuthStore();
 
 const email = ref('');
 const password = ref('');
-const resetEmail = ref('');
-const showResetPassword = ref(false);
+const confirmPassword = ref('');
 const loading = ref(false);
+const showVerificationDialog = ref(false);
+const verificationToken = ref('');
+const verifying = ref(false);
 
-const handleLogin = async () => {
+const handleRegister = async () => {
   try {
     loading.value = true;
-    await authStore.login(email.value, password.value);
+    const response = await authStore.register(email.value, password.value);
+    console.log(response);
+    showVerificationDialog.value = true;
     $q.notify({
       color: 'positive',
-      message: 'Login successful!',
+      message: 'Registration successful! Please check your email to verify your account.',
       icon: 'check_circle'
     });
-    router.push('/');
   } catch (error) {
+    console.error(error);
     $q.notify({
       color: 'negative',
-      message: error instanceof Error ? error.message : 'Login failed. Please check your credentials.',
+      message: 'Registration failed. Please try again.',
       icon: 'report_problem'
     });
   } finally {
@@ -112,30 +115,31 @@ const handleLogin = async () => {
   }
 };
 
-const handleResetPassword = async () => {
+const handleVerification = async () => {
   try {
-    loading.value = true;
-    await authStore.resetPassword(resetEmail.value);
+    verifying.value = true;
+    await authStore.verifyRegister(verificationToken.value);
     $q.notify({
       color: 'positive',
-      message: 'Password reset instructions have been sent to your email.',
+      message: 'Account verified successfully! You can now login.',
       icon: 'check_circle'
     });
-    showResetPassword.value = false;
+    router.push('/login');
   } catch (error) {
+    console.error(error);
     $q.notify({
       color: 'negative',
-      message: error instanceof Error ? error.message : 'Password reset failed. Please try again.',
+      message: 'Verification failed. Please try again.',
       icon: 'report_problem'
     });
   } finally {
-    loading.value = false;
+    verifying.value = false;
   }
 };
 </script>
 
 <style scoped>
-.login-page {
+.register-page {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -143,7 +147,7 @@ const handleResetPassword = async () => {
   background-color: #f5f5f5;
 }
 
-.login-card {
+.register-card {
   width: 100%;
   max-width: 400px;
   padding: 20px;

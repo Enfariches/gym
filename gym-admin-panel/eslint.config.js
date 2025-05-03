@@ -15,7 +15,7 @@ export default [
      *
      * ESLint requires "ignores" key to be the only one in this object
      */
-    // ignores: []
+    ignores: ['protogen/'], // игнорироать protogen
   },
 
   ...pluginQuasar.configs.recommended(),
@@ -74,9 +74,12 @@ export default [
       '@typescript-eslint/consistent-type-imports': [
         'error',
       ],
+      "@typescript-eslint/no-empty-object-type": "error",
+
 
       // allow debugger during development only
-      'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off'
+      'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
+
     }
   },
 
