@@ -14,3 +14,9 @@ go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 пути для devs:
 
 http://localhost:8083/ - docs
+
+
+# ./entrypoint error
+
+dos2unix gym-server/entrypoint.sh
+git update-index --chmod=+x gym-server/entrypoint.sh
