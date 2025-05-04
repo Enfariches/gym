@@ -26,7 +26,7 @@ services:
       - "8085:8085"  # HTTP вход
       - "8443:8443"  # HTTPS вход
     volumes:
-      - ./envoyproxy/envoy.yaml:/etc/envoy/envoy.yaml  # Подключаем конфиг
+      - ./envoyproxy/envoy.yaml:/etc/envoy/envoy.yaml
     depends_on:
       - gym-server
     networks:
@@ -48,6 +48,8 @@ services:
       - 9090:9090
     environment:
       DB_URL: "postgres:root@postgres:5432/health?sslmode=disable"  
+    volumes:
+    - ./gym-server:/gym
     depends_on:
       postgres:
         condition: service_healthy
@@ -72,4 +74,5 @@ networks:
 
 volumes:
   postgres_data:
+  gym-server:
 

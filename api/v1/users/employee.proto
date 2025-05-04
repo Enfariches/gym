@@ -9,34 +9,34 @@ import "google/protobuf/empty.proto";
 service EmployeeService {
 
     // Получает пользователя.
-    rpc GetUser (GetUserRequest) returns (User);
+    rpc GetEmployee (GetEmployeeRequest) returns (Employee);
 
     // Обновляет пользователя.
-    rpc UpdateAdmin (UpdateUserRequest) returns (User);
+    rpc UpdateEmployee (UpdateEmployeeRequest) returns (Employee);
 
     // Удаляет пользователя.
-    rpc DeleteAdmin (DeleteUserRequest) returns (google.protobuf.Empty);
+    rpc DeleteEmployee (DeleteEmployeeRequest) returns (google.protobuf.Empty);
 }
 
 // Запрос на получение пользователя.
-message GetUserRequest {
+message GetEmployeeRequest {
     // ID пользователя.
     string employee_id = 1;
 }
 
 // Запрос на обновление пользователя.
-message UpdateUserRequest {
+message UpdateEmployeeRequest {
     // Нужно согласовать какие поля расписания можно менять.
 }
 
 // Запрос на удаление пользователя.
-message DeleteUserRequest {
+message DeleteEmployeeRequest {
     // ID пользователя.
     string employee_id = 1;
 }
 
 // Структура пользователя.
-message User {
+message Employee {
     // ID пользователя.
     string id = 1;
 

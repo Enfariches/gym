@@ -86,3 +86,27 @@ func NewResetToken(email, source string, duration time.Duration) (string, error)
 
 	return resetTokenString, nil
 }
+
+func ParseResetToken(tokenString string) (*models.AuthUser, error) {
+	authToken, err := jwt.Parse(tokenString, func(token *jwt.Token) (any, error) {
+		return []byte(resetSecret), nil
+	}, jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}))
+	if err != nil {
+		return nil, err
+	}
+
+	claims, ok := authToken.Claims.(jwt.MapClaims)
+	if !ok {
+		return nil, err
+	}
+
+	expFloat := claims["exp"].(float64)
+	if int64(expFloat) < time.Now().Unix() {
+		return nil, jwt.ErrTokenExpired
+	}
+
+	return &models.AuthUser{
+		Email:    claims["email"].(string),
+		Source:    claims["source"].(string),
+	}, nil
+}

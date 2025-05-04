@@ -14,8 +14,8 @@ type AuthService interface {
 	RegisterNewUser(ctx context.Context, email, password, source string) (authToken string, err error)
 	Login(ctx context.Context, email, password, source string) (token string, err error)
 	VerifyRegister(ctx context.Context, authToken string) error
-	ResetPassword(ctx context.Context, email string, source string) (string, error)
-	ChangePassword(ctx context.Context, resetTokenm, source string) error
+	ChangePassword(ctx context.Context, email string, source string) (string, error)
+	VerifyChangePassword(ctx context.Context, resetToken, source string) error
 }
 
 type AuthServerManagmentApi struct {
@@ -75,7 +75,7 @@ func (s *AuthServerManagmentApi) VerifyRegister(ctx context.Context, r *pb.Verif
 	return &pb.VerifyRegisterResponse{}, nil
 }
 
-func (s *AuthServerManagmentApi) ResetPassword(ctx context.Context, r *pb.ResetPasswordRequest) (*pb.ResetPasswordResponse, error) {
+func (s *AuthServerManagmentApi) ChangePassword(ctx context.Context, r *pb.ChangePasswordRequest) (*pb.ChangePasswordResponse, error) {
 	if r.Email == "" {
 		return nil, status.Error(codes.InvalidArgument, "email is required")
 	}
@@ -85,15 +85,15 @@ func (s *AuthServerManagmentApi) ResetPassword(ctx context.Context, r *pb.ResetP
 		return nil, status.Error(codes.InvalidArgument, fmt.Sprintf("unknown app source: %v", err))
 	}
 
-	resetToken, err := s.auth.ResetPassword(context.Background(), r.Email, source)
+	resetToken, err := s.auth.ChangePassword(context.Background(), r.Email, source)
 	if err != nil {
 		return nil, status.Error(codes.Internal, fmt.Sprintf("failed to reset password: %v", err))
 	}
 
-	return &pb.ResetPasswordResponse{ResetToken: resetToken}, nil
+	return &pb.ChangePasswordResponse{ResetToken: resetToken}, nil
 }
 
-func (s *AuthServerManagmentApi) ChangePassword(ctx context.Context, r *pb.ChangePasswordRequest) (*pb.ChangePasswordResponse, error) {
+func (s *AuthServerManagmentApi) VerifyChangePassword(ctx context.Context, r *pb.VerifyChangePasswordRequest) (*pb.VerifyChangePasswordResponse, error) {
 	if r.ResetToken == "" {
 		return nil, status.Error(codes.InvalidArgument, "reset token is required")
 	}
@@ -102,11 +102,11 @@ func (s *AuthServerManagmentApi) ChangePassword(ctx context.Context, r *pb.Chang
 		return nil, status.Error(codes.InvalidArgument, "new password is required")
 	}
 
-	if err := s.auth.ChangePassword(context.Background(), r.ResetToken, r.NewPassword); err != nil {
+	if err := s.auth.VerifyChangePassword(context.Background(), r.ResetToken, r.NewPassword); err != nil {
 		return nil, status.Error(codes.Internal, fmt.Sprintf("failed to change password: %v", err))
 	}
 
-	return &pb.ChangePasswordResponse{}, nil
+	return &pb.VerifyChangePasswordResponse{}, nil
 }
 
 func validateAuth(r *pb.AuthRequest) error {

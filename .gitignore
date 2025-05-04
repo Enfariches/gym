@@ -2,6 +2,8 @@ gym-admin-panel/.env
 gym-admin-panel/protogen
 gym-admin-panel/node_modules
 gym-server/protogen
+gym-server/main
+gym-server/migrate
 .idea
 .database
 .env
