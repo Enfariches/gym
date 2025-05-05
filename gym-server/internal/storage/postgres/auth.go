@@ -46,7 +46,7 @@ func (s *Storage) CheckUser(ctx context.Context, authUser *models.AuthUser) erro
 	return fmt.Errorf("%s: %w", op, storage.ErrUserExists)
 }
 
-func (s *Storage) User(ctx context.Context, email, source string) (models.AuthUser, error) {
+func (s *Storage) User(ctx context.Context, email, source string) (*models.AuthUser, error) {
 	const op = "postgres.User"
 
 	query, args, _ := goqu.From(source).
@@ -56,16 +56,16 @@ func (s *Storage) User(ctx context.Context, email, source string) (models.AuthUs
 		ToSQL()
 
 	var authUser models.AuthUser
-	err := s.db.QueryRow(query, args...).Scan(&authUser.Id, &authUser.Email, &authUser.PassHash)
+	err := s.db.QueryRow(query, args...).Scan(&authUser.ID, &authUser.Email, &authUser.PassHash)
 	if err != nil {
 		if HandleDBError(err) == storage.ErrUserNotFound {
-			return models.AuthUser{}, fmt.Errorf("%s: %w", op, storage.ErrUserNotFound)
+			return nil, fmt.Errorf("%s: %w", op, storage.ErrUserNotFound)
 		}
-		return models.AuthUser{}, fmt.Errorf("%s: %w", op, err)
+		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 	authUser.Source = source
 
-	return authUser, nil
+	return &authUser, nil
 }
 
 func (s *Storage) UpdateUserPassword(ctx context.Context, authUser *models.AuthUser) error {

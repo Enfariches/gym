@@ -226,6 +226,14 @@
                 </li>
               
                 <li>
+                  <a href="#auth.ChangePasswordRequest"><span class="badge">M</span>ChangePasswordRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#auth.ChangePasswordResponse"><span class="badge">M</span>ChangePasswordResponse</a>
+                </li>
+              
+                <li>
                   <a href="#auth.LoginResponse"><span class="badge">M</span>LoginResponse</a>
                 </li>
               
@@ -234,9 +242,25 @@
                 </li>
               
                 <li>
-                  <a href="#auth.VerifyEmailRequest"><span class="badge">M</span>VerifyEmailRequest</a>
+                  <a href="#auth.VerifyChangePasswordRequest"><span class="badge">M</span>VerifyChangePasswordRequest</a>
                 </li>
               
+                <li>
+                  <a href="#auth.VerifyChangePasswordResponse"><span class="badge">M</span>VerifyChangePasswordResponse</a>
+                </li>
+              
+                <li>
+                  <a href="#auth.VerifyRegisterRequest"><span class="badge">M</span>VerifyRegisterRequest</a>
+                </li>
+              
+                <li>
+                  <a href="#auth.VerifyRegisterResponse"><span class="badge">M</span>VerifyRegisterResponse</a>
+                </li>
+              
+              
+                <li>
+                  <a href="#auth.AppSource"><span class="badge">E</span>AppSource</a>
+                </li>
               
               
               
@@ -249,23 +273,23 @@
         
           
           <li>
-            <a href="#api%2fv1%2fuser%2femployee.proto">api/v1/user/employee.proto</a>
+            <a href="#api%2fv1%2fusers%2femployee.proto">api/v1/users/employee.proto</a>
             <ul>
               
                 <li>
-                  <a href="#employee.DeleteUserRequest"><span class="badge">M</span>DeleteUserRequest</a>
+                  <a href="#employee.DeleteEmployeeRequest"><span class="badge">M</span>DeleteEmployeeRequest</a>
                 </li>
               
                 <li>
-                  <a href="#employee.GetUserRequest"><span class="badge">M</span>GetUserRequest</a>
+                  <a href="#employee.Employee"><span class="badge">M</span>Employee</a>
                 </li>
               
                 <li>
-                  <a href="#employee.UpdateUserRequest"><span class="badge">M</span>UpdateUserRequest</a>
+                  <a href="#employee.GetEmployeeRequest"><span class="badge">M</span>GetEmployeeRequest</a>
                 </li>
               
                 <li>
-                  <a href="#employee.User"><span class="badge">M</span>User</a>
+                  <a href="#employee.UpdateEmployeeRequest"><span class="badge">M</span>UpdateEmployeeRequest</a>
                 </li>
               
               
@@ -280,7 +304,7 @@
         
           
           <li>
-            <a href="#api%2fv1%2fuser%2fadmin.proto">api/v1/user/admin.proto</a>
+            <a href="#api%2fv1%2fusers%2fadmin.proto">api/v1/users/admin.proto</a>
             <ul>
               
                 <li>
@@ -288,19 +312,7 @@
                 </li>
               
                 <li>
-                  <a href="#admin.DeleteAdminRequest"><span class="badge">M</span>DeleteAdminRequest</a>
-                </li>
-              
-                <li>
                   <a href="#admin.GetAdminRequest"><span class="badge">M</span>GetAdminRequest</a>
-                </li>
-              
-                <li>
-                  <a href="#admin.IsAdminRequest"><span class="badge">M</span>IsAdminRequest</a>
-                </li>
-              
-                <li>
-                  <a href="#admin.IsAdminResponse"><span class="badge">M</span>IsAdminResponse</a>
                 </li>
               
                 <li>
@@ -621,6 +633,68 @@
                   <td><p>Пароль пользователя. </p></td>
                 </tr>
               
+                <tr>
+                  <td>source</td>
+                  <td><a href="#auth.AppSource">AppSource</a></td>
+                  <td></td>
+                  <td><p>Источник запроса (клиент или админка) </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="auth.ChangePasswordRequest">ChangePasswordRequest</h3>
+        <p>Запрос на смену пароля пользователя.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>email</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Электронная почта пользователя. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>source</td>
+                  <td><a href="#auth.AppSource">AppSource</a></td>
+                  <td></td>
+                  <td><p>Источник запроса (клиент или админка) </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="auth.ChangePasswordResponse">ChangePasswordResponse</h3>
+        <p>Ответ на смену пароля.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>reset_token</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Токен для сброса пароля. </p></td>
+                </tr>
+              
             </tbody>
           </table>
 
@@ -677,7 +751,45 @@
 
         
       
-        <h3 id="auth.VerifyEmailRequest">VerifyEmailRequest</h3>
+        <h3 id="auth.VerifyChangePasswordRequest">VerifyChangePasswordRequest</h3>
+        <p>Запрос на подтверждение смены пароля.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>reset_token</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Токен для смены пароля. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>new_password</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p>Новый пароль пользователя. </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="auth.VerifyChangePasswordResponse">VerifyChangePasswordResponse</h3>
+        <p>Возвращает OK, если смена пароля прошёл успешно.</p><p>Возвращает ERROR, если смена пароля не прошёл.</p>
+
+        
+
+        
+      
+        <h3 id="auth.VerifyRegisterRequest">VerifyRegisterRequest</h3>
         <p></p>
 
         
@@ -701,7 +813,43 @@
 
         
       
+        <h3 id="auth.VerifyRegisterResponse">VerifyRegisterResponse</h3>
+        <p>Возвращает OK, если регистрация прошла успешно.</p><p>Возвращает ERROR, если регистрация не прошла.</p>
 
+        
+
+        
+      
+
+      
+        <h3 id="auth.AppSource">AppSource</h3>
+        <p>Тип приложения, от которого пришёл запрос</p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Name</td><td>Number</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>APP_SOURCE_UNSPECIFIED</td>
+                <td>0</td>
+                <td><p>Неизвестный источник</p></td>
+              </tr>
+            
+              <tr>
+                <td>EMPLOYEE</td>
+                <td>1</td>
+                <td><p>Клиентское приложение</p></td>
+              </tr>
+            
+              <tr>
+                <td>ADMIN</td>
+                <td>2</td>
+                <td><p>Админ-панель</p></td>
+              </tr>
+            
+          </tbody>
+        </table>
       
 
       
@@ -730,16 +878,23 @@
               </tr>
             
               <tr>
-                <td>ResetPassword</td>
-                <td><a href="#auth.AuthRequest">AuthRequest</a></td>
-                <td><a href="#auth.RegisterResponse">RegisterResponse</a></td>
-                <td><p>Сбрасывает пароль пользователя.</p></td>
+                <td>ChangePassword</td>
+                <td><a href="#auth.ChangePasswordRequest">ChangePasswordRequest</a></td>
+                <td><a href="#auth.ChangePasswordResponse">ChangePasswordResponse</a></td>
+                <td><p>Обновляет пароль пользователя.</p></td>
               </tr>
             
               <tr>
-                <td>VerifyEmail</td>
-                <td><a href="#auth.VerifyEmailRequest">VerifyEmailRequest</a></td>
-                <td><a href="#auth.RegisterResponse">RegisterResponse</a></td>
+                <td>VerifyChangePassword</td>
+                <td><a href="#auth.VerifyChangePasswordRequest">VerifyChangePasswordRequest</a></td>
+                <td><a href="#auth.VerifyChangePasswordResponse">VerifyChangePasswordResponse</a></td>
+                <td><p>Подтверждает смену пароля пользователя по токену.</p></td>
+              </tr>
+            
+              <tr>
+                <td>VerifyRegister</td>
+                <td><a href="#auth.VerifyRegisterRequest">VerifyRegisterRequest</a></td>
+                <td><a href="#auth.VerifyRegisterResponse">VerifyRegisterResponse</a></td>
                 <td><p>Подтверждает регистрацию пользователя по токену.
 Токен отправляется на почту пользователя.</p></td>
               </tr>
@@ -751,12 +906,12 @@
     
       
       <div class="file-heading">
-        <h2 id="api/v1/user/employee.proto">api/v1/user/employee.proto</h2><a href="#title">Top</a>
+        <h2 id="api/v1/users/employee.proto">api/v1/users/employee.proto</h2><a href="#title">Top</a>
       </div>
       <p></p>
 
       
-        <h3 id="employee.DeleteUserRequest">DeleteUserRequest</h3>
+        <h3 id="employee.DeleteEmployeeRequest">DeleteEmployeeRequest</h3>
         <p>Запрос на удаление пользователя.</p>
 
         
@@ -768,7 +923,7 @@
               
                 <tr>
                   <td>employee_id</td>
-                  <td><a href="#string">string</a></td>
+                  <td><a href="#int64">int64</a></td>
                   <td></td>
                   <td><p>ID пользователя. </p></td>
                 </tr>
@@ -780,38 +935,7 @@
 
         
       
-        <h3 id="employee.GetUserRequest">GetUserRequest</h3>
-        <p>Запрос на получение пользователя.</p>
-
-        
-          <table class="field-table">
-            <thead>
-              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
-            </thead>
-            <tbody>
-              
-                <tr>
-                  <td>employee_id</td>
-                  <td><a href="#string">string</a></td>
-                  <td></td>
-                  <td><p>ID пользователя. </p></td>
-                </tr>
-              
-            </tbody>
-          </table>
-
-          
-
-        
-      
-        <h3 id="employee.UpdateUserRequest">UpdateUserRequest</h3>
-        <p>Запрос на обновление пользователя.</p><p>Нужно согласовать какие поля расписания можно менять.</p>
-
-        
-
-        
-      
-        <h3 id="employee.User">User</h3>
+        <h3 id="employee.Employee">Employee</h3>
         <p>Структура пользователя.</p>
 
         
@@ -823,7 +947,7 @@
               
                 <tr>
                   <td>id</td>
-                  <td><a href="#string">string</a></td>
+                  <td><a href="#int64">int64</a></td>
                   <td></td>
                   <td><p>ID пользователя. </p></td>
                 </tr>
@@ -898,6 +1022,37 @@
 
         
       
+        <h3 id="employee.GetEmployeeRequest">GetEmployeeRequest</h3>
+        <p>Запрос на получение пользователя.</p>
+
+        
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>employee_id</td>
+                  <td><a href="#int64">int64</a></td>
+                  <td></td>
+                  <td><p>ID пользователя. </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
+
+        
+      
+        <h3 id="employee.UpdateEmployeeRequest">UpdateEmployeeRequest</h3>
+        <p>Запрос на обновление пользователя.</p><p>Нужно согласовать какие поля расписания можно менять.</p>
+
+        
+
+        
+      
 
       
 
@@ -913,22 +1068,22 @@
           <tbody>
             
               <tr>
-                <td>GetUser</td>
-                <td><a href="#employee.GetUserRequest">GetUserRequest</a></td>
-                <td><a href="#employee.User">User</a></td>
+                <td>GetEmployee</td>
+                <td><a href="#employee.GetEmployeeRequest">GetEmployeeRequest</a></td>
+                <td><a href="#employee.Employee">Employee</a></td>
                 <td><p>Получает пользователя.</p></td>
               </tr>
             
               <tr>
-                <td>UpdateAdmin</td>
-                <td><a href="#employee.UpdateUserRequest">UpdateUserRequest</a></td>
-                <td><a href="#employee.User">User</a></td>
+                <td>UpdateEmployee</td>
+                <td><a href="#employee.UpdateEmployeeRequest">UpdateEmployeeRequest</a></td>
+                <td><a href="#employee.Employee">Employee</a></td>
                 <td><p>Обновляет пользователя.</p></td>
               </tr>
             
               <tr>
-                <td>DeleteAdmin</td>
-                <td><a href="#employee.DeleteUserRequest">DeleteUserRequest</a></td>
+                <td>DeleteEmployee</td>
+                <td><a href="#employee.DeleteEmployeeRequest">DeleteEmployeeRequest</a></td>
                 <td><a href="#google.protobuf.Empty">.google.protobuf.Empty</a></td>
                 <td><p>Удаляет пользователя.</p></td>
               </tr>
@@ -940,7 +1095,7 @@
     
       
       <div class="file-heading">
-        <h2 id="api/v1/user/admin.proto">api/v1/user/admin.proto</h2><a href="#title">Top</a>
+        <h2 id="api/v1/users/admin.proto">api/v1/users/admin.proto</h2><a href="#title">Top</a>
       </div>
       <p></p>
 
@@ -957,7 +1112,7 @@
               
                 <tr>
                   <td>id</td>
-                  <td><a href="#string">string</a></td>
+                  <td><a href="#int64">int64</a></td>
                   <td></td>
                   <td><p>ID администратора. </p></td>
                 </tr>
@@ -997,30 +1152,6 @@
 
         
       
-        <h3 id="admin.DeleteAdminRequest">DeleteAdminRequest</h3>
-        <p>Запрос на удаление администратора.</p>
-
-        
-          <table class="field-table">
-            <thead>
-              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
-            </thead>
-            <tbody>
-              
-                <tr>
-                  <td>admin_id</td>
-                  <td><a href="#string">string</a></td>
-                  <td></td>
-                  <td><p> </p></td>
-                </tr>
-              
-            </tbody>
-          </table>
-
-          
-
-        
-      
         <h3 id="admin.GetAdminRequest">GetAdminRequest</h3>
         <p>Запрос на получение администратора.</p>
 
@@ -1033,57 +1164,9 @@
               
                 <tr>
                   <td>admin_id</td>
-                  <td><a href="#string">string</a></td>
+                  <td><a href="#int64">int64</a></td>
                   <td></td>
-                  <td><p> </p></td>
-                </tr>
-              
-            </tbody>
-          </table>
-
-          
-
-        
-      
-        <h3 id="admin.IsAdminRequest">IsAdminRequest</h3>
-        <p>Запрос на проверку администратора.</p>
-
-        
-          <table class="field-table">
-            <thead>
-              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
-            </thead>
-            <tbody>
-              
-                <tr>
-                  <td>admin_id</td>
-                  <td><a href="#string">string</a></td>
-                  <td></td>
-                  <td><p> </p></td>
-                </tr>
-              
-            </tbody>
-          </table>
-
-          
-
-        
-      
-        <h3 id="admin.IsAdminResponse">IsAdminResponse</h3>
-        <p>Ответ на запрос проверки администратора.</p>
-
-        
-          <table class="field-table">
-            <thead>
-              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
-            </thead>
-            <tbody>
-              
-                <tr>
-                  <td>IsAdmin</td>
-                  <td><a href="#bool">bool</a></td>
-                  <td></td>
-                  <td><p>Флаг, является ли пользователь администратором. </p></td>
+                  <td><p>ID администратора. </p></td>
                 </tr>
               
             </tbody>
@@ -1094,9 +1177,33 @@
         
       
         <h3 id="admin.UpdateAdminRequest">UpdateAdminRequest</h3>
-        <p>Запрос на обновление администратора.</p><p>Нужно согласовать какие поля расписания можно менять.</p>
+        <p>Запрос на обновление администратора.</p>
 
         
+          <table class="field-table">
+            <thead>
+              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
+            </thead>
+            <tbody>
+              
+                <tr>
+                  <td>admin</td>
+                  <td><a href="#admin.Admin">Admin</a></td>
+                  <td></td>
+                  <td><p>Администратор, который будет обновлен. </p></td>
+                </tr>
+              
+                <tr>
+                  <td>field_mask</td>
+                  <td><a href="#google.protobuf.FieldMask">google.protobuf.FieldMask</a></td>
+                  <td></td>
+                  <td><p>Маска полей, которые будут обновлены. </p></td>
+                </tr>
+              
+            </tbody>
+          </table>
+
+          
 
         
       
@@ -1126,20 +1233,6 @@
                 <td><a href="#admin.UpdateAdminRequest">UpdateAdminRequest</a></td>
                 <td><a href="#admin.Admin">Admin</a></td>
                 <td><p>Обновляет администратора.</p></td>
-              </tr>
-            
-              <tr>
-                <td>DeleteAdmin</td>
-                <td><a href="#admin.DeleteAdminRequest">DeleteAdminRequest</a></td>
-                <td><a href="#google.protobuf.Empty">.google.protobuf.Empty</a></td>
-                <td><p>Удаляет администратора.</p></td>
-              </tr>
-            
-              <tr>
-                <td>IsAdmin</td>
-                <td><a href="#admin.IsAdminRequest">IsAdminRequest</a></td>
-                <td><a href="#admin.IsAdminResponse">IsAdminResponse</a></td>
-                <td><p>Проверяет, является ли пользователь администратором.</p></td>
               </tr>
             
           </tbody>

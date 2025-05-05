@@ -7,6 +7,7 @@ import (
 	"health/internal/config"
 	grpcgym "health/internal/gym/grpc"
 	"health/internal/services/auth"
+	"health/internal/services/admin"
 	"health/internal/storage/postgres"
 )
 
@@ -23,8 +24,9 @@ func New(log *slog.Logger, grpcPort int, storagePath string,
 	}
 
 	authService := auth.New(log, storage, storage, smtpConfig, tokenTTL, authTokenTLL)
+	adminService := admin.New(log, storage)
 
-	grpcGym := grpcgym.New(log, authService, grpcPort)
+	grpcGym := grpcgym.New(log, authService, adminService, grpcPort)
 
 	return &Gym{
 		GRPCSrv: grpcGym,

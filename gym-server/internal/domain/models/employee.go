@@ -1,7 +1,7 @@
 package models
 
 type Employee struct{
-	ID string
+	ID int
 	Name string
 	SecondName string
 	Surname string
@@ -11,5 +11,4 @@ type Employee struct{
 	Departament string
 	Post string // Должность
 	Email string
-	PassHash []byte
 }

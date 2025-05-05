@@ -7,7 +7,6 @@ import "google/protobuf/empty.proto";
 
 // Сервис для управления пользователями.
 service EmployeeService {
-
     // Получает пользователя.
     rpc GetEmployee (GetEmployeeRequest) returns (Employee);
 
@@ -21,7 +20,7 @@ service EmployeeService {
 // Запрос на получение пользователя.
 message GetEmployeeRequest {
     // ID пользователя.
-    string employee_id = 1;
+    int64 employee_id = 1;
 }
 
 // Запрос на обновление пользователя.
@@ -32,13 +31,13 @@ message UpdateEmployeeRequest {
 // Запрос на удаление пользователя.
 message DeleteEmployeeRequest {
     // ID пользователя.
-    string employee_id = 1;
+    int64 employee_id = 1;
 }
 
 // Структура пользователя.
 message Employee {
     // ID пользователя.
-    string id = 1;
+    int64 id = 1;
 
     // Имя пользователя.
     string name = 2;

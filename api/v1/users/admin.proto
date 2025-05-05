@@ -3,54 +3,37 @@ syntax="proto3";
 package admin;
 option go_package = "github.com/Enfariches/gym/protogen";
 
-import "google/protobuf/empty.proto";
+import "google/protobuf/field_mask.proto";
 
 // Сервис для управления администраторами.
 service AdminService {
-
     // Получает администратора.
     rpc GetAdmin (GetAdminRequest) returns (Admin);
 
     // Обновляет администратора.
     rpc UpdateAdmin (UpdateAdminRequest) returns (Admin);
-
-    // Удаляет администратора.
-    rpc DeleteAdmin (DeleteAdminRequest) returns (google.protobuf.Empty);
-
-    // Проверяет, является ли пользователь администратором.
-    rpc IsAdmin (IsAdminRequest) returns (IsAdminResponse);
 }
 
 // Запрос на получение администратора.
 message GetAdminRequest {
-    string admin_id = 1;
+    // ID администратора.
+    int64 admin_id = 1;
 }
 
 // Запрос на обновление администратора.
 message UpdateAdminRequest {
-    // Нужно согласовать какие поля расписания можно менять.
+    // Администратор, который будет обновлен.
+    Admin admin = 1;
+
+    // Маска полей, которые будут обновлены.
+    google.protobuf.FieldMask field_mask = 2;
 }
 
-// Запрос на проверку администратора.
-message IsAdminRequest {
-    string admin_id = 1;
-}
-
-// Запрос на удаление администратора.
-message DeleteAdminRequest {
-    string admin_id = 1;
-}
-
-// Ответ на запрос проверки администратора.
-message IsAdminResponse {
-    // Флаг, является ли пользователь администратором.
-    bool IsAdmin = 1;
-}
 
 // Структура администратора.
 message Admin {
     // ID администратора.
-    string id = 1;
+    int64 id = 1;
 
     // Имя администратора.
 	string name = 2;

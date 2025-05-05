@@ -35,7 +35,7 @@ func TestNewToken_ValidToken(t *testing.T) {
 
 	// Корректный случай
 	f(models.AuthUser{
-		Id:       1,
+		ID:       1,
 		Email:    "test@example.ru",
 		PassHash: wantPassHash,
 	}, timeDuration)
@@ -64,7 +64,7 @@ func TestNewToken_InvalidToken(t *testing.T) {
 
 	// Корректный случай
 	f(models.AuthUser{
-		Id:       2,
+		ID:       2,
 		Email:    "admin@yandex.ru",
 		PassHash: wantPassHash,
 	}, timeDuration)
@@ -72,7 +72,7 @@ func TestNewToken_InvalidToken(t *testing.T) {
 
 func wantMapClaims(user models.AuthUser, duration time.Duration) jwt.MapClaims {
 	return jwt.MapClaims{
-		"uid":   user.Id,
+		"uid":   user.ID,
 		"email": user.Email,
 		"exp":   time.Now().Add(duration).Unix(),
 	}

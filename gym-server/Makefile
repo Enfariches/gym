@@ -16,22 +16,19 @@ ifeq ($(SHELL_TYPE),windows)
 	MAKE_DIR = mkdir protogen
 else
     export CONFIG_PATH=$(CURDIR)/gym-server/config/dev.yaml
-	PROTO_FILES = '$(shell find ../api/v1 -name '*.proto')'
+	PROTO_FILES = $(shell find ../api/v1 -name '*.proto')
 	MAKE_DIR = mkdir -p ./protogen
 endif
 
 # TODO: Сделать тесты.
-# Исправить кроссплатформенность в make
 
 # Написать тесты на SMTP; Auth
-# Добавить Password Reset
-# Подумать как разграничить методы на уровне БД
 
 # Генерация gRPC Go Интерфейсов.
 gen:
 	$(MAKE_DIR)
 	protoc -I ../api $(PROTO_FILES) \
-	 --go_out=./protogen/ \
+	--go_out=./protogen/ \
 	  --go_opt=paths=source_relative \
 	--go-grpc_out=./protogen/ \
 	 --go-grpc_opt=paths=source_relative
@@ -44,7 +41,6 @@ clean:
 # 2) С помощью env CONFIG_PATH, который экспортируется перед запуском make
 # Если flag не указан, используется путь из env.
 bundle:
-	docker compose down gym-server
 	docker compose up gym-server
 
 # go test ./... - для поиска тестов во всех пакетах
@@ -54,3 +50,6 @@ test:
 
 migrate:
 	go run ./cmd/migrator/migrator.go --storage-url=postgres:root@localhost:5436/health?sslmode=disable --migrations-path=migrations
+
+opendb:
+	docker exec -it postgres psql -U postgres health

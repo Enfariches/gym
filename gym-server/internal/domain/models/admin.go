@@ -1,10 +1,9 @@
 package models
 
 type Admin struct{
-	ID string
+	ID int64
 	Name string
 	Surname string
 	Email string
 	Departament string
-	PassHash []byte
 }
