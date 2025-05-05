@@ -4,7 +4,7 @@
 PROTO_FILES = $(shell find ./api/v1 -name '*.proto')
 DOCS_FILE = $(pwd)/docs:/usr/share/nginx/html
 
-bundle:
+bundle-up:
 	docker compose up -d
 
 docs:
@@ -16,7 +16,16 @@ docs:
 clean-volumes:
 	docker compose down --volumes --remove-orphans
 
-rebundle:
+bundle-gen:
+	make -C gym-admin-panel clean
+	make -C gym-server clean
+	make -C gym-admin-panel gen
+	make -C gym-server gen
+	docker compose down
+	docker compose build
+	docker compose up
+
+bundle:
 	docker compose down
 	docker compose build
 	docker compose up
