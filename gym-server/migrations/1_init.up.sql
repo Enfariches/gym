@@ -23,8 +23,8 @@ CREATE TABLE IF NOT EXISTS employees (
 
 CREATE TABLE IF NOT EXISTS schedules (
     id SERIAL PRIMARY KEY,
-    cron_expression TEXT NOT NULL
-    is_active BOOLEAN DEFAULT true
+    cron_expression TEXT NOT NULL,
+    is_active BOOLEAN DEFAULT TRUE,
     video_id iNTEGER NOT NULL,
-    admin_id INTEGER NOT NULL,
+    admin_id INTEGER NOT NULL
 );
