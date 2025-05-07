@@ -1,68 +1,93 @@
 <template>
-  <div class="register-page">
-    <q-card class="register-card">
-      <q-card-section>
-        <h4 class="text-h4 q-mb-md">Register</h4>
-        <q-form @submit="handleRegister" class="q-gutter-md">
-          <q-input
-            v-model="email"
-            label="Email"
-            type="email"
-            :rules="[val => !!val || 'Email is required', val => /.+@.+\..+/.test(val) || 'Email must be valid']"
-            required
-          />
-          <q-input
-            v-model="password"
-            label="Password"
-            type="password"
-            :rules="[val => !!val || 'Password is required', val => val.length >= 8 || 'Password must be at least 8 characters']"
-            required
-          />
-          <q-input
-            v-model="confirmPassword"
-            label="Confirm Password"
-            type="password"
-            :rules="[val => !!val || 'Please confirm your password', val => val === password || 'Passwords do not match']"
-            required
-          />
-          <div class="row q-mt-lg">
-            <q-btn
-              type="submit"
-              color="primary"
-              label="Register"
-              :loading="loading"
-              class="full-width"
-            />
-          </div>
-          <div class="row q-mt-sm">
-            <q-btn
-              flat
-              color="primary"
-              label="Already have an account? Login"
-              to="/login"
-            />
-          </div>
-        </q-form>
-      </q-card-section>
-    </q-card>
+  <q-page class="bg-grey-1 register-page">
+    <div class="content">
+      <div class="register-container">
+        <q-card class="register-card">
+          <q-card-section class="q-pb-none">
+            <h1 class="page-title text-center">Регистрация</h1>
+            <p class="text-subtitle text-center">Создайте новый аккаунт</p>
+          </q-card-section>
+
+          <q-card-section>
+            <q-form @submit="handleRegister" class="q-gutter-md">
+              <q-input
+                v-model="email"
+                label="Email"
+                type="email"
+                outlined
+                class="register-input"
+                :rules="[val => !!val || 'Email обязателен', val => /.+@.+\..+/.test(val) || 'Email должен быть действительным']"
+                required
+              />
+              <q-input
+                v-model="password"
+                label="Пароль"
+                type="password"
+                outlined
+                class="register-input"
+                :rules="[val => !!val || 'Пароль обязателен', val => val.length >= 8 || 'Пароль должен содержать минимум 8 символов']"
+                required
+              />
+              <q-input
+                v-model="confirmPassword"
+                label="Подтвердите пароль"
+                type="password"
+                outlined
+                class="register-input"
+                :rules="[val => !!val || 'Подтвердите пароль', val => val === password || 'Пароли не совпадают']"
+                required
+              />
+
+              <div class="row q-mt-lg">
+                <q-btn
+                  type="submit"
+                  color="primary"
+                  label="Зарегистрироваться"
+                  :loading="loading"
+                  class="full-width"
+                  size="lg"
+                />
+              </div>
+
+              <div class="row q-mt-md justify-center">
+                <p class="q-mr-sm no-margin">Уже есть аккаунт?</p>
+                <q-btn
+                  flat
+                  color="primary"
+                  label="Войти"
+                  to="/login"
+                  padding="none"
+                  class="no-padding"
+                />
+              </div>
+            </q-form>
+          </q-card-section>
+        </q-card>
+
+        <div class="copyright-text">
+          © {{ new Date().getFullYear() }} Производственная Гимнастика. Все права защищены.
+        </div>
+      </div>
+    </div>
 
     <q-dialog v-model="showVerificationDialog">
-      <q-card>
+      <q-card style="min-width: 400px">
         <q-card-section>
-          <h4 class="text-h4 q-mb-md">Verify Registration</h4>
-          <p class="q-mb-md">Please check your email for the verification link. If you haven't received it, you can enter the verification token below:</p>
+          <h4 class="text-h5 q-mb-md">Подтверждение регистрации</h4>
+          <p class="q-mb-md">Пожалуйста, проверьте ваш email для подтверждения регистрации. Если вы не получили письмо, введите токен подтверждения ниже:</p>
           <q-form @submit="handleVerification" class="q-gutter-md">
             <q-input
               v-model="verificationToken"
-              label="Verification Token"
-              :rules="[val => !!val || 'Token is required']"
+              label="Токен подтверждения"
+              outlined
+              :rules="[val => !!val || 'Токен обязателен']"
               required
             />
             <div class="row q-mt-lg">
               <q-btn
                 type="submit"
                 color="primary"
-                label="Verify"
+                label="Подтвердить"
                 :loading="verifying"
                 class="full-width"
               />
@@ -71,7 +96,7 @@
         </q-card-section>
       </q-card>
     </q-dialog>
-  </div>
+  </q-page>
 </template>
 
 <script setup lang="ts">
@@ -100,14 +125,14 @@ const handleRegister = async () => {
     showVerificationDialog.value = true;
     $q.notify({
       color: 'positive',
-      message: 'Registration successful! Please check your email to verify your account.',
+      message: 'Регистрация успешна! Пожалуйста, проверьте email для подтверждения аккаунта.',
       icon: 'check_circle'
     });
   } catch (error) {
     console.error(error);
     $q.notify({
       color: 'negative',
-      message: 'Registration failed. Please try again.',
+      message: 'Ошибка регистрации. Пожалуйста, попробуйте снова.',
       icon: 'report_problem'
     });
   } finally {
@@ -121,7 +146,7 @@ const handleVerification = async () => {
     await authStore.verifyRegister(verificationToken.value);
     $q.notify({
       color: 'positive',
-      message: 'Account verified successfully! You can now login.',
+      message: 'Аккаунт успешно подтвержден! Теперь вы можете войти в систему.',
       icon: 'check_circle'
     });
     router.push('/login');
@@ -129,7 +154,7 @@ const handleVerification = async () => {
     console.error(error);
     $q.notify({
       color: 'negative',
-      message: 'Verification failed. Please try again.',
+      message: 'Ошибка подтверждения. Пожалуйста, попробуйте снова.',
       icon: 'report_problem'
     });
   } finally {
@@ -144,12 +169,52 @@ const handleVerification = async () => {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background-color: #f5f5f5;
+}
+
+.content {
+  width: 100%;
+  max-width: 1200px;
+  padding: 40px;
+}
+
+.register-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 .register-card {
   width: 100%;
-  max-width: 400px;
+  max-width: 450px;
   padding: 20px;
+}
+
+.page-title {
+  color: rgba(90,92,105,1);
+  font-weight: bold;
+  font-size: 32px;
+  margin-bottom: 10px;
+}
+
+.text-subtitle {
+  color: rgba(108,117,125,1);
+  font-size: 16px;
+  margin-bottom: 20px;
+}
+
+.register-input {
+  margin-bottom: 20px;
+}
+
+.no-padding {
+  padding: 0;
+}
+
+.copyright-text {
+  margin-top: 30px;
+  color: rgba(108,117,125,1);
+  font-size: 14px;
+  text-align: center;
 }
 </style>
