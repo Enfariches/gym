@@ -8,28 +8,35 @@ const routes: RouteRecordRaw[] = [
     beforeEnter: authGuard
   },
   {
-    path: '/login',
-    name: 'login',
-    component: () => import('pages/LoginPage.vue'),
-    meta: { requiresAuth: false }
-  },
-  {
-    path: '/register',
-    name: 'register',
-    component: () => import('pages/RegisterPage.vue'),
-    meta: { requiresAuth: false }
-  },
-  {
-    path: '/reset-password',
-    name: 'reset-password',
-    component: () => import('pages/ResetPasswordPage.vue'),
-    meta: { requiresAuth: false }
-  },
-  {
-    path: '/change-password',
-    name: 'change-password',
-    component: () => import('pages/ChangePasswordPage.vue'),
-    meta: { requiresAuth: false }
+    path: '/auth',
+    component: () => import('layouts/AuthLayout.vue'),
+    meta: { requiresAuth: false },
+    children: [
+      {
+        path: 'login',
+        name: 'login',
+        component: () => import('pages/LoginPage.vue'),
+        alias: '/login'
+      },
+      {
+        path: 'register',
+        name: 'register',
+        component: () => import('pages/RegisterPage.vue'),
+        alias: '/register'
+      },
+      {
+        path: 'reset-password',
+        name: 'reset-password',
+        component: () => import('pages/ResetPasswordPage.vue'),
+        alias: '/reset-password'
+      },
+      {
+        path: 'change-password',
+        name: 'change-password',
+        component: () => import('pages/ChangePasswordPage.vue'),
+        alias: '/change-password'
+      },
+    ],
   },
   {
     path: '/admin',

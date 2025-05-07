@@ -1,70 +1,96 @@
 <template>
-  <div class="login-page">
-    <q-card class="login-card">
-      <q-card-section>
-        <h4 class="text-h4 q-mb-md">Login</h4>
-        <q-form @submit="handleLogin" class="q-gutter-md">
-          <q-input
-            v-model="email"
-            label="Email"
-            type="email"
-            :rules="[val => !!val || 'Email is required', val => /.+@.+\..+/.test(val) || 'Email must be valid']"
-            required
-          />
-          <q-input
-            v-model="password"
-            label="Password"
-            type="password"
-            :rules="[val => !!val || 'Password is required']"
-            required
-          />
-          <div class="row q-mt-lg">
-            <q-btn
-              type="submit"
-              color="primary"
-              label="Login"
-              :loading="loading"
-              class="full-width"
-            />
-          </div>
-          <div class="row q-mt-sm">
-            <q-btn
-              flat
-              color="primary"
-              label="Forgot Password?"
-              @click="showResetPassword = true"
-            />
-          </div>
-          <div class="row q-mt-sm">
-            <q-btn
-              flat
-              color="primary"
-              label="Don't have an account? Register"
-              to="/register"
-            />
-          </div>
-        </q-form>
-      </q-card-section>
-    </q-card>
+  <q-page class="bg-grey-1 login-page">
+    <div class="content">
+      <div class="login-container">
+        <q-card class="login-card">
+          <q-card-section class="q-pb-none">
+            <h1 class="page-title text-center">Вход в систему</h1>
+            <p class="text-subtitle text-center">Войдите в свой аккаунт</p>
+          </q-card-section>
+
+          <q-card-section>
+            <q-form @submit="handleLogin" class="q-gutter-md">
+              <q-input
+                v-model="email"
+                label="Email"
+                type="email"
+                outlined
+                class="login-input"
+                :rules="[val => !!val || 'Email обязателен', val => /.+@.+\..+/.test(val) || 'Email должен быть действительным']"
+                required
+              />
+              <q-input
+                v-model="password"
+                label="Пароль"
+                type="password"
+                outlined
+                class="login-input"
+                :rules="[val => !!val || 'Пароль обязателен']"
+                required
+              />
+
+              <div class="row justify-between items-center q-mb-md">
+                <q-checkbox v-model="rememberMe" label="Запомнить меня" color="primary" />
+                <q-btn
+                  flat
+                  color="primary"
+                  label="Забыли пароль?"
+                  @click="showResetPassword = true"
+                  class="no-padding"
+                />
+              </div>
+
+              <div class="row q-mt-lg">
+                <q-btn
+                  type="submit"
+                  color="primary"
+                  label="Войти"
+                  :loading="loading"
+                  class="full-width"
+                  size="lg"
+                />
+              </div>
+
+              <div class="row q-mt-md justify-center">
+                <p class="q-mr-sm no-margin">Нет аккаунта?</p>
+                <q-btn
+                  flat
+                  color="primary"
+                  label="Зарегистрироваться"
+                  to="/register"
+                  padding="none"
+                  class="no-padding"
+                />
+              </div>
+            </q-form>
+          </q-card-section>
+        </q-card>
+
+        <div class="copyright-text">
+          © {{ new Date().getFullYear() }} Производственная Гимнастика. Все права защищены.
+        </div>
+      </div>
+    </div>
 
     <q-dialog v-model="showResetPassword">
-      <q-card>
+      <q-card style="min-width: 400px">
         <q-card-section>
-          <h4 class="text-h4 q-mb-md">Reset Password</h4>
+          <h4 class="text-h5 q-mb-md">Сброс пароля</h4>
           <q-form @submit="handleResetPassword" class="q-gutter-md">
             <q-input
               v-model="resetEmail"
               label="Email"
               type="email"
-              :rules="[val => !!val || 'Email is required', val => /.+@.+\..+/.test(val) || 'Email must be valid']"
+              outlined
+              :rules="[val => !!val || 'Email обязателен', val => /.+@.+\..+/.test(val) || 'Email должен быть действительным']"
               required
             />
             <div class="row q-mt-lg">
               <q-btn
                 type="submit"
                 color="primary"
-                label="Reset Password"
-                :loading="loading"
+                label="Отправить инструкции по сбросу"
+                :loading="resetting"
                 class="full-width"
               />
             </div>
@@ -72,7 +98,7 @@
         </q-card-section>
       </q-card>
     </q-dialog>
-  </div>
+  </q-page>
 </template>
 
 <script setup lang="ts">
@@ -90,6 +116,8 @@ const password = ref('');
 const resetEmail = ref('');
 const showResetPassword = ref(false);
 const loading = ref(false);
+const resetting = ref(false);
+const rememberMe = ref(false);
 
 const handleLogin = async () => {
   try {
@@ -97,14 +125,14 @@ const handleLogin = async () => {
     await authStore.login(email.value, password.value);
     $q.notify({
       color: 'positive',
-      message: 'Login successful!',
+      message: 'Вход выполнен успешно!',
       icon: 'check_circle'
     });
     router.push('/');
   } catch (error) {
     $q.notify({
       color: 'negative',
-      message: error instanceof Error ? error.message : 'Login failed. Please check your credentials.',
+      message: error instanceof Error ? error.message : 'Ошибка входа. Проверьте свои учетные данные.',
       icon: 'report_problem'
     });
   } finally {
@@ -114,22 +142,22 @@ const handleLogin = async () => {
 
 const handleResetPassword = async () => {
   try {
-    loading.value = true;
+    resetting.value = true;
     await authStore.resetPassword(resetEmail.value);
     $q.notify({
       color: 'positive',
-      message: 'Password reset instructions have been sent to your email.',
+      message: 'Инструкции по сбросу пароля отправлены на вашу электронную почту.',
       icon: 'check_circle'
     });
     showResetPassword.value = false;
   } catch (error) {
     $q.notify({
       color: 'negative',
-      message: error instanceof Error ? error.message : 'Password reset failed. Please try again.',
+      message: error instanceof Error ? error.message : 'Не удалось сбросить пароль. Пожалуйста, попробуйте снова.',
       icon: 'report_problem'
     });
   } finally {
-    loading.value = false;
+    resetting.value = false;
   }
 };
 </script>
@@ -140,12 +168,52 @@ const handleResetPassword = async () => {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background-color: #f5f5f5;
+}
+
+.content {
+  width: 100%;
+  max-width: 1200px;
+  padding: 40px;
+}
+
+.login-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 .login-card {
   width: 100%;
-  max-width: 400px;
+  max-width: 450px;
   padding: 20px;
+}
+
+.page-title {
+  color: rgba(90,92,105,1);
+  font-weight: bold;
+  font-size: 32px;
+  margin-bottom: 10px;
+}
+
+.text-subtitle {
+  color: rgba(108,117,125,1);
+  font-size: 16px;
+  margin-bottom: 20px;
+}
+
+.login-input {
+  margin-bottom: 20px;
+}
+
+.no-padding {
+  padding: 0;
+}
+
+.copyright-text {
+  margin-top: 30px;
+  color: rgba(108,117,125,1);
+  font-size: 14px;
+  text-align: center;
 }
 </style>
