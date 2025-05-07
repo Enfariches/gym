@@ -40,7 +40,6 @@ services:
     ports:
       - "8083:80"
 
-
   gym-server:
     container_name: gym-server
     build: ./gym-server

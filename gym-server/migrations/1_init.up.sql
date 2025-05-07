@@ -1,31 +1,30 @@
 CREATE TABLE IF NOT EXISTS admins (
     id SERIAL PRIMARY KEY,
-    name TEXT,
-    surname TEXT,
+    name TEXT DEFAULT '',
+    surname TEXT DEFAULT '',
     email TEXT NOT NULL UNIQUE,
-    departament TEXT,
+    departament TEXT DEFAULT '',
     passhash TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS employees (
     id SERIAL PRIMARY KEY,
-    name TEXT,
-    second_name TEXT,
-    surname TEXT,
-    age INTEGER,
-    sex boolean,
-    phone TEXT UNIQUE,
+    name TEXT DEFAULT '',
+    second_name TEXT DEFAULT '',
+    surname TEXT DEFAULT '',
+    age INTEGER DEFAULT 0,
+    sex BOOLEAN DEFAULT FALSE,
+    phone TEXT UNIQUE DEFAULT '',
     email TEXT NOT NULL UNIQUE,
-    departament TEXT,
-    post TEXT,
+    departament TEXT DEFAULT '',
+    post TEXT DEFAULT '',
     passhash TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS schedules (
     id SERIAL PRIMARY KEY,
-    day_of_week TEXT NOT NULL,
-    hour TEXT NOT NULL,
-    minute TEXT NOT NULL,
+    cron_expression TEXT NOT NULL,
+    is_active BOOLEAN DEFAULT TRUE,
     video_id iNTEGER NOT NULL,
-    employee_id INTEGER NOT NULL
+    admin_id INTEGER NOT NULL
 );

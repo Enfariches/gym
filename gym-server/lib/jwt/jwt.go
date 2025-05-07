@@ -9,17 +9,16 @@ import (
 )
 
 const (
-	secret     = "mainGymnasticUnique"
-	authSecret = "authGymnasticUnique"
+	secret      = "mainGymnasticUnique"
+	authSecret  = "authGymnasticUnique"
 	resetSecret = "resetGymansticUnique"
 )
 
 func NewToken(user models.AuthUser, duration time.Duration) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"id":    user.Id,
-		"email": user.Email,
+		"id":     user.ID,
 		"source": user.Source,
-		"exp":   time.Now().Add(duration).Unix(),
+		"exp":    time.Now().Add(duration).Unix(),
 	})
 
 	tokenString, err := token.SignedString([]byte(secret))
@@ -28,6 +27,22 @@ func NewToken(user models.AuthUser, duration time.Duration) (string, error) {
 	}
 
 	return tokenString, nil
+}
+
+func ParseToken(tokenString string) (int, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (any, error) {
+		return []byte(secret), nil
+	}, jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}))
+	if err != nil || !token.Valid {
+		return 0, err
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return 0, err
+	}
+
+	return int(claims["id"].(float64)), nil
 }
 
 func NewAuthToken(authUser models.AuthUser, duration time.Duration) (string, error) {
@@ -50,7 +65,7 @@ func ParseAuthToken(tokenString string) (*models.AuthUser, error) {
 	authToken, err := jwt.Parse(tokenString, func(token *jwt.Token) (any, error) {
 		return []byte(authSecret), nil
 	}, jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}))
-	if err != nil {
+	if err != nil || !authToken.Valid {
 		return nil, err
 	}
 
@@ -59,24 +74,18 @@ func ParseAuthToken(tokenString string) (*models.AuthUser, error) {
 		return nil, err
 	}
 
-	expFloat := claims["exp"].(float64)
-	if int64(expFloat) < time.Now().Unix() {
-		return nil, jwt.ErrTokenExpired
-	}
-
-
 	return &models.AuthUser{
 		Email:    claims["email"].(string),
 		PassHash: []byte(claims["passhash"].(string)),
-		Source:    claims["source"].(string),
+		Source:   claims["source"].(string),
 	}, nil
 }
 
 func NewResetToken(email, source string, duration time.Duration) (string, error) {
 	resetToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"email":    email,
-		"source":   source,
-		"exp":      time.Now().Add(duration).Unix(),
+		"email":  email,
+		"source": source,
+		"exp":    time.Now().Add(duration).Unix(),
 	})
 
 	resetTokenString, err := resetToken.SignedString([]byte(resetSecret))
@@ -91,7 +100,7 @@ func ParseResetToken(tokenString string) (*models.AuthUser, error) {
 	authToken, err := jwt.Parse(tokenString, func(token *jwt.Token) (any, error) {
 		return []byte(resetSecret), nil
 	}, jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}))
-	if err != nil {
+	if err != nil || !authToken.Valid {
 		return nil, err
 	}
 
@@ -100,13 +109,8 @@ func ParseResetToken(tokenString string) (*models.AuthUser, error) {
 		return nil, err
 	}
 
-	expFloat := claims["exp"].(float64)
-	if int64(expFloat) < time.Now().Unix() {
-		return nil, jwt.ErrTokenExpired
-	}
-
 	return &models.AuthUser{
-		Email:    claims["email"].(string),
-		Source:    claims["source"].(string),
+		Email:  claims["email"].(string),
+		Source: claims["source"].(string),
 	}, nil
 }

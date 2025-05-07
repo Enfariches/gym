@@ -31,7 +31,7 @@ type UserManager interface {
 	UpdateUserPassword(ctx context.Context, authUser *models.AuthUser) error
 }
 type UserProvider interface {
-	User(ctx context.Context, email, source string) (models.AuthUser, error)
+	User(ctx context.Context, email, source string) (*models.AuthUser, error)
 }
 
 var (
@@ -89,7 +89,7 @@ func (a *Auth) RegisterNewUser(ctx context.Context, email, password, source stri
 		return "", fmt.Errorf("%s: %w", op, err)
 	}
 
-	// err = smtp.SendMail(a.smtpConfig, authToken, email)
+	// err = smtp.SendAuthMail(a.smtpConfig, authToken, email)
 	// if err != nil {
 	// 	log.Error("failed to send email", sl.Err(err))
 	// 	return "", fmt.Errorf("%s: %w", op, err)
@@ -124,7 +124,7 @@ func (a *Auth) Login(ctx context.Context, email, password, source string) (strin
 		return "", fmt.Errorf("%s: %w", op, ErrPasswordIsIncorrect)
 	}
 
-	token, err := jwt.NewToken(user, a.tokenTTL)
+	token, err := jwt.NewToken(*user, a.tokenTTL)
 	if err != nil {
 		log.Error("failed to generate JWT token", sl.Err(err))
 		return "", fmt.Errorf("%s: %w", op, err)
@@ -180,7 +180,7 @@ func (a *Auth) ChangePassword(ctx context.Context, email, source string) (string
 		return "", fmt.Errorf("%s: %w", op, err)
 	}
 
-	// err = smtp.SendMail(a.smtpConfig, resetToken, email)
+	// err = smtp.SendResetMail(a.smtpConfig, resetToken, email)
 	// if err != nil {
 	// 	log.Error("failed to send email", sl.Err(err))
 	// 	return "", fmt.Errorf("%s: %w", op, err)

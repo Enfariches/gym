@@ -1,7 +1,7 @@
 package models
 
 type Schedule struct {
-	ID            string
+	ID            int
 	DayOfWeek     int
 	Hour          int
 	Minute        int

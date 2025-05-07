@@ -1,7 +1,7 @@
 package models
 
 type AuthUser struct {
-	Id int
+	ID int
 	Email string
 	PassHash []byte
 	Source string
