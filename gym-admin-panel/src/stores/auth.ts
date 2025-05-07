@@ -10,9 +10,9 @@ import {
 import type {
   RegisterResponse,
   LoginResponse,
-  ResetPasswordResponse,
   ChangePasswordResponse,
-  VerifyRegisterResponse
+  VerifyRegisterResponse,
+  VerifyChangePasswordResponse
 } from '../../protogen/v1/auth/auth';
 
 export const useAuthStore = defineStore('auth', {
@@ -46,7 +46,7 @@ export const useAuthStore = defineStore('auth', {
     },
 
     // Сброс пароля
-    async resetPassword(email: string): Promise<ResetPasswordResponse> {
+    async resetPassword(email: string): Promise<ChangePasswordResponse> {
       try {
         const response = await resetPassword(email);
         return response;
@@ -56,7 +56,7 @@ export const useAuthStore = defineStore('auth', {
     },
 
     // Подтверждение сброса пароля
-    async changePassword(resetToken: string, newPassword: string): Promise<ChangePasswordResponse> {
+    async changePassword(resetToken: string, newPassword: string): Promise<VerifyChangePasswordResponse> {
       try {
         const response = await changePassword(resetToken, newPassword);
         return response;

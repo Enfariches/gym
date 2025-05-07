@@ -12,12 +12,22 @@ endif
 
 ifeq ($(SHELL_TYPE),windows)
     export CONFIG_PATH=$(CURDIR)/gym-server/config/dev.yaml
-	PROTO_FILES = ../api/v1/auth/auth.proto ../api/v1/user/admin.proto ../api/v1/user/employee.proto ../api/v1/schedule/schedule.proto
+	PROTO_FILES = ../api/v1/auth/auth.proto ../api/v1/users/admin.proto ../api/v1/users/employee.proto ../api/v1/schedule/schedule.proto
 	MAKE_DIR = mkdir protogen
+	PROTOC_CMD = npx protoc -I ../api $(PROTO_FILES) \
+		--go_out=./protogen/ \
+		--go_opt=paths=source_relative \
+		--go-grpc_out=./protogen/ \
+		--go-grpc_opt=paths=source_relative
 else
     export CONFIG_PATH=$(CURDIR)/gym-server/config/dev.yaml
 	PROTO_FILES = $(shell find ../api/v1 -name '*.proto')
 	MAKE_DIR = mkdir -p ./protogen
+	PROTOC_CMD = protoc -I ../api $(PROTO_FILES) \
+		--go_out=./protogen/ \
+		--go_opt=paths=source_relative \
+		--go-grpc_out=./protogen/ \
+		--go-grpc_opt=paths=source_relative
 endif
 
 # TODO: Сделать тесты.
@@ -27,11 +37,7 @@ endif
 # Генерация gRPC Go Интерфейсов.
 gen:
 	$(MAKE_DIR)
-	protoc -I ../api $(PROTO_FILES) \
-	--go_out=./protogen/ \
-	  --go_opt=paths=source_relative \
-	--go-grpc_out=./protogen/ \
-	 --go-grpc_opt=paths=source_relative
+	$(PROTOC_CMD)
 
 clean:
 	if exist protogen rmdir /s /q protogen

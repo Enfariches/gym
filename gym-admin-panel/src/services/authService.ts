@@ -3,12 +3,13 @@ import type {
   AuthRequest,
   RegisterResponse,
   LoginResponse,
-  ResetPasswordRequest,
-  ResetPasswordResponse,
   ChangePasswordRequest,
   ChangePasswordResponse,
   VerifyRegisterRequest,
-  VerifyRegisterResponse} from '../../protogen/v1/auth/auth';
+  VerifyRegisterResponse,
+  VerifyChangePasswordRequest,
+  VerifyChangePasswordResponse
+} from '../../protogen/v1/auth/auth';
 import {
   AppSource
 } from '../../protogen/v1/auth/auth';
@@ -42,22 +43,22 @@ export const login = async (email: string, password: string): Promise<LoginRespo
   return (await authService.login(request)).response;
 };
 
-// Сброс пароля
-export const resetPassword = async (email: string): Promise<ResetPasswordResponse> => {
-  const request: ResetPasswordRequest = {
+// Сброс пароля (отправка reset token)
+export const resetPassword = async (email: string): Promise<ChangePasswordResponse> => {
+  const request: ChangePasswordRequest = {
     email,
     source: AppSource.ADMIN
   };
-  return (await authService.resetPassword(request)).response;
+  return (await authService.changePassword(request)).response;
 };
 
-// Подтверждение сброса пароля
-export const changePassword = async (resetToken: string, newPassword: string): Promise<ChangePasswordResponse> => {
-  const request: ChangePasswordRequest = {
+// Подтверждение сброса пароля (смена пароля)
+export const changePassword = async (resetToken: string, newPassword: string): Promise<VerifyChangePasswordResponse> => {
+  const request: VerifyChangePasswordRequest = {
     resetToken,
     newPassword
   };
-  return (await authService.changePassword(request)).response;
+  return (await authService.verifyChangePassword(request)).response;
 };
 
 // Подтверждение регистрации

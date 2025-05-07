@@ -11,7 +11,7 @@ else
 endif
 
 ifeq ($(SHELL_TYPE),windows)
-	PROTO_FILES = ../api/v1/auth/auth.proto ../api/v1/user/admin.proto ../api/v1/user/employee.proto ../api/v1/schedule/schedule.proto
+	PROTO_FILES = ../api/v1/auth/auth.proto ../api/v1/users/admin.proto ../api/v1/users/employee.proto ../api/v1/schedule/schedule.proto
 	MAKE_DIR = mkdir protogen
 else
 	PROTO_FILES = '$(shell find ../api/v1 -name '*.proto')'
