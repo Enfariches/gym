@@ -37,8 +37,8 @@ sudo apt install -y protobuf-compiler libprotobuf-dev
 # Установка protoc-gen-go без полной Go-среды
 echo "Установка protoc-gen-go..."
 PROTOC_GEN_GO_VERSION="v1.32.0"
+# Тип процессора
 ARCH=$(dpkg --print-architecture)
-# Внимание на платформу Linux, моя виртуалка под ARM64.
 curl -sSL "https://github.com/protocolbuffers/protobuf-go/releases/download/$PROTOC_GEN_GO_VERSION/protoc-gen-go.$PROTOC_GEN_GO_VERSION.linux.$ARCH.tar.gz" | \ 
 sudo tar -xz -C /usr/local/bin protoc-gen-go
 

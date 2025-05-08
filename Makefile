@@ -1,7 +1,4 @@
 .PHONY: docs
-include ./gym-admin-panel/Makefile
-include ./gym-server/Makefile
-
 # Основной Makefile для иницализации и запуска Docker, third_party и основных сервисов.
 # Возможно для запуска пайплайнов
 PROTO_FILES = $(shell find ./api -name '*.proto')
