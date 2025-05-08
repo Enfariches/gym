@@ -9,7 +9,9 @@ https://github.com/RO1T/gym-client
 ## Stack
 
 Server: Golang
+
 Frontend: Vue/Quasar
+
 Protocol: GRPc
 
 ## запуск сервера
