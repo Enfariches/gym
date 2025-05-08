@@ -1,22 +1,37 @@
-# Gymnastic Monorepo
+# Веб приложение "Производственная гимнастика" (monorepo)
 
-запуск сервера
+Веб приложение для управления сервисом "Производственная гимнастика", позволяет настраивать расписание, отслеживать статистику, и управлять разминочными комплексами для клиентов приложения.
 
-make gen
-docker compose up или (make bundle из gym)
-make migrate 
-make bundle (из gym-server)
+## Клиентское приложение
 
-(если ошибка protoc-gen-doc)
-go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
-go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+https://github.com/RO1T/gym-client
 
-пути для devs:
+## Stack
+
+Server: Golang
+Frontend: Vue/Quasar
+Protocol: GRPc
+
+## запуск сервера
+
+Запуск системы + генерация протоген файлов.
+
+make bundle-gen
+
+Запуск системы без генерации
+
+make bundle
+
+## Доступные пути
 
 http://localhost:8083/ - docs
+http://localhost:8085/ - envoy
+http://localhost:9090/ - server
+http://localhost:8080/ - frontend (основная точка входа)
 
 
-# ./entrypoint error
+## Ошибки
 
+### ./entrypoint error 
 dos2unix gym-server/entrypoint.sh
 git update-index --chmod=+x gym-server/entrypoint.sh
