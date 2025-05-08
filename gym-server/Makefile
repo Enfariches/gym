@@ -11,6 +11,7 @@ else
 endif
 
 ifeq ($(SHELL_TYPE),windows)
+	if exist protogen rmdir /s /q protogen
     export CONFIG_PATH=$(CURDIR)/gym-server/config/dev.yaml
 	PROTO_FILES = ../api/v1/auth/auth.proto ../api/v1/users/admin.proto ../api/v1/users/employee.proto ../api/v1/schedule/schedule.proto
 	MAKE_DIR = mkdir protogen
@@ -33,14 +34,12 @@ endif
 # TODO: Сделать тесты.
 
 # Написать тесты на SMTP; Auth
+# Настроить Makefile и попробовать запустить через setup.sh
 
 # Генерация gRPC Go Интерфейсов.
 gen:
 	$(MAKE_DIR)
 	$(PROTOC_CMD)
-
-clean:
-	if exist protogen rmdir /s /q protogen
 
 # Путь конфига указывается двумя способами:
 # 1) flag --config=./config/dev.yaml
