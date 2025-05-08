@@ -27,13 +27,18 @@ make bundle
 ## Доступные пути
 
 http://localhost:8083/ - docs
+
 http://localhost:8085/ - envoy
+
 http://localhost:9090/ - server
+
 http://localhost:8080/ - frontend (основная точка входа)
 
 
 ## Ошибки
 
 ### ./entrypoint error 
+
 dos2unix gym-server/entrypoint.sh
+
 git update-index --chmod=+x gym-server/entrypoint.sh
