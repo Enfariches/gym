@@ -40,7 +40,11 @@ gen:
 	$(PROTOC_CMD)
 
 clean:
+ifeq ($(SHELL_TYPE),windows)
 	if exist protogen rmdir /s /q protogen
+else
+	rm -rf ./protogen
+endif
 
 # Путь конфига указывается двумя способами:
 # 1) flag --config=./config/dev.yaml
