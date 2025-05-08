@@ -36,27 +36,12 @@ func (s *AdminServerManagmentApi) GetAdmin(ctx context.Context, r *pb.GetAdminRe
 		return nil, status.Errorf(codes.Internal, "failed to get admin: %v", err)
 	}
 
-	departament := ""
-	if admin.Departament != nil {
-		departament = *admin.Departament
-	}
-
-	name := ""
-	if admin.Name != nil {
-		name = *admin.Name
-	}
-
-	surname := ""
-	if admin.Surname != nil {
-		surname = *admin.Surname
-	}
-
 	return &pb.Admin{
 		Id:          admin.ID,
-		Name:        name,
-		Surname:     surname,
+		Name:        admin.Name,
+		Surname:     admin.Surname,
 		Email:       admin.Email,
-		Departament: departament,
+		Departament: admin.Departament,
 	}, nil
 }
 
@@ -79,27 +64,12 @@ func (s *AdminServerManagmentApi) UpdateAdmin(ctx context.Context, r *pb.UpdateA
 		return nil, status.Errorf(codes.Internal, "failed to update admin")
 	}
 
-	name := ""
-	if updatedAdmin.Name != nil {
-		name = *updatedAdmin.Name
-	}
-
-	surname := ""
-	if updatedAdmin.Surname != nil {
-		surname = *updatedAdmin.Surname
-	}
-
-	departament := ""
-	if updatedAdmin.Departament != nil {
-		departament = *updatedAdmin.Departament
-	}
-
 	return &pb.Admin{
 		Id:          updatedAdmin.ID,
-		Name:        name,
-		Surname:     surname,
+		Name:        updatedAdmin.Name,
+		Surname:     updatedAdmin.Surname,
 		Email:       updatedAdmin.Email,
-		Departament: departament,
+		Departament: updatedAdmin.Departament,
 	}, nil
 }
 
