@@ -62,9 +62,11 @@
 import { ref, onMounted, watch } from 'vue';
 import EssentialLink, { type EssentialLinkProps } from 'components/EssentialLink.vue';
 import { useRouter, useRoute } from 'vue-router';
+import { useAuthStore } from '../stores/auth';
 
 const router = useRouter();
 const route = useRoute();
+const authStore = useAuthStore();
 
 const linksList: EssentialLinkProps[] = [
   {
@@ -129,7 +131,7 @@ function isLinkActive(link: string): boolean {
 
 function logout(): void {
   localStorage.removeItem('drawerOpen'); // Очищаем состояние drawer'а при выходе
-  localStorage.clear();
+  authStore.logout(); // Используем метод logout из AuthStore вместо ручной очистки localStorage
   router.push('/login');
 }
 </script>
