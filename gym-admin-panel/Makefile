@@ -11,10 +11,11 @@ else
 endif
 
 ifeq ($(SHELL_TYPE),windows)
+    if exist protogen rmdir /s /q protogen
 	PROTO_FILES = ../api/v1/auth/auth.proto ../api/v1/users/admin.proto ../api/v1/users/employee.proto ../api/v1/schedule/schedule.proto
 	MAKE_DIR = mkdir protogen
 else
-	PROTO_FILES = '$(shell find ../api/v1 -name '*.proto')'
+	PROTO_FILES = $(shell find ../api/v1 -name '*.proto')
 	MAKE_DIR = mkdir -p ./protogen
 endif
 
@@ -25,6 +26,3 @@ gen:
     --ts_out ./protogen \
     --ts_opt ts_nocheck \
     --ts_opt eslint_disable \
-
-clean:
-	if exist protogen rmdir /s /q protogen
