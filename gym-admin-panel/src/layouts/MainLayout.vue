@@ -91,6 +91,12 @@ const linksList: EssentialLinkProps[] = [
     icon: 'trending_up',
     link: '/admin/stats/',
   },
+  {
+    title: 'Профиль',
+    caption: 'Управление личным профилем',
+    icon: 'person',
+    link: '/admin/profile/',
+  },
 ];
 
 const leftDrawerOpen = ref(false);
