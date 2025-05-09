@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package streamer;
+option go_package = "github.com/Enfariches/gym/protogen";
+
+// Сервис "Стример" для передачи видео и загрузки видео.
+service Streamer {
+  // Передает (запускает) видео.
+  rpc StreamVideo(StreamVideoRequest) returns (stream VideoChunk);
+
+  // Загружает новое видео.
+  rpc UploadVideo(stream VideoChunk) returns (UploadVideoResponse);
+}
+
+// Запрос на начало стрима видео по айди.
+message StreamVideoRequest {
+  string video_id = 1;
+}
+
+// Кусок памяти видео.
+message VideoChunk {
+  bytes data = 1;
+}
+
+// Ответ на запрос загрузки видео с статусом.
+message UploadVideoResponse {
+  string message = 1;
+}

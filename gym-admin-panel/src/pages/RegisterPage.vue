@@ -25,7 +25,7 @@
                 type="password"
                 outlined
                 class="register-input"
-                :rules="[val => !!val || 'Пароль обязателен', val => val.length >= 8 || 'Пароль должен содержать минимум 8 символов']"
+                :rules="[val => !!val || 'Пароль обязателен', val => val.length >= 6 || 'Пароль должен содержать минимум 6 символов']"
                 required
               />
               <q-input

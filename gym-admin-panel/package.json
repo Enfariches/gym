@@ -1,8 +1,8 @@
 {
   "name": "gym-admin-panel",
   "version": "0.0.1",
-  "description": "Admin panel for Gymnastic",
-  "productName": "gymnastic",
+  "description": "Admin panel for Gym",
+  "productName": "gym",
   "author": "RO1T",
   "type": "module",
   "private": true,
@@ -24,7 +24,6 @@
     "axios": "^1.9.0",
     "chart.js": "^4.4.9",
     "gym-admin-panel": "file:",
-    "gymnastic": "file:",
     "pinia": "^3.0.2",
     "quasar": "^2.18.1",
     "vue": "^3.5.13",
