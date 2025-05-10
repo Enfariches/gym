@@ -14,7 +14,7 @@ import (
 
 type AdminService interface {
 	GetAdmin(ctx context.Context, admin_id int64) (*models.Admin, error)
-	UpdateAdmin(ctx context.Context, fieldMask map[string]interface{}) (*models.Admin, error)
+	UpdateAdmin(ctx context.Context, fieldMask map[string]any) (*models.Admin, error)
 }
 
 type AdminServerManagmentApi struct {
@@ -73,19 +73,25 @@ func (s *AdminServerManagmentApi) UpdateAdmin(ctx context.Context, r *pb.UpdateA
 	}, nil
 }
 
-func applyFieldMask(req *pb.Admin, mask *fieldmaskpb.FieldMask) (map[string]interface{}, error) {
-	updateMap := make(map[string]interface{})
+func applyFieldMask(req *pb.Admin, mask *fieldmaskpb.FieldMask) (map[string]any, error) {
+	updateMap := make(map[string]any)
 
 	for _, path := range mask.GetPaths() {
 		switch path {
 		case "name":
-			updateMap["name"] = req.Name
+			updateMap[path] = req.Name
 		case "surname":
-			updateMap["surname"] = req.Surname
+			updateMap[path] = req.Surname
 		case "departament":
-			updateMap["departament"] = req.Departament
+			updateMap[path] = req.Departament
 		default:
-			return nil, status.Errorf(codes.InvalidArgument, "id and email immutable fields")
+			return nil, status.Error(codes.InvalidArgument, "incorrect fields")
+		}
+	}
+
+	for _, value := range updateMap {
+		if value == "" {
+			return nil, status.Error(codes.InvalidArgument, "field value is required")
 		}
 	}
 	return updateMap, nil

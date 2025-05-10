@@ -5,12 +5,13 @@ option go_package = "github.com/Enfariches/gym/protogen";
 
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";
+import "google/api/field_behavior.proto";
 
 // Сервис для управления расписанием.
 service ScheduleService {
 
     // Создает новое расписание.
-    rpc CreateSchedule(CreateScheduleRequest) returns (Schedule);
+    rpc CreateSchedules(CreateSchedulesRequest) returns (CreateSchedulesResponse);
 
     // Получает расписание.
     rpc GetSchedule(GetScheduleRequest) returns (Schedule);
@@ -26,12 +27,16 @@ service ScheduleService {
 }
 
 // Запрос на создание расписания.
-message CreateScheduleRequest {
+message CreateSchedulesRequest {
     // Расписания, которые необходимо создать.
     repeated Schedule schedules = 1;
+}
 
-    // Флаг повторения расписания вновь и вновь.
-    bool force = 2;
+// Ответ на запрос создания расписания.
+// Возвращает список сохраненных в БД расписаний.
+message CreateSchedulesResponse {
+    // Список сохраненных расписаний.
+    repeated Schedule schedules = 1;
 }
 
 //Запрос на получение расписания.
@@ -66,27 +71,34 @@ message DeleteScheduleRequest {
 // Струкутура расписания.
 message Schedule {
     // ID расписания.
-    string id = 1;
+    int64 id = 1 [(google.api.field_behavior) = OUTPUT_ONLY];
 
-    // ID отдела, для которого предназначено расписание.
-    string departament_id = 2;
+    // Cron-выражение - представления времени запуска. (Формат crontab)
+    //
+    // * * * * * 
+    // | | | | |
+    // | | | | +----- Дни недели (диапазон: 1-7)
+    // | | | +------- Месяцы     (диапазон: 1-12)
+    // | | +--------- Дни месяца (диапазон: 1-31)
+    // | +----------- Часы       (диапазон: 0-23)
+    // +------------- Минуты     (диапазон: 0-59)
+    //
+    // Примеры: 
+    // * * * * * (каждую минуту, каждого часа и каждого тд)
+    // 30 * * * * (в 30 минут, каждого часа и каждого тд)
+    // https://ru.wikipedia.org/wiki/Cron#crontab
+    string cron_expression = 3;
 
-    // День недели (0 - воскресенье, 1 - понедельник, ..., 6 - суббота).
-    int32 day_of_week = 3;
-
-    // Час времени.
-    int32 hour = 4;
-
-    // Минуты времени.
-    int32 minute = 5;
+    // Активно расписание или нет.
+    bool is_active = 4;
 
     // ID видео, которое необходимо воспроизвести по расписанию.
-    string video_id = 6;
+    int64 video_id = 5;
+
+    // ID админа, который создал расписание.
+    int64 admin_id = 6 [(google.api.field_behavior) = OUTPUT_ONLY];
 
     // Время создания расписания.
-    google.protobuf.Timestamp create_at = 7;
-
-    // Время обновления расписания.
-    google.protobuf.Timestamp update_at = 8;
+    google.protobuf.Timestamp created_at = 7 [(google.api.field_behavior) = OUTPUT_ONLY];
 }
     

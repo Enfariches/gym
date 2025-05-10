@@ -27,8 +27,8 @@ func main() {
 
 	//Если запускается код не из контейнера, то нужно указать localhost, а не postgres://postgres:root@postgres:5432/health?sslmode=disable
 	m, err := migrate.New(
-		"file://" + migrationsPath,
-		"postgres://" + storageUrl, 
+		"file://"+migrationsPath,
+		"postgres://"+storageUrl,
 	)
 	if err != nil {
 		panic(err)

@@ -30,10 +30,6 @@ func main() {
 	signal.Notify(stop, syscall.SIGTERM, syscall.SIGINT)
 	<-stop
 	app.GRPCSrv.Stop()
-
-	// Приложение
-	// grpc-сервер
-	// Тесты
 }
 
 func setupLogger(env string) *slog.Logger {

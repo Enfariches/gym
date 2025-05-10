@@ -37,6 +37,8 @@ type UserProvider interface {
 var (
 	ErrInvalidCredentials  = errors.New("invalid credentials")
 	ErrPasswordIsIncorrect = errors.New("password is incorrect")
+	ErrUserExists          = errors.New("user already exists")
+	ErrUserNotFound        = errors.New("user not found")
 )
 
 // New возвращает инстанс Auth сервиса
@@ -77,10 +79,8 @@ func (a *Auth) RegisterNewUser(ctx context.Context, email, password, source stri
 		if errors.Is(err, storage.ErrUserExists) {
 			log.Warn(storage.ErrUserExists.Error(), sl.Err(err))
 
-			return "", fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
+			return "", fmt.Errorf("%s: %w", op, ErrUserExists)
 		}
-		log.Warn("failed to check user", sl.Err(err))
-		return "", fmt.Errorf("%s: %w", op, err)
 	}
 
 	authToken, err := jwt.NewAuthToken(authUser, a.authTokenTTL)
@@ -112,7 +112,7 @@ func (a *Auth) Login(ctx context.Context, email, password, source string) (strin
 		if errors.Is(err, storage.ErrUserNotFound) {
 			log.Warn(storage.ErrUserNotFound.Error(), sl.Err(err))
 
-			return "", fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
+			return "", fmt.Errorf("%s: %w", op, ErrUserNotFound)
 		}
 
 		log.Error("failed to get user", sl.Err(err))
@@ -167,10 +167,10 @@ func (a *Auth) ChangePassword(ctx context.Context, email, source string) (string
 	log := a.log.With(slog.String("op", op), slog.String("email", email))
 
 	if err := a.userManager.CheckUser(ctx, &models.AuthUser{Email: email, Source: source}); err != nil {
-		if !errors.Is(err, storage.ErrUserExists) {
+		if errors.Is(err, storage.ErrUserNotFound) {
 			log.Warn(storage.ErrUserNotFound.Error(), sl.Err(err))
 
-			return "", fmt.Errorf("%s: %w", op, err)
+			return "", fmt.Errorf("%s: %w", op, ErrUserNotFound)
 		}
 	}
 
@@ -207,6 +207,7 @@ func (a *Auth) VerifyChangePassword(ctx context.Context, resetToken, newPassword
 	}
 
 	authUser.PassHash = passHash
+
 	err = a.userManager.UpdateUserPassword(ctx, authUser)
 	if err != nil {
 		return fmt.Errorf("%s: %w", op, ErrInvalidCredentials)

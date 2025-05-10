@@ -15,7 +15,7 @@ type Admin struct {
 
 type AdminManager interface {
 	Admin(ctx context.Context, admin_id int64) (*models.Admin, error)
-	UpdateAdmin(ctx context.Context, updateFields map[string]interface{}) (*models.Admin, error)
+	UpdateAdmin(ctx context.Context, updateFields map[string]any) (*models.Admin, error)
 }
 
 func New(log *slog.Logger, adminManager AdminManager) *Admin {
@@ -38,7 +38,7 @@ func (a *Admin) GetAdmin(ctx context.Context, admin_id int64) (*models.Admin, er
 	return admin, nil
 }
 
-func (a *Admin) UpdateAdmin(ctx context.Context, updateFields map[string]interface{}) (*models.Admin, error) {
+func (a *Admin) UpdateAdmin(ctx context.Context, updateFields map[string]any) (*models.Admin, error) {
 	const op = "admin.UpdateAdmin"
 	log := a.log.With("op", op)
 

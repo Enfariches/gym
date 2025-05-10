@@ -1,8 +1,8 @@
 package models
 
 type AuthUser struct {
-	ID int
-	Email string
-	PassHash []byte
-	Source string
+	ID       int64  `db:"id"`
+	Email    string `db:"email"`
+	PassHash []byte `db:"passhash"`
+	Source   string `db:"-"`
 }

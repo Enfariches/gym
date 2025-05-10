@@ -4,6 +4,7 @@ package admin;
 option go_package = "github.com/Enfariches/gym/protogen";
 
 import "google/protobuf/field_mask.proto";
+import "google/api/field_behavior.proto";
 
 // Сервис для управления администраторами.
 service AdminService {
@@ -33,7 +34,7 @@ message UpdateAdminRequest {
 // Структура администратора.
 message Admin {
     // ID администратора.
-    int64 id = 1;
+    int64 id = 1 [(google.api.field_behavior) = OUTPUT_ONLY];
 
     // Имя администратора.
 	string name = 2;
@@ -42,7 +43,7 @@ message Admin {
 	string surname = 3;
 
     // Электронная почта администратора.
-	string email = 4;
+	string email = 4 [(google.api.field_behavior) = OUTPUT_ONLY];
 
     // Отдел за котором закреплен администратор.
 	string departament = 5;

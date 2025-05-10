@@ -6,9 +6,11 @@ import (
 
 	"health/internal/config"
 	grpcgym "health/internal/gym/grpc"
-	"health/internal/services/auth"
 	"health/internal/services/admin"
+	"health/internal/services/auth"
+	"health/internal/services/schedule"
 	"health/internal/storage/postgres"
+	"health/lib/gcron"
 )
 
 type Gym struct {
@@ -23,10 +25,16 @@ func New(log *slog.Logger, grpcPort int, storagePath string,
 		log.Error("failed to create storage", slog.String("path", storagePath))
 	}
 
+	jobScheduler, err := gcron.NewJobScheduler()
+	if err != nil {
+		log.Error("failed to create job scheduler")
+	}
+
 	authService := auth.New(log, storage, storage, smtpConfig, tokenTTL, authTokenTLL)
 	adminService := admin.New(log, storage)
+	scheduleService := schedule.New(log, storage, jobScheduler)
 
-	grpcGym := grpcgym.New(log, authService, adminService, grpcPort)
+	grpcGym := grpcgym.New(log, authService, adminService, scheduleService, grpcPort)
 
 	return &Gym{
 		GRPCSrv: grpcGym,
