@@ -26,3 +26,11 @@ gen:
     --ts_out ./protogen \
     --ts_opt ts_nocheck \
     --ts_opt eslint_disable \
+
+clean:
+ifeq ($(SHELL_TYPE),windows)
+	if exist protogen rmdir /s /q protogen
+else
+	rm -rf ./protogen
+endif
+

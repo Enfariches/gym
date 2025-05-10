@@ -39,6 +39,13 @@ gen:
 	$(MAKE_DIR)
 	$(PROTOC_CMD)
 
+clean:
+ifeq ($(SHELL_TYPE),windows)
+	if exist protogen rmdir /s /q protogen
+else
+	rm -rf ./protogen
+endif
+
 # Путь конфига указывается двумя способами:
 # 1) flag --config=./config/dev.yaml
 # 2) С помощью env CONFIG_PATH, который экспортируется перед запуском make
