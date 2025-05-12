@@ -42,13 +42,13 @@ message CreateSchedulesResponse {
 //Запрос на получение расписания.
 message GetScheduleRequest {
     // ID расписания, которое необходимо получить.
-    string schedule_id = 1;
+    int64 schedule_id = 1;
 }
 
 // Запрос на получение списка расписаний.
 message ListScheduleRequest {
     // ID расписания, которое необходимо получить.
-    repeated string schedule_ids = 1;
+    repeated int64 schedule_ids = 1;
 }
 
 // Ответ на запрос списка расписаний.
@@ -65,7 +65,7 @@ message UpdateScheduleRequest {
 // Запрос на удаление расписания.
 message DeleteScheduleRequest {
     // ID расписания, которое необходимо удалить.
-    string schedule_id = 1;
+    int64 schedule_id = 1;
 }
 
 // Струкутура расписания.
@@ -87,18 +87,18 @@ message Schedule {
     // * * * * * (каждую минуту, каждого часа и каждого тд)
     // 30 * * * * (в 30 минут, каждого часа и каждого тд)
     // https://ru.wikipedia.org/wiki/Cron#crontab
-    string cron_expression = 3;
+    string cron_expression = 2;
 
     // Активно расписание или нет.
-    bool is_active = 4;
+    bool is_active = 3;
 
     // ID видео, которое необходимо воспроизвести по расписанию.
-    int64 video_id = 5;
+    int64 video_id = 4;
 
     // ID админа, который создал расписание.
-    int64 admin_id = 6 [(google.api.field_behavior) = OUTPUT_ONLY];
+    int64 admin_id = 5 [(google.api.field_behavior) = OUTPUT_ONLY];
 
     // Время создания расписания.
-    google.protobuf.Timestamp created_at = 7 [(google.api.field_behavior) = OUTPUT_ONLY];
+    google.protobuf.Timestamp created_at = 6 [(google.api.field_behavior) = OUTPUT_ONLY];
 }
     
