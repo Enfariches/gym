@@ -12,11 +12,7 @@ endif
 endif
 
 # Set config path
-ifeq ($(SHELL_TYPE),windows)
 CONFIG_PATH=$(CURDIR)/gym-server/config/dev.yaml
-else
-CONFIG_PATH=$(CURDIR)/gym-server/config/dev.yaml
-endif
 
 # Export config path
 export CONFIG_PATH
