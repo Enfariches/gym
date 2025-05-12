@@ -5,20 +5,15 @@ option go_package = "github.com/Enfariches/gym/protogen";
 
 import "google/protobuf/field_mask.proto";
 import "google/api/field_behavior.proto";
+import "google/protobuf/empty.proto";
 
 // Сервис для управления администраторами.
 service AdminService {
-    // Получает администратора.
-    rpc GetAdmin (GetAdminRequest) returns (Admin);
+    // Получает администратора, по его ID, которое передается в контексте.
+    rpc GetAdmin (google.protobuf.Empty) returns (Admin);
 
     // Обновляет администратора.
     rpc UpdateAdmin (UpdateAdminRequest) returns (Admin);
-}
-
-// Запрос на получение администратора.
-message GetAdminRequest {
-    // ID администратора.
-    int64 admin_id = 1;
 }
 
 // Запрос на обновление администратора.

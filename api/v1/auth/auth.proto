@@ -3,6 +3,8 @@ syntax="proto3";
 package auth;
 option go_package = "github.com/Enfariches/gym/protogen";
 
+import "google/protobuf/empty.proto";
+
 // Сервис для аутентификации и регистрации пользователей.
 service AuthService {
 
@@ -16,11 +18,11 @@ service AuthService {
     rpc ChangePassword(ChangePasswordRequest) returns (ChangePasswordResponse);
 
     // Подтверждает смену пароля пользователя по токену.
-    rpc VerifyChangePassword(VerifyChangePasswordRequest) returns (VerifyChangePasswordResponse);
+    rpc VerifyChangePassword(VerifyChangePasswordRequest) returns (google.protobuf.Empty);
 
     // Подтверждает регистрацию пользователя по токену.
     // Токен отправляется на почту пользователя.
-    rpc VerifyRegister(VerifyRegisterRequest) returns (VerifyRegisterResponse);
+    rpc VerifyRegister(VerifyRegisterRequest) returns (google.protobuf.Empty);
 }
 
 // Запрос на аутентификацию или регистрацию.
@@ -59,11 +61,6 @@ message VerifyChangePasswordRequest {
     string new_password = 2;
 }
 
-message VerifyChangePasswordResponse {
-    // Возвращает OK, если смена пароля прошёл успешно.
-    // Возвращает ERROR, если смена пароля не прошёл.
-}
-
 message VerifyRegisterRequest {
     // JWT-токен для подтверждения регистрации. Включает в себя email и хэш пароля.
     string auth_token = 1;
@@ -80,11 +77,6 @@ message RegisterResponse {
     // JWT-токен для подтверждения регистрации. Включает в себя email и хэш пароля.
     // Так же отправляется на почту линк с потверждением.
     string auth_token = 1;
-}
-
-message VerifyRegisterResponse {
-    // Возвращает OK, если регистрация прошла успешно.
-    // Возвращает ERROR, если регистрация не прошла.
 }
 
 // Тип приложения, от которого пришёл запрос

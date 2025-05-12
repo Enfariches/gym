@@ -3,12 +3,14 @@ package admin
 import (
 	"context"
 	"health/internal/domain/models"
+	"health/lib/ctxkey"
 	pb "health/protogen/v1/users"
 
 	"github.com/mennanov/fmutils"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/fieldmaskpb"
 )
 
@@ -26,12 +28,10 @@ func RegisterGRPCServer(gRPC *grpc.Server, admin AdminService) {
 	pb.RegisterAdminServiceServer(gRPC, &AdminServerManagmentApi{admin: admin})
 }
 
-func (s *AdminServerManagmentApi) GetAdmin(ctx context.Context, r *pb.GetAdminRequest) (*pb.Admin, error) {
-	if r.AdminId == 0 {
-		return nil, status.Errorf(codes.InvalidArgument, "admin_id is required")
-	}
+func (s *AdminServerManagmentApi) GetAdmin(ctx context.Context, _ *emptypb.Empty) (*pb.Admin, error) {
+	admin_id := ctx.Value(ctxkey.UserKey).(int64)
 
-	admin, err := s.admin.GetAdmin(ctx, r.AdminId)
+	admin, err := s.admin.GetAdmin(ctx, admin_id)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to get admin: %v", err)
 	}
@@ -61,7 +61,7 @@ func (s *AdminServerManagmentApi) UpdateAdmin(ctx context.Context, r *pb.UpdateA
 
 	updatedAdmin, err := s.admin.UpdateAdmin(ctx, updateFields)
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "failed to update admin")
+		return nil, status.Errorf(codes.Internal, "failed to update admin: %v", err)
 	}
 
 	return &pb.Admin{
@@ -85,7 +85,7 @@ func applyFieldMask(req *pb.Admin, mask *fieldmaskpb.FieldMask) (map[string]any,
 		case "departament":
 			updateMap[path] = req.Departament
 		default:
-			return nil, status.Error(codes.InvalidArgument, "incorrect fields")
+			return nil, status.Errorf(codes.InvalidArgument, "incorrect fields: %s", path)
 		}
 	}
 

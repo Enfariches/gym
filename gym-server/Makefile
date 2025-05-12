@@ -30,7 +30,6 @@ PROTOC_CMD = npx protoc -I ../api $(PROTO_FILES) \
 else
 PROTO_FILES = $(shell find ../api/v1 -name '*.proto')
 MAKE_DIR = mkdir -p ./protogen
-RM_CMD = rm -rf ./protogen
 PROTOC_CMD = protoc -I ../api $(PROTO_FILES) \
 	--go_out=./protogen/ \
 	--go_opt=paths=source_relative \
