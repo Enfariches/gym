@@ -9,9 +9,9 @@ import (
 )
 
 const (
-	secret      = "mainGymnasticUnique"
-	authSecret  = "authGymnasticUnique"
-	resetSecret = "resetGymansticUnique"
+	secret      = "mainGymUnique"
+	authSecret  = "authGymUnique"
+	resetSecret = "resetGymUnique"
 )
 
 func NewToken(user models.AuthUser, duration time.Duration) (string, error) {

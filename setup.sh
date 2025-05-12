@@ -46,5 +46,5 @@ sudo npm install -g @protobuf-ts/plugin
 sudo newgrp docker
 
 # Запуск сервиса
-echo "Start Gymnastics..."
+echo "Start Gym's..."
 sudo make bundle-gen

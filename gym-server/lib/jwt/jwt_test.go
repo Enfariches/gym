@@ -25,7 +25,7 @@ func TestNewToken_ValidToken(t *testing.T) {
 
 		token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
 			// Секретный ключ из NewToken()
-			return []byte("gymnastic"), nil
+			return []byte("gym"), nil
 		},
 		)
 
@@ -55,7 +55,7 @@ func TestNewToken_InvalidToken(t *testing.T) {
 
 		_, err = jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
 			// Секретный ключ из NewToken()
-			return []byte("gymnastic"), nil
+			return []byte("gym"), nil
 		})
 
 		assert.Error(t, err, "Expected error for expired token")

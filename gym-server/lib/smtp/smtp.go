@@ -14,7 +14,7 @@ func SendAuthMail(smtpConfig config.SMTPConfig, authToken, userEmail string) err
 	m.SetAddressHeader("Cc", userEmail, "")
 	m.SetHeader("Subject", "Gymanstic: Подтвердждения email")
 
-	verifyURL := fmt.Sprintf("https://localhost:8080/VerifyRegister?auth_token=%s", authToken)
+	verifyURL := fmt.Sprintf("http://localhost:8080/VerifyRegister?auth_token=%s", authToken)
 	htmlBody := fmt.Sprintf(`
 	<html>
 		<body>
@@ -58,7 +58,7 @@ func SendResetMail(smtpConfig config.SMTPConfig, resetToken, userEmail string) e
 	m.SetAddressHeader("Cc", userEmail, "")
 	m.SetHeader("Subject", "Gymanstic: Смена пароля пользователя")
 
-	verifyURL := fmt.Sprintf("https://localhost:8080/VerifyChangePassword?reset_token=%s", resetToken)
+	verifyURL := fmt.Sprintf("http://localhost:8080/VerifyChangePassword?reset_token=%s", resetToken)
 	htmlBody := fmt.Sprintf(`
 	<html>
 		<body>

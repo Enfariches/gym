@@ -36,6 +36,18 @@ const routes: RouteRecordRaw[] = [
         component: () => import('pages/ChangePasswordPage.vue'),
         alias: '/change-password'
       },
+      {
+        path: 'verify-register',
+        name: 'verify-register',
+        component: () => import('pages/VerifyRegisterPage.vue'),
+        alias: '/VerifyRegister'
+      },
+      {
+        path: 'verify-change-password',
+        name: 'verify-change-password',
+        component: () => import('pages/VerifyChangePasswordPage.vue'),
+        alias: '/VerifyChangePassword'
+      },
     ],
   },
   {
