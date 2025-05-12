@@ -5,8 +5,9 @@ import (
 	"fmt"
 	admingrpc "health/internal/handlers/admin"
 	authgrpc "health/internal/handlers/auth"
-	"health/lib/jwt"
+	schedulegrpc "health/internal/handlers/schedule"
 	ctxkey "health/lib/ctxkey"
+	"health/lib/jwt"
 	"log/slog"
 	"net"
 	"strings"
@@ -31,13 +32,16 @@ type Gym struct {
 	port       int
 }
 
-func New(log *slog.Logger, authService authgrpc.AuthService, adminService admingrpc.AdminService, port int) *Gym {
+func New(log *slog.Logger, authService authgrpc.AuthService, adminService admingrpc.AdminService,
+	scheduleService schedulegrpc.ScheduleService, port int) *Gym {
+
 	gRPCServer := grpc.NewServer(
 		grpc.UnaryInterceptor(JWTServerInterceptor),
 	)
 
 	authgrpc.RegisterGRPCServer(gRPCServer, authService)
 	admingrpc.RegisterGRPCServer(gRPCServer, adminService)
+	schedulegrpc.RegisterGRPCServer(gRPCServer, scheduleService)
 
 	return &Gym{
 		log:        log,

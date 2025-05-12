@@ -12,7 +12,7 @@ import (
 )
 
 type Storage struct {
-	db  *goqu.Database
+	db *goqu.Database
 }
 
 func New(log *slog.Logger, databaseURL string) (*Storage, error) {
@@ -32,7 +32,7 @@ func HandleDBError(err error) error {
 		case "23505":
 			return storage.ErrUserExists
 		default:
-			return errors.New("unknown error, please check the error code")	
+			return fmt.Errorf("unknown error: %v", pqErr.Error())
 		}
 	}
 

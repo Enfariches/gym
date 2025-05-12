@@ -39,7 +39,6 @@ PROTOC_CMD = protoc -I ../api $(PROTO_FILES) \
 endif
 
 # TODO: Сделать тесты.
-
 # Написать тесты на SMTP; Auth
 
 # Генерация gRPC Go Интерфейсов.

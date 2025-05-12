@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS schedules (
     id SERIAL PRIMARY KEY,
     cron_expression TEXT NOT NULL,
     is_active BOOLEAN DEFAULT TRUE,
-    video_id iNTEGER NOT NULL,
-    admin_id INTEGER NOT NULL
+    video_id INTEGER NOT NULL,
+    admin_id INTEGER NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

@@ -1,9 +1,9 @@
 package models
 
 type Admin struct {
-	ID          int64
-	Name        string
-	Surname     string
-	Email       string
-	Departament string
+	ID          int64  `db:"id"`
+	Name        string `db:"name"`
+	Surname     string `db:"surname"`
+	Email       string `db:"email"`
+	Departament string `db:"departament"`
 }

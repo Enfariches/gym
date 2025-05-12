@@ -29,7 +29,7 @@ func NewToken(user models.AuthUser, duration time.Duration) (string, error) {
 	return tokenString, nil
 }
 
-func ParseToken(tokenString string) (int, error) {
+func ParseToken(tokenString string) (int64, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (any, error) {
 		return []byte(secret), nil
 	}, jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}))
@@ -42,7 +42,7 @@ func ParseToken(tokenString string) (int, error) {
 		return 0, err
 	}
 
-	return int(claims["id"].(float64)), nil
+	return int64(claims["id"].(float64)), nil
 }
 
 func NewAuthToken(authUser models.AuthUser, duration time.Duration) (string, error) {
