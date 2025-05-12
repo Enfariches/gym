@@ -48,6 +48,7 @@ const routes: RouteRecordRaw[] = [
       { path: 'videos', component: () => import('pages/VideosPage.vue') },
       { path: 'schedule', component: () => import('pages/SchedulePage.vue') },
       { path: 'stats', component: () => import('pages/StatsPage.vue') },
+      { path: 'profile', component: () => import('pages/ProfilePage.vue') },
     ],
   },
   {
