@@ -8,6 +8,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 type AuthService interface {
@@ -63,7 +64,7 @@ func (s *AuthServerManagmentApi) Login(ctx context.Context, r *pb.AuthRequest) (
 	return &pb.LoginResponse{Token: token}, nil
 }
 
-func (s *AuthServerManagmentApi) VerifyRegister(ctx context.Context, r *pb.VerifyRegisterRequest) (*pb.VerifyRegisterResponse, error) {
+func (s *AuthServerManagmentApi) VerifyRegister(ctx context.Context, r *pb.VerifyRegisterRequest) (*emptypb.Empty, error) {
 	if r.AuthToken == "" {
 		return nil, status.Error(codes.InvalidArgument, "token is required")
 	}
@@ -72,7 +73,7 @@ func (s *AuthServerManagmentApi) VerifyRegister(ctx context.Context, r *pb.Verif
 		return nil, status.Error(codes.Internal, fmt.Sprintf("failed to verify register: %v", err))
 	}
 
-	return &pb.VerifyRegisterResponse{}, nil
+	return &emptypb.Empty{}, nil
 }
 
 func (s *AuthServerManagmentApi) ChangePassword(ctx context.Context, r *pb.ChangePasswordRequest) (*pb.ChangePasswordResponse, error) {
@@ -93,7 +94,7 @@ func (s *AuthServerManagmentApi) ChangePassword(ctx context.Context, r *pb.Chang
 	return &pb.ChangePasswordResponse{ResetToken: resetToken}, nil
 }
 
-func (s *AuthServerManagmentApi) VerifyChangePassword(ctx context.Context, r *pb.VerifyChangePasswordRequest) (*pb.VerifyChangePasswordResponse, error) {
+func (s *AuthServerManagmentApi) VerifyChangePassword(ctx context.Context, r *pb.VerifyChangePasswordRequest) (*emptypb.Empty, error) {
 	if r.ResetToken == "" {
 		return nil, status.Error(codes.InvalidArgument, "reset token is required")
 	}
@@ -106,7 +107,7 @@ func (s *AuthServerManagmentApi) VerifyChangePassword(ctx context.Context, r *pb
 		return nil, status.Error(codes.Internal, fmt.Sprintf("failed to change password: %v", err))
 	}
 
-	return &pb.VerifyChangePasswordResponse{}, nil
+	return &emptypb.Empty{}, nil
 }
 
 func validateAuth(r *pb.AuthRequest) error {

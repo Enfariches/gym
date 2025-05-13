@@ -24,8 +24,8 @@ message VideoChunk {
   bytes data = 1;
 }
 
-// Ответ на запрос загрузки видео с статусом.
+// Ответ на запрос загрузки видео.
 message UploadVideoResponse {
-  // Статус выполнения запроса.
+  // Сообщение о cтатусе запроса.
   string message = 1;
 }

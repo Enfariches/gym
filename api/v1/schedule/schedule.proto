@@ -3,9 +3,9 @@ syntax="proto3";
 package schedule;
 option go_package = "github.com/Enfariches/gym/protogen";
 
-import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";
 import "google/api/field_behavior.proto";
+import "google/protobuf/field_mask.proto";
 
 // Сервис для управления расписанием.
 service ScheduleService {
@@ -16,8 +16,8 @@ service ScheduleService {
     // Получает расписание.
     rpc GetSchedule(GetScheduleRequest) returns (Schedule);
 
-    // Получает список расписание.
-    rpc ListSchedule(ListScheduleRequest) returns (ListScheduleResponse);
+    // Получает список расписаний, по ID администратора, которое передается в контексте.
+    rpc ListSchedule(google.protobuf.Empty) returns (ListScheduleResponse);
 
     // Обновляет расписание.
     rpc UpdateSchedule(UpdateScheduleRequest) returns (Schedule);
@@ -45,12 +45,6 @@ message GetScheduleRequest {
     int64 schedule_id = 1;
 }
 
-// Запрос на получение списка расписаний.
-message ListScheduleRequest {
-    // ID расписания, которое необходимо получить.
-    repeated int64 schedule_ids = 1;
-}
-
 // Ответ на запрос списка расписаний.
 message ListScheduleResponse {
     // Список расписаний.
@@ -59,7 +53,11 @@ message ListScheduleResponse {
 
 // Запрос на обновление расписания.
 message UpdateScheduleRequest {
-    // Нужно согласовать какие поля расписания можно менять.
+    // Администратор, который будет обновлен.
+    Schedule schedule = 1;
+
+    // Маска полей, которые будут обновлены.
+    google.protobuf.FieldMask field_mask = 2;
 }
 
 // Запрос на удаление расписания.
@@ -71,7 +69,7 @@ message DeleteScheduleRequest {
 // Струкутура расписания.
 message Schedule {
     // ID расписания.
-    int64 id = 1 [(google.api.field_behavior) = OUTPUT_ONLY];
+    int64 id = 1 [(google.api.field_behavior) = OPTIONAL];
 
     // Cron-выражение - представления времени запуска. (Формат crontab)
     //
@@ -99,6 +97,6 @@ message Schedule {
     int64 admin_id = 5 [(google.api.field_behavior) = OUTPUT_ONLY];
 
     // Время создания расписания.
-    google.protobuf.Timestamp created_at = 6 [(google.api.field_behavior) = OUTPUT_ONLY];
+    string created_at = 6 [(google.api.field_behavior) = OUTPUT_ONLY];
 }
     

@@ -25,7 +25,7 @@ func TestNewToken_ValidToken(t *testing.T) {
 
 		token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
 			// Секретный ключ из NewToken()
-			return []byte("gym"), nil
+			return []byte(secret), nil
 		},
 		)
 
@@ -50,12 +50,12 @@ func TestNewToken_InvalidToken(t *testing.T) {
 
 		assert.NoError(t, err, "Failed to generate token")
 
-		//Дожидаемся просрочки токена
+		// Дожидаемся просрочки токена
 		time.Sleep(time.Second)
 
 		_, err = jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
 			// Секретный ключ из NewToken()
-			return []byte("gym"), nil
+			return []byte(secret), nil
 		})
 
 		assert.Error(t, err, "Expected error for expired token")
