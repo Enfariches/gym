@@ -75,13 +75,13 @@ func SendResetMail(smtpConfig config.SMTPConfig, resetToken, userEmail string) e
 					border-radius: 6px;
 				">Подтвердить смену пароля</a>
 			</p>
-			<p>Или скопируйте ссылку в браузер:</p>
-			<p><a href="%s">%s</a></p>
+			<p>Или введите токен в ручную:</p>
+			<p>%s</p>
 			<p>С уважением, сервис Производственная гимнастика.</p>
 			<p><i>Если вы не запрашивали подтверждение, просто проигнорируйте это сообщение.</i></p>
 		</body>
 	</html>
-	`, userEmail, verifyURL, verifyURL, verifyURL)
+	`, userEmail, verifyURL, resetToken)
 
 	m.SetBody("text/html", htmlBody)
 
