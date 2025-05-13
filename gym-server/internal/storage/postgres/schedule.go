@@ -80,9 +80,7 @@ func (s *Storage) UpdateSchedule(ctx context.Context, schedule_id int64, updateF
 	}
 	row := s.db.QueryRow(query, args...)
 
-	schedule := &models.Schedule{}
-
-	err = row.Scan(&schedule.ID, &schedule.CronExpression, &schedule.IsActive, &schedule.VideoID, &schedule.AdminID, &schedule.CreatedAt)
+	schedule, err := scanSchedule(row)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return &models.Schedule{}, fmt.Errorf("%s: %w", op, errors.New("schedule not found"))
@@ -91,7 +89,6 @@ func (s *Storage) UpdateSchedule(ctx context.Context, schedule_id int64, updateF
 	}
 
 	return schedule, nil
-
 }
 
 func (s *Storage) DeleteSchedule(ctx context.Context, schedule_id int64) (*models.Schedule, error) {
@@ -100,16 +97,14 @@ func (s *Storage) DeleteSchedule(ctx context.Context, schedule_id int64) (*model
 	query, args, _ := goqu.
 		Delete("schedules").
 		Where(goqu.C("id").Eq(schedule_id)).
-		Returning("id", "cron_expression", "video_id", "admin_id", "created_at").
+		Returning("id", "cron_expression", "is_active", "video_id", "admin_id", "created_at").
 		Limit(1).
 		ToSQL()
 
 	row := s.db.QueryRow(query, args...)
 
 	// Деактивируем удаленное расписание, чтобы прекратить его работу в планировщике.
-	schedule := &models.Schedule{IsActive: false}
-
-	err := row.Scan(&schedule.ID, &schedule.CronExpression, &schedule.VideoID, &schedule.AdminID, &schedule.CreatedAt)
+	schedule, err := scanSchedule(row, func(s *models.Schedule) { s.IsActive = false })
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return &models.Schedule{}, fmt.Errorf("%s: %w", op, errors.New("schedule not found"))

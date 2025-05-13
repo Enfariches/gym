@@ -89,11 +89,11 @@ func (a *Auth) RegisterNewUser(ctx context.Context, email, password, source stri
 		return "", fmt.Errorf("%s: %w", op, err)
 	}
 
-	// err = smtp.SendAuthMail(a.smtpConfig, authToken, email)
-	// if err != nil {
-	// 	log.Error("failed to send email", sl.Err(err))
-	// 	return "", fmt.Errorf("%s: %w", op, err)
-	// }
+// err = smtp.SendAuthMail(a.smtpConfig, authToken, email)
+// if err != nil {
+// 	log.Error("failed to send email", sl.Err(err))
+// 	return "", fmt.Errorf("%s: %w", op, err)
+// }
 
 	return authToken, nil
 }

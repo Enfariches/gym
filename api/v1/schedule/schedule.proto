@@ -3,7 +3,6 @@ syntax="proto3";
 package schedule;
 option go_package = "github.com/Enfariches/gym/protogen";
 
-import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";
 import "google/api/field_behavior.proto";
 import "google/protobuf/field_mask.proto";
@@ -98,6 +97,6 @@ message Schedule {
     int64 admin_id = 5 [(google.api.field_behavior) = OUTPUT_ONLY];
 
     // Время создания расписания.
-    google.protobuf.Timestamp created_at = 6 [(google.api.field_behavior) = OUTPUT_ONLY];
+    string created_at = 6 [(google.api.field_behavior) = OUTPUT_ONLY];
 }
     

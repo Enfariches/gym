@@ -14,7 +14,6 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/fieldmaskpb"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type ScheduleService interface {
@@ -72,7 +71,7 @@ func (s *ScheduleServerManagmentApi) GetSchedule(ctx context.Context, r *pb.GetS
 		IsActive:       schedule.IsActive,
 		VideoId:        schedule.VideoID,
 		AdminId:        schedule.AdminID,
-		CreatedAt:      timestamppb.New(schedule.CreatedAt),
+		CreatedAt:      schedule.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
 	}, nil
 }
 
@@ -106,7 +105,7 @@ func (s *ScheduleServerManagmentApi) UpdateSchedule(ctx context.Context, r *pb.U
 		IsActive:       updatedSchedule.IsActive,
 		VideoId:        updatedSchedule.VideoID,
 		AdminId:        updatedSchedule.AdminID,
-		CreatedAt:      timestamppb.New(updatedSchedule.CreatedAt),
+		CreatedAt:      updatedSchedule.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
 	}, nil
 }
 
@@ -204,7 +203,7 @@ func makePbSchedules(savedSchedule []*models.Schedule) []*pb.Schedule {
 			IsActive:       schedule.IsActive,
 			VideoId:        schedule.VideoID,
 			AdminId:        schedule.AdminID,
-			CreatedAt:      timestamppb.New(schedule.CreatedAt),
+			CreatedAt:      schedule.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
 		})
 	}
 

@@ -48,12 +48,16 @@ func HandleDBError(err error) error {
 	return err
 }
 
-func scanSchedule(s Scanner) (*models.Schedule, error) {
+func scanSchedule(s Scanner, opts ...func(s *models.Schedule)) (*models.Schedule, error) {
 	schedule := &models.Schedule{}
 
 	err := s.Scan(&schedule.ID, &schedule.CronExpression, &schedule.IsActive, &schedule.VideoID, &schedule.AdminID, &schedule.CreatedAt)
 	if err != nil {
 		return nil, fmt.Errorf("failed to scan row: %w", err)
+	}
+
+	for _, opt := range opts {
+		opt(schedule)
 	}
 
 	return schedule, nil
