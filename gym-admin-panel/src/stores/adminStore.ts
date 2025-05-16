@@ -11,12 +11,12 @@ export const useAdminStore = defineStore('admin', {
 
   actions: {
     // Получить информацию об администраторе
-    async fetchAdmin(adminId: number) {
+    async fetchAdmin() {
       this.loading = true;
       this.error = null;
 
       try {
-        const admin = await getAdmin(adminId);
+        const admin = await getAdmin();
         this.currentAdmin = admin;
       } catch (error) {
         this.error = error instanceof Error ? error.message : 'Не удалось загрузить данные администратора';

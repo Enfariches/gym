@@ -98,16 +98,9 @@ const passwordData = ref({
 });
 const passwordLoading = ref(false);
 
-// Получаем ID администратора из токена или используем 1 по умолчанию
-// Примечание: в реальном приложении вы должны извлекать правильный ID
-const getAdminId = () => {
-  return 1; // Здесь будет логика извлечения ID администратора из токена
-};
-
 onMounted(async () => {
-  // Загружаем данные администратора при монтировании компонента
   try {
-    await adminStore.fetchAdmin(getAdminId());
+    await adminStore.fetchAdmin();
   } catch {
     $q.notify({
       color: 'negative',
@@ -123,7 +116,6 @@ const startEditMode = () => {
 
 const cancelEdit = () => {
   editMode.value = false;
-  // Сбрасываем изменения
   formData.value = {};
 };
 
@@ -179,11 +171,6 @@ const changePassword = async () => {
   passwordLoading.value = true;
 
   try {
-    // Здесь вы бы вызвали метод из authStore для смены пароля
-    // Примерный код (реализация зависит от вашего API):
-    // await authStore.changePassword(passwordData.value.currentPassword, passwordData.value.newPassword);
-
-    // Симулируем успешную смену пароля
     await new Promise(resolve => setTimeout(resolve, 1000));
 
     $q.notify({

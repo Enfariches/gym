@@ -6,9 +6,7 @@ import type {
   ChangePasswordRequest,
   ChangePasswordResponse,
   VerifyRegisterRequest,
-  VerifyRegisterResponse,
   VerifyChangePasswordRequest,
-  VerifyChangePasswordResponse
 } from '../../protogen/v1/auth/auth';
 import {
   AppSource
@@ -53,18 +51,18 @@ export const resetPassword = async (email: string): Promise<ChangePasswordRespon
 };
 
 // Подтверждение сброса пароля (смена пароля)
-export const changePassword = async (resetToken: string, newPassword: string): Promise<VerifyChangePasswordResponse> => {
+export const changePassword = async (resetToken: string, newPassword: string) => {
   const request: VerifyChangePasswordRequest = {
     resetToken,
     newPassword
   };
-  return (await authService.verifyChangePassword(request)).response;
+  await authService.verifyChangePassword(request)
 };
 
 // Подтверждение регистрации
-export const verifyRegister = async (authToken: string): Promise<VerifyRegisterResponse> => {
+export const verifyRegister = async (authToken: string) => {
   const request: VerifyRegisterRequest = {
     authToken
   };
-  return (await authService.verifyRegister(request)).response;
+  await authService.verifyRegister(request)
 };

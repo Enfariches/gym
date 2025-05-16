@@ -1,6 +1,5 @@
 import { AdminServiceClient } from '../../protogen/v1/users/admin.client';
 import type {
-  GetAdminRequest,
   UpdateAdminRequest,
   Admin
 } from '../../protogen/v1/users/admin';
@@ -8,9 +7,11 @@ import type {
 // Конфигурация gRPC-Web клиента
 import { GrpcWebFetchTransport } from '@protobuf-ts/grpcweb-transport';
 import type { RpcOptions } from '@protobuf-ts/runtime-rpc';
+import { FieldMask } from '../../protogen/google/protobuf/field_mask';
+import type { Empty } from '../../protogen/google/protobuf/empty';
 
 // Получаем базовый URL из переменных окружения или используем значение по умолчанию
-const API_URL = 'http://localhost:8085';
+const API_URL = process.env.QUASAR_API_URL || 'http://localhost:8085';
 
 // Функция для создания транспорта с JWT токеном
 const createTransport = () => {
@@ -40,13 +41,11 @@ const createAuthOptions = (): RpcOptions => {
 };
 
 // Получить информацию об администраторе
-export const getAdmin = async (adminId: number): Promise<Admin> => {
+export const getAdmin = async (): Promise<Admin> => {
   const transport = createTransport();
   const adminService = new AdminServiceClient(transport);
 
-  const request: GetAdminRequest = {
-    adminId: BigInt(adminId)
-  };
+  const request: Empty = {};
 
   try {
     const options = createAuthOptions();
@@ -68,9 +67,7 @@ export const updateAdmin = async (
 
   const request: UpdateAdminRequest = {
     admin,
-    fieldMask: {
-      paths: fieldsToUpdate
-    }
+    fieldMask: FieldMask.create({ paths: fieldsToUpdate })
   };
 
   try {

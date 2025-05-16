@@ -23,8 +23,8 @@
           :dayOrder="day.order"
           :items="day.items"
           :videos="videos"
-          @edit="onEdit"
-          @delete="_removeSchedule"
+          @edit="handleEditEvent"
+          @delete="onDelete"
           @add="onAdd"
         />
       </div>
@@ -33,203 +33,300 @@
     <ScheduleEditModal
       v-model:isOpen="isEditModalOpen"
       :videos="videos"
-      :scheduleId="index"
-      :initialVideoName="newVideoName"
-      :initialTime="timeWithSeconds"
-      :dayOrder="videoToSchedule.dayofweek"
+      v-bind="selectedScheduleForModal.id ? { scheduleId: selectedScheduleForModal.id } : {}"
+      :initialVideoName="selectedScheduleForModal.videoName || ''"
+      :initialTime="selectedScheduleForModal.time"
+      :initialIsActive="selectedScheduleForModal.isActive"
+      :dayOrder="selectedScheduleForModal.dayOrder.toString()"
       @save="onSave"
     />
+
+    <!-- Индикатор загрузки -->
+    <q-inner-loading :showing="scheduleStore.isLoading">
+      <q-spinner size="50px" color="primary" />
+    </q-inner-loading>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { onMounted, ref } from 'vue'
+import { useQuasar } from 'quasar'
 import ScheduleFilters from '../components/schedulePage/ScheduleFilters.vue'
 import ScheduleSidebar from '../components/schedulePage/ScheduleSidebar.vue'
 import ScheduleCard from '../components/schedulePage/ScheduleCard.vue'
 import ScheduleEditModal from '../components/schedulePage/ScheduleEditModal.vue'
+import { useScheduleStore } from '../stores/scheduleStore'
+import type { Schedule as ProtoSchedule } from '../../protogen/v1/schedule/schedule'
 
-const mondayVideos: { ID: string, Time: string, VideoID: string, Name: string }[] = []
-const tuesdayVideos: { ID: string, Time: string, VideoID: string, Name: string }[] = []
-const wednesdayVideos: { ID: string, Time: string, VideoID: string, Name: string }[] = []
-const thursdayVideos: { ID: string, Time: string, VideoID: string, Name: string }[] = []
-const fridayVideos: { ID: string, Time: string, VideoID: string, Name: string }[] = []
-const saturdayVideos: { ID: string, Time: string, VideoID: string, Name: string }[] = []
-const sundayVideos: { ID: string, Time: string, VideoID: string, Name: string }[] = []
+const $q = useQuasar();
+const scheduleStore = useScheduleStore();
+
+interface VideoItem {
+  ID: string;
+  Name: string;
+}
+
+interface ScheduleItem {
+  ID: string;
+  Time: string;
+  VideoID: string;
+  Name: string;
+  is_active: boolean;
+  dayOrder: number;
+  cron_expression: string;
+}
+
+// Data for preparing modal and for onSave to process modal's emitted data
+interface ScheduleModalInputData {
+  id?: string;
+  videoName?: string; // videoName is for initial display, not strictly part of emitted save data
+  time: string;
+  isActive: boolean;
+  dayOrder: number; // Internally, we might prefer number for dayOrder
+  videoId?: string;
+}
+
+// Actual payload from ScheduleEditModal's @save event
+interface ScheduleEditModalSavePayload {
+  videoId: string;
+  time: string;
+  dayOrder: string; // Modal emits dayOrder as string
+  scheduleId: string | undefined;
+  isActive: boolean;
+}
+
+// Define ScheduleCardEditPayload based on what ScheduleCard emits
+interface ScheduleCardEditPayload {
+  videoName: string;
+  videoId: string;
+  scheduleId: string;
+  dayOrder: number;
+}
 
 const days = ref([
-  { items: mondayVideos, name: "Понедельник", bg: 'bg-primary', order:0 },
-  { items: tuesdayVideos, name: "Вторник", bg: 'bg-primary',order:1 },
-  { items: wednesdayVideos, name: "Среда", bg: 'bg-primary',order:2 },
-  { items: thursdayVideos, name: "Четверг", bg: 'bg-primary',order:3 },
-  { items: fridayVideos, name: "Пятница", bg: 'bg-primary',order:4 },
-  { items: saturdayVideos, name: "Суббота", bg: 'bg-primary',order:5 },
-  { items: sundayVideos, name: "Воскресенье", bg: 'bg-primary',order:6 },
+  { items: [] as ScheduleItem[], name: "Понедельник", order: 1 },
+  { items: [] as ScheduleItem[], name: "Вторник", order: 2 },
+  { items: [] as ScheduleItem[], name: "Среда", order: 3 },
+  { items: [] as ScheduleItem[], name: "Четверг", order: 4 },
+  { items: [] as ScheduleItem[], name: "Пятница", order: 5 },
+  { items: [] as ScheduleItem[], name: "Суббота", order: 6 },
+  { items: [] as ScheduleItem[], name: "Воскресенье", order: 0 },
 ])
-const videos = ref()
-const index = ref()
+
+const videos = ref<VideoItem[]>([])
 const isEditModalOpen = ref(false)
-const newVideoName = ref('')
-const timeWithSeconds = ref('')
-const videoToSchedule = ref({
-  dayofweek: '',
-  time: '',
-  videoid: ''
+// Use ScheduleModalInputData for preparing data to pass to the modal
+const selectedScheduleForModal = ref<ScheduleModalInputData>({
+  videoName: '', // Ensure videoName is initialized as string
+  time: '00:00',
+  isActive: true,
+  dayOrder: 0,
 })
-const timeError = ref('')
 
 const departments = ref([
   { id: 'all', name: 'Все отделы', checked: true },
-  { id: 'dev', name: 'Разработчики', checked: false },
-  { id: 'finance', name: 'Финансовый отдел', checked: false },
-  { id: 'marketing', name: 'Маркетинг', checked: false },
-  { id: 'hr', name: 'HR', checked: false },
 ])
-
 const selectedVideos = ref<string[]>([])
 const allVideosChecked = ref(true)
 
-const API_URL = process.env.QUASAR_API_URL || 'http://localhost:8083/api/v1'
+const cronToTime = (cronExpression: string): string => {
+  const parts = cronExpression.split(' ')
+  if (parts.length >= 2) {
+    const minute = parts[0]?.padStart(2, '0') || '00'
+    const hour = parts[1]?.padStart(2, '0') || '00'
+    return `${hour}:${minute}`
+  }
+  return '00:00'
+}
 
-const init = () => {
-  const token = localStorage.getItem('token');
+const timeToCron = (time: string, dayOfWeek: number): string => {
+  const [hourStr, minuteStr] = time.split(':')
+  const minutes = minuteStr || '0'
+  const hours = hourStr || '0'
+  return `${minutes} ${hours} * * ${dayOfWeek}`
+}
 
-  days.value.forEach(async (day, idx) => {
-    setTimeout(async () => {
-      await fetch(`${API_URL}/schedule/${idx}`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-        }).then(async (res) => {
-          const response = await res.json()
-          day.items = response
-        })
-    }, idx * 50)
-  })
+const getDayOfWeekFromCron = (cronExpression: string): number => {
+  const parts = cronExpression.split(' ')
+  if (parts.length >= 5 && parts[4] && parts[4] !== '*') {
+    return parseInt(parts[4], 10)
+  }
+  return 0
+}
+
+const getVideoName = (videoId: string | undefined): string => {
+  if (!videoId) return 'Неизвестное видео'
+  const video = videos.value.find(v => v.ID === videoId)
+  return video ? video.Name : 'Неизвестное видео'
 }
 
 onMounted(async () => {
-  init()
-  await fetch(`${API_URL}/videos`, {
-    method: 'GET',
-  }).then(async (res) => {
-    if (res.ok) {
-      const response = await res.json()
-      videos.value = response;
-    }
-  })
+  if (videos.value.length === 0) {
+    videos.value = [
+      { ID: "1", Name: "Утреннняя зарядка" },
+      { ID: "2", Name: "Вечерняя йога" },
+    ]
+  }
+  await loadSchedules()
 })
 
-const _removeSchedule = async () => {
-  const token = localStorage.getItem('token');
-  await fetch(`${API_URL}/schedule/${index.value}`, {
-    method: 'DELETE',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-    }
-  }).then(async (res) => {
-    if (res.ok) {
-      init()
-    }
-  })
-}
+const loadSchedules = async () => {
+  try {
+    days.value.forEach(day => day.items = [])
+    await scheduleStore.fetchSchedules()
+    const protoSchedules = scheduleStore.allSchedules
 
-const updateSchedule = async () =>{
-  const token = localStorage.getItem('token');
+    protoSchedules.forEach(protoSchedule => {
+      // Assuming protobuf-ts converts snake_case to camelCase
+      const dayOrder = getDayOfWeekFromCron(protoSchedule.cronExpression)
+      const scheduleItem: ScheduleItem = {
+        ID: protoSchedule.id.toString(),
+        Time: cronToTime(protoSchedule.cronExpression),
+        VideoID: protoSchedule.videoId.toString(),
+        Name: getVideoName(protoSchedule.videoId.toString()),
+        is_active: protoSchedule.isActive, // camelCase
+        dayOrder: dayOrder,
+        cron_expression: protoSchedule.cronExpression, // Store original cron
+      }
 
-  if(videoToSchedule.value.videoid === '' || videoToSchedule.value.time === '' || videoToSchedule.value.dayofweek === '')
-    return
-
-  await fetch(`${API_URL}/schedule`, {
-    method: 'PUT',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-    },
-    body: JSON.stringify({
-      dayofweek: Number(videoToSchedule.value.dayofweek),
-      time: videoToSchedule.value.time,
-      videoid: Number(videoToSchedule.value.videoid)
-    }),
-  }).then(async (res) => {
-    if (res.ok) {
-      init()
-    }
-  })
-}
-
-const validateTime = () => {
-  const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/
-
-  if (!timeWithSeconds.value) {
-    timeError.value = 'Время не может быть пустым'
-    return false
+      const day = days.value.find(d => d.order === dayOrder)
+      if (day) {
+        day.items.push(scheduleItem)
+      }
+    })
+  } catch (error) {
+    console.error('Error loading schedules:', error)
+    $q.notify({
+      color: 'negative',
+      message: 'Не удалось загрузить расписания',
+      icon: 'error'
+    });
   }
-
-  if (!timeRegex.test(timeWithSeconds.value)) {
-    timeError.value = 'Неверный формат времени. Используйте формат ЧЧ:ММ (например, 09:00)'
-    return false
-  }
-
-  timeError.value = ''
-  videoToSchedule.value.time = timeWithSeconds.value
-  return true
-}
-
-const onSave = () => {
-  if (!validateTime()) return
-  updateSchedule().then(
-    () => onDecline()
-  )
-}
-
-const onDecline = () => {
-  videoToSchedule.value.dayofweek =''
-  videoToSchedule.value.time =''
-  videoToSchedule.value.videoid =''
-  isEditModalOpen.value = false
-  newVideoName.value=''
-  timeWithSeconds.value = ''
-}
-
-const onEdit = ({ videoName, videoId, scheduleId, dayOrder }: { videoName: string; videoId: string; scheduleId: string; dayOrder: number }) => {
-  newVideoName.value = videoName;
-  videoToSchedule.value.videoid = videoId;
-  videoToSchedule.value.dayofweek = dayOrder.toString();
-  index.value = scheduleId;
-  isEditModalOpen.value = true;
 }
 
 const onAdd = (dayOrder: number) => {
-  videoToSchedule.value.dayofweek = dayOrder.toString();
-  isEditModalOpen.value = true;
+  selectedScheduleForModal.value = {
+    // id is undefined for new item
+    videoName: '', // Provide a default videoName or leave for modal to handle
+    time: '00:00',
+    isActive: true,
+    dayOrder: dayOrder,
+    // videoId is undefined, modal needs to select one
+  }
+  isEditModalOpen.value = true
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+// New handler for the @edit event from ScheduleCard
+const handleEditEvent = (payload: ScheduleCardEditPayload) => {
+  const day = days.value.find(d => d.order === payload.dayOrder)
+  if (!day) return
+  const itemToEdit = day.items.find(item => item.ID === payload.scheduleId)
+  if (!itemToEdit) return
+
+  selectedScheduleForModal.value = {
+    id: itemToEdit.ID,
+    videoId: itemToEdit.VideoID,
+    videoName: getVideoName(itemToEdit.VideoID),
+    time: itemToEdit.Time,
+    isActive: itemToEdit.is_active,
+    dayOrder: itemToEdit.dayOrder,
+  }
+  isEditModalOpen.value = true
+}
+
+const onDelete = async (scheduleId: string) => {
+  try {
+    await scheduleStore.deleteSchedule(scheduleId)
+    await loadSchedules()
+    $q.notify({
+      color: 'positive',
+      message: 'Расписание успешно удалено',
+      icon: 'check_circle'
+    });
+  } catch (error) {
+    console.error('Error deleting schedule:', error)
+    $q.notify({
+      color: 'negative',
+      message: 'Не удалось удалить расписание',
+      icon: 'error'
+    });
+  }
+}
+
+// onSave now expects the payload from ScheduleEditModalSavePayload
+const onSave = async (data: ScheduleEditModalSavePayload) => {
+  try {
+    // Convert dayOrder from string (emitted by modal) to number for timeToCron
+    const dayOrderNum = parseInt(data.dayOrder, 10)
+    const cronExpression = timeToCron(data.time, dayOrderNum)
+
+    if (!data.videoId) {
+      console.error("Video ID is missing in modal data")
+      $q.notify({
+        color: 'negative',
+        message: 'Необходимо выбрать видео',
+        icon: 'error'
+      });
+      return
+    }
+    const videoIdBigInt = BigInt(data.videoId)
+
+    const scheduleData: ProtoSchedule = {
+      id: data.scheduleId ? BigInt(data.scheduleId) : 0n, // Use scheduleId from modal payload
+      cronExpression: cronExpression,
+      isActive: data.isActive,
+      videoId: videoIdBigInt,
+      adminId: 0n,
+      createdAt: '',
+    }
+
+    if (data.scheduleId) { // If scheduleId (from modal) exists, it's an update
+      await scheduleStore.updateSchedule(scheduleData, ['cron_expression', 'is_active', 'video_id'])
+      $q.notify({
+        color: 'positive',
+        message: 'Расписание успешно обновлено',
+        icon: 'check_circle'
+      });
+    } else {
+      await scheduleStore.createSchedules([scheduleData])
+      $q.notify({
+        color: 'positive',
+        message: 'Расписание успешно создано',
+        icon: 'check_circle'
+      });
+    }
+
+    await loadSchedules()
+    isEditModalOpen.value = false
+  } catch (error) {
+    console.error('Error saving schedule:', error)
+    $q.notify({
+      color: 'negative',
+      message: 'Не удалось сохранить расписание',
+      icon: 'error'
+    });
+  }
+}
+
 const onDepartmentChange = (value: string) => {
-  // Логика изменения отдела
+  console.log('Department changed:', value)
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const onVideoChange = (value: string) => {
-  // Логика изменения видео
+  console.log('Video changed:', value)
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const onDepartmentToggle = (id: string) => {
-  // Логика переключения отдела
+  console.log('Department toggled:', id)
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const onVideoToggle = (id: string) => {
-  // Логика переключения видео
+  console.log('Video toggled:', id)
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const onAllVideosToggle = () => {
-  // Логика переключения всех видео
+  console.log('All videos toggled')
 }
-
 </script>
 
 <style scoped>

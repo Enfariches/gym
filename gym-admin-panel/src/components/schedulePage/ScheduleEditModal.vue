@@ -25,6 +25,12 @@
           {{ timeError }}
         </div>
       </div>
+      <div class="form-group">
+        <div class="checkbox-wrapper">
+          <q-checkbox v-model="isActive" label="Активно" />
+          <div class="checkbox-hint">Неактивные расписания не будут выполняться</div>
+        </div>
+      </div>
       <div class="modal-actions">
         <button class="btn btn-outline" @click="closeModal">Отмена</button>
         <button class="btn btn-primary" @click="onSave" :disabled="!!timeError">Сохранить</button>
@@ -48,11 +54,12 @@ const props = defineProps<{
   initialVideoName?: string;
   initialTime?: string;
   dayOrder: string;
+  initialIsActive?: boolean;
 }>();
 
 const emit = defineEmits<{
   (e: 'update:isOpen', value: boolean): void;
-  (e: 'save', data: { videoId: string; time: string; dayOrder: string; scheduleId: string | undefined }): void;
+  (e: 'save', data: { videoId: string; time: string; dayOrder: string; scheduleId: string | undefined; isActive: boolean }): void;
 }>();
 
 const localIsOpen = ref(props.isOpen);
@@ -60,12 +67,14 @@ const localIsOpen = ref(props.isOpen);
 const selectedVideoName = ref(props.initialVideoName || '');
 const time = ref(props.initialTime || '');
 const timeError = ref('');
+const isActive = ref(props.initialIsActive !== undefined ? props.initialIsActive : true);
 
 watch(() => props.isOpen, (newValue) => {
   localIsOpen.value = newValue;
   if (newValue) {
     selectedVideoName.value = props.initialVideoName || '';
     time.value = props.initialTime || '';
+    isActive.value = props.initialIsActive !== undefined ? props.initialIsActive : true;
     timeError.value = '';
   }
 });
@@ -98,7 +107,8 @@ const onSave = () => {
     videoId: video.ID,
     time: time.value,
     dayOrder: props.dayOrder,
-    scheduleId: props.scheduleId || undefined
+    scheduleId: props.scheduleId || undefined,
+    isActive: isActive.value
   });
 
   closeModal();
@@ -173,4 +183,16 @@ const onSave = () => {
   background: #ccc;
   cursor: not-allowed;
 }
-</style> 
+
+.checkbox-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.checkbox-hint {
+  font-size: 0.8em;
+  color: #666;
+  margin-top: 4px;
+  margin-left: 30px;
+}
+</style>
