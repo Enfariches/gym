@@ -39,6 +39,9 @@ endif
 
 # TODO: Сделать тесты.
 # Написать тесты на SMTP; Auth
+# Создать контейнер MinIO, сохранять туда файл и какие еще данные можно туда положить (media_id?).
+# Сохранять инфу о MediaID и дату создания в Постгрю и добавить ручку для взаимодействия с инфой о медиа.
+# Подумать над Response для /upload
 
 # Генерация gRPC Go Интерфейсов.
 gen:
@@ -66,3 +69,7 @@ migrate:
 
 opendb:
 	docker exec -it postgres psql -U postgres health
+
+resetdb:
+	docker compose down -v postgres
+	docker compose up gym-server

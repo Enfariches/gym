@@ -51,7 +51,7 @@ func HandleDBError(err error) error {
 func scanSchedule(s Scanner, opts ...func(s *models.Schedule)) (*models.Schedule, error) {
 	schedule := &models.Schedule{}
 
-	err := s.Scan(&schedule.ID, &schedule.CronExpression, &schedule.IsActive, &schedule.VideoID, &schedule.AdminID, &schedule.CreatedAt)
+	err := s.Scan(&schedule.ID, &schedule.CronExpression, &schedule.IsActive, &schedule.MediaID, &schedule.AdminID, &schedule.CreatedAt)
 	if err != nil {
 		return nil, fmt.Errorf("failed to scan row: %w", err)
 	}
@@ -63,13 +63,32 @@ func scanSchedule(s Scanner, opts ...func(s *models.Schedule)) (*models.Schedule
 	return schedule, nil
 }
 
-func scanAdmin(s Scanner) (*models.Admin, error) {
+func scanAdmin(s Scanner, opts ...func(s *models.Admin)) (*models.Admin, error) {
 	admin := &models.Admin{}
 
-	err := s.Scan(&admin.ID, &admin.Name, &admin.Surname, &admin.Email, &admin.Departament)
+	err := s.Scan(&admin.ID, &admin.Name, &admin.Surname, &admin.Email)
 	if err != nil {
 		return nil, fmt.Errorf("failed to scan row: %w", err)
 	}
 
+	for _, opt := range opts {
+		opt(admin)
+	}
+
 	return admin, nil
+}
+
+func scanMedia(s Scanner, opts...func(s *models.Media)) (*models.Media, error) {
+	media := &models.Media{}
+
+    err := s.Scan(&media.ID, &media.AdminID, &media.DepartmentID, &media.CreatedAt)
+    if err != nil {
+        return nil, fmt.Errorf("failed to scan row: %w", err)
+    }
+
+    for _, opt := range opts {
+        opt(media)
+    }
+
+    return media, nil
 }

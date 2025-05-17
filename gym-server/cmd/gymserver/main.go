@@ -22,14 +22,16 @@ func main() {
 	log := setupLogger(envDev)
 	log.Info("Starting server...")
 
-	app := gym.New(log, cfg.GRPC.Port, cfg.Storage, cfg.SMTP, cfg.TokenTTL, cfg.AuthTokenTTL)
+	app := gym.New(log, cfg.GRPC.Port, cfg.HTTP.Port, cfg.Storage, cfg.Minio, cfg.SMTP, cfg.TokenTTL, cfg.AuthTokenTTL)
 	go app.GRPCSrv.Run()
+	go app.HTTPSrv.Run()
 
 	stop := make(chan os.Signal, 1)
 
 	signal.Notify(stop, syscall.SIGTERM, syscall.SIGINT)
 	<-stop
 	app.GRPCSrv.Stop()
+	app.HTTPSrv.Stop()
 }
 
 func setupLogger(env string) *slog.Logger {

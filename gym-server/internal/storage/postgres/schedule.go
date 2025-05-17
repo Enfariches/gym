@@ -15,12 +15,26 @@ func (s *Storage) CreateSchedules(ctx context.Context, schedules []*models.Sched
 	const op = "postgres.CreateSchedules"
 
 	admin_id := ctx.Value(ctxkey.UserKey).(int64)
-	records := makeRecords(schedules, admin_id)
+	records := make([]goqu.Record, 0, len(schedules))
+
+	for _, sc := range schedules {
+		media_id, err := s.getMediaIDByAdminID(admin_id, sc.MediaID)
+		if err != nil {
+			return nil, fmt.Errorf("%s: %w", op, err)
+		}
+
+		records = append(records, goqu.Record{
+			"cron_expression": sc.CronExpression,
+			"is_active":       sc.IsActive,
+			"media_id":        media_id,
+			"admin_id":        admin_id,
+		})
+	}
 
 	query, args, _ := goqu.
 		Insert("schedules").
 		Rows(records).
-		Returning("id", "cron_expression", "is_active", "video_id", "admin_id", "created_at").
+		Returning("id", "cron_expression", "is_active", "media_id", "admin_id", "created_at").
 		ToSQL()
 
 	rows, err := s.db.Query(query, args...)
@@ -47,7 +61,7 @@ func (s *Storage) Schedule(ctx context.Context, schedule_id int64) (*models.Sche
 
 	query, args, _ := goqu.
 		From("schedules").
-		Select("id", "cron_expression", "is_active", "video_id", "admin_id", "created_at").
+		Select("id", "cron_expression", "is_active", "media_id", "admin_id", "created_at").
 		Where(goqu.Ex{"id": schedule_id}).
 		Limit(1).
 		ToSQL()
@@ -67,11 +81,20 @@ func (s *Storage) Schedule(ctx context.Context, schedule_id int64) (*models.Sche
 func (s *Storage) UpdateSchedule(ctx context.Context, schedule_id int64, updateFields map[string]any) (*models.Schedule, error) {
 	const op = "postgres.UpdateSchedule"
 
+	if mediaId, ok := updateFields["media_id"]; ok {
+		admin_id := ctx.Value(ctxkey.UserKey).(int64)
+
+		_, err := s.getMediaIDByAdminID(admin_id, mediaId.(int64))
+		if err != nil {
+			return nil, fmt.Errorf("%s: %w", op, err)
+		}
+	}
+
 	query, args, err := goqu.
 		Update("schedules").
 		Set(updateFields).
 		Where(goqu.C("id").Eq(schedule_id)).
-		Returning("id", "cron_expression", "is_active", "video_id", "admin_id", "created_at").
+		Returning("id", "cron_expression", "is_active", "media_id", "admin_id", "created_at").
 		Limit(1).
 		ToSQL()
 
@@ -97,7 +120,7 @@ func (s *Storage) DeleteSchedule(ctx context.Context, schedule_id int64) (*model
 	query, args, _ := goqu.
 		Delete("schedules").
 		Where(goqu.C("id").Eq(schedule_id)).
-		Returning("id", "cron_expression", "is_active", "video_id", "admin_id", "created_at").
+		Returning("id", "cron_expression", "is_active", "media_id", "admin_id", "created_at").
 		Limit(1).
 		ToSQL()
 
@@ -119,7 +142,7 @@ func (s *Storage) ListSchedule(ctx context.Context, admin_id int64) ([]*models.S
 
 	query, args, _ := goqu.
 		From("schedules").
-		Select("id", "cron_expression", "is_active", "video_id", "admin_id", "created_at").
+		Select("id", "cron_expression", "is_active", "media_id", "admin_id", "created_at").
 		Where(goqu.C("admin_id").Eq(admin_id)).
 		ToSQL()
 
@@ -140,19 +163,4 @@ func (s *Storage) ListSchedule(ctx context.Context, admin_id int64) ([]*models.S
 	}
 
 	return resultSchedules, nil
-}
-
-func makeRecords(schedules []*models.Schedule, admin_id int64) []goqu.Record {
-	records := make([]goqu.Record, 0, len(schedules))
-
-	for _, s := range schedules {
-		records = append(records, goqu.Record{
-			"cron_expression": s.CronExpression,
-			"is_active":       s.IsActive,
-			"video_id":        s.VideoID,
-			"admin_id":        admin_id,
-		})
-	}
-
-	return records
 }

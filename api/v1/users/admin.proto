@@ -41,5 +41,5 @@ message Admin {
 	string email = 4 [(google.api.field_behavior) = OUTPUT_ONLY];
 
     // Отдел за котором закреплен администратор.
-	string departament = 5;
+	string department = 5;
 }

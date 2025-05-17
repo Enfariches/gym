@@ -59,7 +59,7 @@ func (j *JobScheduler) UpdateScheduler(schedules []*models.Schedule) {
 			continue
 		}
 
-		activeJob, err := j.scheduler.NewJob(gocron.CronJob(v.CronExpression, true), gocron.NewTask(work, "hello", v.VideoID))
+		activeJob, err := j.scheduler.NewJob(gocron.CronJob(v.CronExpression, true), gocron.NewTask(work, "hello", v.MediaID))
 		if err != nil {
 			fmt.Println("Error creating job:", err)
 		}
@@ -70,6 +70,6 @@ func (j *JobScheduler) UpdateScheduler(schedules []*models.Schedule) {
 	}
 }
 
-func work(a string, videoID int64) {
-	fmt.Printf("Running task: %s with argument %d\n", a, videoID)
+func work(a string, MediaID int64) {
+	fmt.Printf("Running task: %s with argument %d\n", a, MediaID)
 }
