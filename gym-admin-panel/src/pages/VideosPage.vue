@@ -5,7 +5,7 @@
 
       <div class="upload-section">
         <h2 style="font-size: 32px; color: rgba(90,92,105,1); margin-bottom: 20px;">Загрузить новое видео</h2>
-        <div class="upload-area" @click="handleContainerClick">
+        <div class="upload-area" @click="handleContainerClick" :class="{ 'drag-over': isDragging }">
           <div class="upload-icon">+</div>
           <div class="upload-text">Перетащите файл видео сюда или нажмите для выбора</div>
           <button class="btn btn-primary">Выбрать файл</button>
@@ -23,6 +23,7 @@
         </div>
 
         <div v-if="isUploading" class="progress-container q-mt-md">
+          <div class="progress-label">Загрузка: {{ Math.round(uploadProgress * 100) }}%</div>
           <q-linear-progress
             :value="uploadProgress"
             color="primary"
@@ -47,13 +48,13 @@
           </div>
         </div>
 
-        <button 
-          class="btn btn-primary" 
+        <button
+          class="btn btn-primary"
           style="margin-top: 20px;"
-          :disabled="isUploading"
+          :disabled="isUploading || uploadedFiles.length === 0"
           @click="uploadFiles"
         >
-          Загрузить видео
+          {{ isUploading ? 'Загрузка...' : 'Загрузить видео' }}
         </button>
       </div>
 
@@ -79,9 +80,9 @@
       </div>
 
       <div class="video-grid" v-if="videos.length">
-        <VideoCard 
-          v-for="video in videos" 
-          :key="video.ID" 
+        <VideoCard
+          v-for="video in videos"
+          :key="video.ID"
           :video="video"
           @edit="isModalChangeNameVideo = true; index = $event"
           @delete="index = $event; removeVideo()"
@@ -104,8 +105,8 @@
         <button class="btn btn-outline" @click="isModalChangeNameVideo = false">
           Отмена
         </button>
-        <button 
-          class="btn btn-primary" 
+        <button
+          class="btn btn-primary"
           @click="changeVideoName(index); isModalChangeNameVideo = false"
         >
           Сохранить
@@ -117,7 +118,10 @@
 
 <script lang="ts">
 import { defineComponent, onMounted, ref } from 'vue';
+import { useQuasar } from 'quasar';
 import VideoCard from 'src/components/videosPage/VideoCard.vue';
+import { useMediaStore } from 'src/stores/mediaStore';
+import { storeToRefs } from 'pinia';
 
 export default defineComponent({
   name: 'VideoUploadPage',
@@ -125,16 +129,22 @@ export default defineComponent({
     VideoCard
   },
   setup() {
+    const $q = useQuasar();
     const fileInput = ref<HTMLInputElement | null>(null);
-    const uploadedFiles = ref<File[]>([]);
-    const isUploading = ref(false);
-    const uploadProgress = ref(0);
     const errorMessage = ref<string>('');
-    const videos = ref<{ID: number, Name: string}[]>([])
-    const isModalChangeNameVideo = ref(false)
-    const newVideoName = ref('')
-    const index = ref()
-    const API_URL = process.env.QUASAR_API_URL || 'http://localhost:8083/api/v1'
+    const isModalChangeNameVideo = ref(false);
+    const newVideoName = ref('');
+    const index = ref(0);
+    const isDragging = ref(false);
+
+    // Используем медиа-стор
+    const mediaStore = useMediaStore();
+    const {
+      videos,
+      uploadedFiles,
+      isUploading,
+      uploadProgress
+    } = storeToRefs(mediaStore);
 
     /** Триггерим выбор файла */
     const triggerFileInput = () => {
@@ -155,105 +165,183 @@ export default defineComponent({
     const handleFileChange = (event: Event) => {
       const files = (event.target as HTMLInputElement).files;
       if (files && files.length > 0) {
-        const file = files[0]!;
-        if (file.type !== 'video/mp4') {
-          errorMessage.value = 'Только файлы в формате MP4.';
-          return;
+        const file = files[0];
+        if (file) {
+          const success = mediaStore.addFile(file);
+          if (!success && mediaStore.error) {
+            errorMessage.value = mediaStore.error;
+          } else {
+            errorMessage.value = '';
+          }
         }
-        if (file.size > 500 * 1024 * 1024) {
-          errorMessage.value = 'Файл должен быть не более 500 МБ.';
-          return;
-        }
-        errorMessage.value = '';
-
-        uploadedFiles.value.push(file);
       }
     };
 
     /** Удаление файла из списка */
     const removeFile = (index: number) => {
-      uploadedFiles.value.splice(index, 1);
+      mediaStore.removeFile(index);
     };
 
     /** Отправка файлов на сервер */
     const uploadFiles = async () => {
-      if (uploadedFiles.value.length === 0) return;
-
-      isUploading.value = true;
-      const formData = new FormData();
-      uploadedFiles.value.forEach((file) => {
-        formData.append('file', file);
-      });
-
-      const token = localStorage.getItem('token');
-      if (!token) {
-        errorMessage.value = 'Токен не найден. Пожалуйста, войдите в систему.';
-        isUploading.value = false;
+      if (uploadedFiles.value.length === 0) {
+        errorMessage.value = 'Пожалуйста, выберите файл для загрузки.';
         return;
       }
 
       try {
-        await fetch(`${API_URL}/videos`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-          body: formData
-        });
+        const success = await mediaStore.uploadFile();
 
-        isUploading.value = false;
-        uploadedFiles.value = [];
-        init()
+        if (success) {
+          // Показать уведомление об успехе
+          $q.notify({
+            type: 'positive',
+            message: 'Видео успешно загружено',
+            position: 'top',
+            timeout: 2000
+          });
+
+          errorMessage.value = '';
+        } else if (mediaStore.error) {
+          errorMessage.value = mediaStore.error;
+
+          $q.notify({
+            type: 'negative',
+            message: mediaStore.error,
+            position: 'top',
+            timeout: 3000
+          });
+        }
       } catch (error) {
-        console.error(error);
+        console.error('Ошибка при загрузке видео:', error);
+        const errorMsg = error instanceof Error ? error.message : 'Ошибка при загрузке файла';
+        errorMessage.value = errorMsg;
 
-        errorMessage.value = 'Ошибка при загрузке файла';
-        isUploading.value = false;
+        $q.notify({
+          type: 'negative',
+          message: errorMsg,
+          position: 'top',
+          timeout: 3000
+        });
       }
-      isUploading.value = false;
     };
-    const init = async () => {
-      await fetch(`${API_URL}/videos`, {
-        method: 'GET',
-      }).then(async (res) => {
-        if (res.ok) {
-          const response = await res.json()
-          videos.value = response
-        }
-      })
-    }
 
-    const changeVideoName = async (idx: number) => {
-      const token = localStorage.getItem('token');
-      await fetch(`${API_URL}/videos/${idx}`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        }, body: JSON.stringify({ name: newVideoName.value })
-      }).then(async (res) => {
-        if (res.ok) {
-          init()
+    const changeVideoName = async (videoId: number) => {
+      if (!newVideoName.value) return;
+
+      try {
+        const success = await mediaStore.changeVideoName(videoId, newVideoName.value);
+
+        if (success) {
+          $q.notify({
+            type: 'positive',
+            message: 'Название видео успешно изменено',
+            position: 'top',
+            timeout: 2000
+          });
+
+          newVideoName.value = '';
+        } else if (mediaStore.error) {
+          $q.notify({
+            type: 'negative',
+            message: mediaStore.error,
+            position: 'top',
+            timeout: 3000
+          });
         }
-      })
-    }
+      } catch (error) {
+        console.error('Ошибка при изменении названия:', error);
+
+        $q.notify({
+          type: 'negative',
+          message: 'Не удалось изменить название видео',
+          position: 'top',
+          timeout: 3000
+        });
+      }
+    };
 
     const removeVideo = async () => {
-      const token = localStorage.getItem('token');
-      await fetch(`${API_URL}/videos/${index.value}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        }
-      }).then(async (res) => {
-        if (res.ok) {
-          init()
-        }
-      })
-    }
+      try {
+        const success = await mediaStore.deleteVideo(index.value);
 
-    onMounted(async () => {
-      init()
-    })
+        if (success) {
+          $q.notify({
+            type: 'positive',
+            message: 'Видео успешно удалено',
+            position: 'top',
+            timeout: 2000
+          });
+        } else if (mediaStore.error) {
+          $q.notify({
+            type: 'negative',
+            message: mediaStore.error,
+            position: 'top',
+            timeout: 3000
+          });
+        }
+      } catch (error) {
+        console.error('Ошибка при удалении видео:', error);
+
+        $q.notify({
+          type: 'negative',
+          message: 'Не удалось удалить видео',
+          position: 'top',
+          timeout: 3000
+        });
+      }
+    };
+
+    // Поддержка Drag and Drop
+    const handleDragOver = (event: DragEvent) => {
+      event.preventDefault();
+      isDragging.value = true;
+    };
+
+    const handleDragLeave = () => {
+      isDragging.value = false;
+    };
+
+    const handleDrop = (event: DragEvent) => {
+      event.preventDefault();
+      isDragging.value = false;
+
+      const dataTransfer = event.dataTransfer;
+      if (!dataTransfer?.files || dataTransfer.files.length === 0) {
+        return;
+      }
+
+      const file = dataTransfer.files[0];
+      if (!file) {
+        return;
+      }
+
+      const success = mediaStore.addFile(file);
+      if (!success && mediaStore.error) {
+        errorMessage.value = mediaStore.error;
+      } else {
+        errorMessage.value = '';
+      }
+    };
+
+    // Добавляем слушатели для Drag and Drop
+    onMounted(() => {
+      // Загружаем список видео
+      mediaStore.loadVideos();
+
+      const uploadArea = document.querySelector('.upload-area');
+      if (uploadArea) {
+        uploadArea.addEventListener('dragover', (event: Event) => {
+          handleDragOver(event as DragEvent);
+        });
+        uploadArea.addEventListener('dragleave', () => {
+          handleDragLeave();
+        });
+        uploadArea.addEventListener('drop', (event: Event) => {
+          handleDrop(event as DragEvent);
+        });
+      }
+    });
 
     return {
       fileInput,
@@ -271,7 +359,8 @@ export default defineComponent({
       newVideoName,
       changeVideoName,
       index,
-      removeVideo
+      removeVideo,
+      isDragging
     };
   },
 });
@@ -447,5 +536,17 @@ export default defineComponent({
   border-radius: 4px;
   margin-bottom: 8px;
   font-size: 12px;
+}
+
+.progress-label {
+  font-size: 14px;
+  color: rgba(78,115,223,1);
+  margin-bottom: 5px;
+  text-align: right;
+}
+
+.drag-over {
+  border-color: rgba(78,115,223,1);
+  background-color: rgba(78,115,223,0.1);
 }
 </style>

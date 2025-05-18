@@ -98,16 +98,10 @@ const passwordData = ref({
 });
 const passwordLoading = ref(false);
 
-// Получаем ID администратора из токена или используем 1 по умолчанию
-// Примечание: в реальном приложении вы должны извлекать правильный ID
-const getAdminId = () => {
-  return 1; // Здесь будет логика извлечения ID администратора из токена
-};
-
 onMounted(async () => {
   // Загружаем данные администратора при монтировании компонента
   try {
-    await adminStore.fetchAdmin(getAdminId());
+    await adminStore.fetchAdmin();
   } catch {
     $q.notify({
       color: 'negative',
@@ -137,19 +131,31 @@ const saveProfile = async () => {
     const fieldsToUpdate: string[] = [];
     if (formData.value.name) fieldsToUpdate.push('name');
     if (formData.value.surname) fieldsToUpdate.push('surname');
-    if (formData.value.departament) fieldsToUpdate.push('departament');
+    if (formData.value.department) fieldsToUpdate.push('department');
 
     // Если есть изменения, обновляем профиль
     if (fieldsToUpdate.length > 0) {
-      await adminStore.updateAdmin(formData.value, fieldsToUpdate);
+      // Применяем изменения к админу в сторе
+      if (adminStore.admin) {
+        // Обновляем данные администратора в текущем состоянии
+        if (adminStore.currentAdmin && formData.value) {
+          // Обновляем текущие данные админа перед вызовом API
+          if (formData.value.name) adminStore.currentAdmin.name = formData.value.name;
+          if (formData.value.surname) adminStore.currentAdmin.surname = formData.value.surname;
+          if (formData.value.department) adminStore.currentAdmin.department = formData.value.department;
+        }
 
-      $q.notify({
-        color: 'positive',
-        message: 'Профиль успешно обновлен',
-        icon: 'check_circle'
-      });
+        // Отправляем обновления на сервер
+        await adminStore.updateAdmin(fieldsToUpdate);
 
-      editMode.value = false;
+        $q.notify({
+          color: 'positive',
+          message: 'Профиль успешно обновлен',
+          icon: 'check_circle'
+        });
+
+        editMode.value = false;
+      }
     } else {
       $q.notify({
         color: 'warning',
@@ -157,34 +163,23 @@ const saveProfile = async () => {
         icon: 'info'
       });
     }
-  } catch {
+  } catch (error) {
     $q.notify({
       color: 'negative',
-      message: 'Не удалось обновить профиль',
+      message: error instanceof Error ? error.message : 'Не удалось обновить профиль',
       icon: 'error'
     });
   }
 };
 
 const changePassword = async () => {
-  if (passwordData.value.newPassword !== passwordData.value.confirmPassword) {
-    $q.notify({
-      color: 'negative',
-      message: 'Пароли не совпадают',
-      icon: 'error'
-    });
-    return;
-  }
-
-  passwordLoading.value = true;
-
   try {
-    // Здесь вы бы вызвали метод из authStore для смены пароля
-    // Примерный код (реализация зависит от вашего API):
-    // await authStore.changePassword(passwordData.value.currentPassword, passwordData.value.newPassword);
+    if (passwordData.value.newPassword !== passwordData.value.confirmPassword) {
+      throw new Error('Пароли не совпадают');
+    }
 
-    // Симулируем успешную смену пароля
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    passwordLoading.value = true;
+    // Здесь должен быть вызов API для смены пароля
 
     $q.notify({
       color: 'positive',
@@ -192,16 +187,14 @@ const changePassword = async () => {
       icon: 'check_circle'
     });
 
-    // Сбрасываем поля формы
-    passwordData.value = {
-      currentPassword: '',
-      newPassword: '',
-      confirmPassword: ''
-    };
-  } catch {
+    // Сбрасываем форму
+    passwordData.value.currentPassword = '';
+    passwordData.value.newPassword = '';
+    passwordData.value.confirmPassword = '';
+  } catch (error) {
     $q.notify({
       color: 'negative',
-      message: 'Не удалось изменить пароль',
+      message: error instanceof Error ? error.message : 'Не удалось изменить пароль',
       icon: 'error'
     });
   } finally {
@@ -212,20 +205,17 @@ const changePassword = async () => {
 
 <style scoped>
 .content {
-  padding: 0 40px 40px;
+  padding: 20px;
 }
 
 .page-title {
-  color: rgba(90, 92, 105, 1);
+  color: rgba(90,92,105,1);
   font-weight: bold;
-  font-size: 32px;
-  margin-bottom: 30px;
+  font-size: 28px;
+  margin-bottom: 20px;
 }
 
 .password-card {
-  width: 100%;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
+  height: 100%;
 }
 </style>

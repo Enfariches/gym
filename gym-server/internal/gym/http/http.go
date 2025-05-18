@@ -12,6 +12,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/rs/cors"
 )
 
 type GymHTTP struct {
@@ -35,6 +36,7 @@ func New(log *slog.Logger, pgStorage *postgres.Storage, minioStorage *minio.Stor
 		port:         port,
 	}
 }
+
 func (g *GymHTTP) Run() error {
 	const op = "gymhttp.Run"
 
@@ -42,9 +44,20 @@ func (g *GymHTTP) Run() error {
 
 	g.router.Use(middleware.Logger)
 	g.router.Use(middleware.Recoverer)
-	g.router.Use(jwt.JWTMiddleware)
 
-	g.router.Post("/api/upload", media.UploadMedia(log, g.pgStorage, g.minioStorage))
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"http://localhost:8080", "http://localhost:3000"},
+		AllowedMethods:   []string{http.MethodGet, http.MethodPost, http.MethodDelete, http.MethodPut, http.MethodOptions, http.MethodPatch},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		AllowCredentials: true,
+	})
+	g.router.Use(c.Handler)
+
+	g.router.Group(func(r chi.Router) {
+		r.Use(jwt.JWTMiddleware)
+		r.Post("/api/upload", media.UploadMedia(log, g.pgStorage, g.minioStorage))
+	})
+
 	log.Info("http server is running", slog.String("addr", g.httpServer.Addr))
 
 	if err := g.httpServer.ListenAndServe(); err != nil {

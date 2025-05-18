@@ -1,9 +1,9 @@
 import { AdminServiceClient } from '../../protogen/v1/users/admin.client';
 import type {
-  GetAdminRequest,
   UpdateAdminRequest,
   Admin
 } from '../../protogen/v1/users/admin';
+import { Empty } from '../../protogen/google/protobuf/empty';
 
 // Конфигурация gRPC-Web клиента
 import { GrpcWebFetchTransport } from '@protobuf-ts/grpcweb-transport';
@@ -40,18 +40,14 @@ const createAuthOptions = (): RpcOptions => {
 };
 
 // Получить информацию об администраторе
-export const getAdmin = async (adminId: number): Promise<Admin> => {
+export const getAdmin = async (): Promise<Admin> => {
   const transport = createTransport();
   const adminService = new AdminServiceClient(transport);
 
-  const request: GetAdminRequest = {
-    adminId: BigInt(adminId)
-  };
-
   try {
     const options = createAuthOptions();
-    const response = await adminService.getAdmin(request, options);
-    return response.response;
+    const call = await adminService.getAdmin(Empty.create(), options);
+    return call.response;
   } catch (error) {
     console.error('Error fetching admin data:', error);
     throw new Error('Не удалось получить данные администратора');
@@ -75,8 +71,8 @@ export const updateAdmin = async (
 
   try {
     const options = createAuthOptions();
-    const response = await adminService.updateAdmin(request, options);
-    return response.response;
+    const call = await adminService.updateAdmin(request, options);
+    return call.response;
   } catch (error) {
     console.error('Error updating admin data:', error);
     throw new Error('Не удалось обновить данные администратора');
