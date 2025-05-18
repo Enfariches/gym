@@ -4,21 +4,55 @@ package media;
 option go_package = "github.com/Enfariches/gym/protogen";
 
 import "google/protobuf/duration.proto";
+import "google/protobuf/empty.proto";
 
 service MediaService {
+    // Получение ссылки на загрузку видео из S3-хранилища.
     rpc GetMedia(GetMediaRequest) returns (Media);
+
+    // Получение всех медиа, которые загрузил админ (идентифируется админ по контексту).
+    rpc ListMedia (google.protobuf.Empty) returns (ListMediaResponse);
+
+    // Удаление медиа.
+    rpc DeleteMedia (DeleteMediaRequest) returns (google.protobuf.Empty);
 }
 
 message GetMediaRequest {
+    // Идентификатор медиа.
     int64 media_id = 1;
-    int64 departament_id =2;
-    // В секундах живучесть ссылки
+
+    // Идентификатор отдела.
+    int64 department_id = 2;
+
+    // В секундах живучесть ссылки.
     google.protobuf.Duration expiry = 3;
 }
 
+// Ответ на получения списка медиа.
+message ListMediaResponse {
+    // Список медиа.
+    repeated Media medias = 1;
+}
+
+// Запрос на удаления видео.
+message DeleteMediaRequest {
+    // Идентификатор медиа.
+    int64 media_id = 1;
+}
+
 message Media {
+    // Идентификатор.
     int64 id = 1;
+
+    // Ссылка на загрузку медиа.
     string pressigned_url = 2;
-    int64 departament_id = 3;
+
+    // Идентификатор админа, который загрузил медиа.
+    int64 admin_id = 3;
+
+    // Идентификатор отдела.
+    int64 department_id = 4;
+
+    // Дата создания медиа.
     string created_at = 5;
 }

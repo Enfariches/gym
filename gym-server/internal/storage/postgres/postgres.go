@@ -92,3 +92,33 @@ func scanMedia(s Scanner, opts...func(s *models.Media)) (*models.Media, error) {
 
     return media, nil
 }
+
+func scanEmployee(s Scanner, opts...func(s *models.Employee)) (*models.Employee, error) {
+	employee := &models.Employee{}
+
+    err := s.Scan(&employee.ID, &employee.Name, &employee.SecondName, &employee.Surname, &employee.Age, &employee.Sex, &employee.Phone, &employee.Email, &employee.Post)
+    if err != nil {
+        return nil, fmt.Errorf("failed to scan row: %w", err)
+    }
+
+    for _, opt := range opts {
+        opt(employee)
+    }
+
+    return employee, nil
+}
+
+func scanDepartment(s Scanner, opts...func(s *models.Department)) (*models.Department, error) {
+	department := &models.Department{}
+
+    err := s.Scan(&department.ID, &department.Name)
+    if err != nil {
+        return nil, fmt.Errorf("failed to scan row: %w", err)
+    }
+
+    for _, opt := range opts {
+        opt(department)
+    }
+
+    return department, nil
+}

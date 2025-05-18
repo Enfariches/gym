@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS employees (
     surname VARCHAR(64) DEFAULT '',
     age INTEGER DEFAULT 18,
     sex BOOLEAN DEFAULT FALSE,
-    phone VARCHAR(20) UNIQUE DEFAULT '',
+    phone VARCHAR(20) DEFAULT '',
     email TEXT NOT NULL UNIQUE,
     department_id INTEGER DEFAULT 1,
     post VARCHAR DEFAULT '',

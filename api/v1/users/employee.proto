@@ -4,34 +4,36 @@ package employee;
 option go_package = "github.com/Enfariches/gym/protogen";
 
 import "google/protobuf/empty.proto";
+import "google/protobuf/field_mask.proto";
 
 // Сервис для управления пользователями.
 service EmployeeService {
     // Получает пользователя.
-    rpc GetEmployee (GetEmployeeRequest) returns (Employee);
+    rpc GetEmployee (google.protobuf.Empty) returns (Employee);
 
     // Обновляет пользователя.
     rpc UpdateEmployee (UpdateEmployeeRequest) returns (Employee);
 
     // Удаляет пользователя.
-    rpc DeleteEmployee (DeleteEmployeeRequest) returns (google.protobuf.Empty);
-}
+    rpc DeleteEmployee (google.protobuf.Empty) returns (google.protobuf.Empty);
 
-// Запрос на получение пользователя.
-message GetEmployeeRequest {
-    // ID пользователя.
-    int64 employee_id = 1;
+    // Список всех существующих отделов
+    rpc ListDepartments (google.protobuf.Empty) returns (ListDepartmentsResponse);
 }
 
 // Запрос на обновление пользователя.
 message UpdateEmployeeRequest {
-    // Нужно согласовать какие поля расписания можно менять.
+    // Cотрудник, который будет обновлен.
+    Employee employee = 1;
+
+    // Маска полей, которые будут обновлены.
+    google.protobuf.FieldMask field_mask = 2;
 }
 
-// Запрос на удаление пользователя.
-message DeleteEmployeeRequest {
-    // ID пользователя.
-    int64 employee_id = 1;
+// Ответ на запрос списка отделов
+message ListDepartmentsResponse {
+    // Список отделов
+    repeated Department departments = 1;
 }
 
 // Структура пользователя.
@@ -52,17 +54,26 @@ message Employee {
     string email = 5;
 
     // Возраст пользователя.
-    uint32 age = 6;
+    int64 age = 6;
 
-    // Пол пользователя.
+    // Пол пользователя. 
+    // False - мужчина; True - женщина;
     bool sex = 7;
 
     // Номер телефона пользователя.
-    string number = 8;
+    string phone = 8;
 
     // Отдел пользователя.
     string department = 9;
 
     // Должность пользователя.
     string post = 10;
+}
+
+message Department {
+    // ID отдела.
+    int64 id = 1;
+
+    // Название отдела.
+    string name = 2;
 }

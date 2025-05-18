@@ -38,8 +38,6 @@ func (s *Storage) SaveUser(ctx context.Context, authUser *models.AuthUser) error
 			ToSQL()
 	}
 
-	fmt.Println(query, args)
-
 	_, err = s.db.Exec(query, args...)
 	if err != nil {
 		return fmt.Errorf("%s: %w", op, HandleDBError(err))
@@ -76,14 +74,14 @@ func (s *Storage) User(ctx context.Context, email, source string) (*models.AuthU
 
 	query, args, _ := goqu.
 		From(source).
-		Select("id", "email", "passhash").
+		Select("id", "email", "department_id", "passhash").
 		Where(goqu.Ex{"email": email}).
 		Limit(1).
 		ToSQL()
 
 	var authUser models.AuthUser
 
-	err := s.db.QueryRow(query, args...).Scan(&authUser.ID, &authUser.Email, &authUser.PassHash)
+	err := s.db.QueryRow(query, args...).Scan(&authUser.ID, &authUser.Email, &authUser.DepartmentID, &authUser.PassHash)
 	if err != nil {
 		if HandleDBError(err) == storage.ErrUserNotFound {
 			return nil, fmt.Errorf("%s: %w", op, storage.ErrUserNotFound)

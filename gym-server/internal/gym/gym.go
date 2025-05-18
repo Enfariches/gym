@@ -9,6 +9,7 @@ import (
 	httpgym "health/internal/gym/http"
 	"health/internal/services/admin"
 	"health/internal/services/auth"
+	"health/internal/services/employee"
 	"health/internal/services/media"
 	"health/internal/services/schedule"
 	"health/internal/storage/minio"
@@ -47,8 +48,9 @@ func New(log *slog.Logger, grpcPort, httpPort int, storagePath string, minioConf
 	adminService := admin.New(log, pgStorage)
 	scheduleService := schedule.New(log, pgStorage, jobScheduler)
 	mediaService := media.New(log, pgStorage, minioStorage)
+	employeeService := employee.New(log, pgStorage)
 
-	grpcGym := grpcgym.New(log, authService, adminService, scheduleService, mediaService, grpcPort)
+	grpcGym := grpcgym.New(log, authService, adminService, scheduleService, employeeService, mediaService, grpcPort)
 	httpGym := httpgym.New(log, pgStorage, minioStorage, httpPort)
 
 	return &Gym{
