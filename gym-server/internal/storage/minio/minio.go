@@ -92,3 +92,19 @@ func (ms *Storage) CreatePressignedUrl(ctx context.Context, media_id int64, expr
 
 	return presignedURL.String(), nil
 }
+
+func (ms *Storage) DeleteMedia(ctx context.Context, media_id int64) error {
+	const op = "minio.DeleteMedia"
+
+	media_id_str := fmt.Sprintf("%d", media_id)
+
+	log := ms.log.With("op", op)
+
+	err := ms.client.RemoveObject(ctx, ms.bucketName, media_id_str, minio.RemoveObjectOptions{})
+	if err != nil {
+		return fmt.Errorf("%s: %v", op, err)
+	}
+
+	log.Info("deleted file")
+	return nil
+}
