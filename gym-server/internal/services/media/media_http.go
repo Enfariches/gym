@@ -13,7 +13,7 @@ import (
 )
 
 type MediaSaverPostgres interface {
-	SaveMediaPostgres(admin_id int64) (int64, int64, error)
+	SaveMediaPostgres(admin_id, department_id int64) (int64, error)
 }
 
 type MediaSaverMinio interface {
@@ -61,8 +61,9 @@ func UploadMedia(log *slog.Logger, mediaSaverPg MediaSaverPostgres, mediaSaverMi
 
 		ctx := r.Context()
 		admin_id := ctx.Value(ctxkey.UserKey).(int64)
+		department_id := ctx.Value(ctxkey.DepartmentKey).(int64)
 
-		media_id, department_id, err := mediaSaverPg.SaveMediaPostgres(admin_id)
+		media_id, err := mediaSaverPg.SaveMediaPostgres(admin_id, department_id)
 		if err != nil {
 			log.Error("failed to save mediafile to postgres", sl.Err(err))
 			http.Error(w, "failed to save mediafile to postgres", http.StatusInternalServerError)

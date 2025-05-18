@@ -6,12 +6,13 @@ option go_package = "github.com/Enfariches/gym/protogen";
 import "google/protobuf/duration.proto";
 
 service MediaService {
+    // Получение ссылки на загрузку видео из S3-хранилища
     rpc GetMedia(GetMediaRequest) returns (Media);
 }
 
 message GetMediaRequest {
     int64 media_id = 1;
-    int64 departament_id =2;
+    int64 department_id =2;
     // В секундах живучесть ссылки
     google.protobuf.Duration expiry = 3;
 }
@@ -19,6 +20,6 @@ message GetMediaRequest {
 message Media {
     int64 id = 1;
     string pressigned_url = 2;
-    int64 departament_id = 3;
+    int64 department_id = 3;
     string created_at = 5;
 }

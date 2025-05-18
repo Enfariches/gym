@@ -37,7 +37,7 @@ services:
       timeout: 3s
       retries: 3
     networks:
-      - gym-network   
+      - gym-network  
 
   envoy:
     image: envoyproxy/envoy:v1.28.0

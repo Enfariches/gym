@@ -25,7 +25,7 @@ func RegisterGRPCServer(gRPC *grpc.Server, media MediaService) {
 }
 
 func (s *MediaServerManagmentApi) GetMedia(ctx context.Context, r *pb.GetMediaRequest) (*pb.Media, error) {
-	if r.DepartamentId == 0 {
+	if r.DepartmentId == 0 {
 		return nil, status.Errorf(codes.InvalidArgument, "department_id is required")
 	}
 	if r.MediaId == 0 {
@@ -42,7 +42,7 @@ func (s *MediaServerManagmentApi) GetMedia(ctx context.Context, r *pb.GetMediaRe
 	return &pb.Media{
 		Id:            media.ID,
 		PressignedUrl: media.PressignedUrl,
-		DepartamentId: media.DepartmentID,
+		DepartmentId: media.DepartmentID,
 		CreatedAt:     media.CreatedAt.Format(time.RFC3339),
 	}, nil
 }

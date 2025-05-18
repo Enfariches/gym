@@ -13,6 +13,8 @@ import (
 func (s *Storage) Admin(ctx context.Context, admin_id int64) (*models.Admin, error) {
 	const op = "postgres.Admin"
 
+	department_id := ctx.Value(ctxkey.DepartmentKey).(int64)
+
 	query, args, _ := goqu.
 		From("admins").
 		Select("id", "name", "surname", "email").
@@ -22,7 +24,7 @@ func (s *Storage) Admin(ctx context.Context, admin_id int64) (*models.Admin, err
 
 	row := s.db.QueryRow(query, args...)
 
-	departmentName, err := s.GetDepNameByAdminID(admin_id)
+	departmentName, err := s.GetDepNameByDepID(department_id)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get department by admin id: %w", err)
 	}
@@ -42,9 +44,10 @@ func (s *Storage) UpdateAdmin(ctx context.Context, updateFields map[string]any) 
 	const op = "postgres.UpdateAdmin"
 
 	admin_id := ctx.Value(ctxkey.UserKey).(int64)
+	department_id := ctx.Value(ctxkey.DepartmentKey).(int64)
 
 	if deptName, ok := updateFields["department"]; ok {
-		err := s.updateDepNameByAdminID(admin_id, deptName.(string))
+		err := s.updateDepNameByDepID(department_id, deptName.(string))
 		if err != nil {
 			return nil, fmt.Errorf("%s: %w", op, err)
 		}
@@ -69,7 +72,7 @@ func (s *Storage) UpdateAdmin(ctx context.Context, updateFields map[string]any) 
 
 	row := s.db.QueryRow(query, args...)
 
-	departmentName, err := s.GetDepNameByAdminID(admin_id)
+	departmentName, err := s.GetDepNameByDepID(department_id)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get department by admin id: %w", err)
 	}
@@ -82,17 +85,13 @@ func (s *Storage) UpdateAdmin(ctx context.Context, updateFields map[string]any) 
 	return updatedAdmin, nil
 }
 
-func (s *Storage) GetDepNameByAdminID(admin_id int64) (string, error) {
-	const op = "postgres.GetDepNameByAdminID"
+func (s *Storage) GetDepNameByDepID(department_id int64) (string, error) {
+	const op = "postgres.GetDepNameByDepID"
 
 	query, args, _ := goqu.
-		From("admins").
-		Select(goqu.I("d.name")).
-		Join(
-			goqu.T("departments").As("d"),
-			goqu.On(goqu.I("admins.department_id").Eq(goqu.I("d.id"))),
-		).
-		Where(goqu.I("admins.id").Eq(admin_id)).
+		From("departments").
+		Select("name").
+		Where(goqu.C("id").Eq(department_id)).
 		ToSQL()
 
 	var departmentName string
@@ -105,15 +104,13 @@ func (s *Storage) GetDepNameByAdminID(admin_id int64) (string, error) {
 	return departmentName, nil
 }
 
-func (s *Storage) updateDepNameByAdminID(admin_id int64, deptName string) error {
-	const op = "postgres.updateDepNameByAdminID"
+func (s *Storage) updateDepNameByDepID(department_id int64, deptName string) error {
+	const op = "postgres.updateDepNameByDepID"
 
 	query, args, _ := goqu.
 		Update("departments").
 		Set(goqu.Record{"name": deptName}).
-		Where(goqu.C("id").Eq(
-			goqu.L("(SELECT department_id FROM admins WHERE id = ?)", admin_id),
-		)).
+		Where(goqu.C("id").Eq(department_id)).
 		ToSQL()
 
 	_, err := s.db.Exec(query, args...)
@@ -122,26 +119,6 @@ func (s *Storage) updateDepNameByAdminID(admin_id int64, deptName string) error 
 	}
 
 	return nil
-}
-
-func (s *Storage) getDepIdByAdminID(admin_id int64) (int64, error) {
-	const op = "postgres.getDepIdByAdminID"
-
-	query, args, _ := goqu.
-		From("admins").
-		Select("department_id").
-		Where(goqu.C("id").Eq(admin_id)).
-		Limit(1).
-		ToSQL()
-
-	var departmentID int64
-
-	err := s.db.QueryRow(query, args...).Scan(&departmentID)
-	if err != nil {
-		return 0, fmt.Errorf("%s: %w", op, err)
-	}
-
-	return departmentID, nil
 }
 
 func (s *Storage) getMediaIDByAdminID(admin_id, media_id int64) (int64, error) {

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	admingrpc "health/internal/handlers/admin"
 	authgrpc "health/internal/handlers/auth"
+	employeegrpc "health/internal/handlers/employee"
 	mediagrpc "health/internal/handlers/media"
 	schedulegrpc "health/internal/handlers/schedule"
 	"health/lib/jwt"
@@ -23,7 +24,7 @@ type GymGRPC struct {
 }
 
 func New(log *slog.Logger, authService authgrpc.AuthService, adminService admingrpc.AdminService,
-	scheduleService schedulegrpc.ScheduleService, mediaService mediagrpc.MediaService, port int) *GymGRPC {
+	scheduleService schedulegrpc.ScheduleService, employeeService employeegrpc.EmployeeService, mediaService mediagrpc.MediaService, port int) *GymGRPC {
 
 	gRPCServer := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(
@@ -33,6 +34,7 @@ func New(log *slog.Logger, authService authgrpc.AuthService, adminService adming
 
 	authgrpc.RegisterGRPCServer(gRPCServer, authService)
 	admingrpc.RegisterGRPCServer(gRPCServer, adminService)
+	employeegrpc.RegisterGRPCServer(gRPCServer, employeeService)
 	schedulegrpc.RegisterGRPCServer(gRPCServer, scheduleService)
 	mediagrpc.RegisterGRPCServer(gRPCServer, mediaService)
 

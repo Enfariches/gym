@@ -17,6 +17,7 @@ const (
 func NewToken(user models.AuthUser, duration time.Duration) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"id":     user.ID,
+		"department_id": user.DepartmentID,
 		"source": user.Source,
 		"exp":    time.Now().Add(duration).Unix(),
 	})
@@ -29,20 +30,20 @@ func NewToken(user models.AuthUser, duration time.Duration) (string, error) {
 	return tokenString, nil
 }
 
-func ParseToken(tokenString string) (int64, error) {
+func ParseToken(tokenString string) (int64, int64, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (any, error) {
 		return []byte(secret), nil
 	}, jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}))
 	if err != nil || !token.Valid {
-		return 0, err
+		return 0, 0, err
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
-		return 0, err
+		return 0, 0, err
 	}
 
-	return int64(claims["id"].(float64)), nil
+	return int64(claims["id"].(float64)), int64(claims["department_id"].(float64)), nil
 }
 
 func NewAuthToken(authUser models.AuthUser, duration time.Duration) (string, error) {

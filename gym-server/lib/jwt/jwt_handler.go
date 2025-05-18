@@ -13,7 +13,6 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-
 var PublicMethods = map[string]bool{
 	"/auth.AuthService/Login":                true,
 	"/auth.AuthService/Register":             true,
@@ -39,12 +38,13 @@ func JWTServerInterceptor(ctx context.Context, req interface{}, info *grpc.Unary
 
 	tokenString := strings.TrimPrefix(authHeader[0], "Bearer ")
 
-	userId, err := ParseToken(tokenString)
+	userId, departmentId, err := ParseToken(tokenString)
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, "invalid token")
 	}
 
 	ctx = context.WithValue(ctx, ctxkey.UserKey, userId)
+	ctx = context.WithValue(ctx, ctxkey.DepartmentKey, departmentId)
 
 	return handler(ctx, req)
 }
@@ -66,7 +66,7 @@ func JWTMiddleware(next http.Handler) http.Handler {
 		}
 
 		// Парсим токен
-		userID, err := ParseToken(tokenString) // Ваша функция парсинга
+		userID, departmentId, err := ParseToken(tokenString) // Ваша функция парсинга
 		if err != nil {
 			http.Error(w, "invalid token", http.StatusUnauthorized)
 			return
@@ -74,6 +74,7 @@ func JWTMiddleware(next http.Handler) http.Handler {
 
 		// Сохраняем userID в контекст
 		ctx := context.WithValue(r.Context(), ctxkey.UserKey, userID)
+		ctx = context.WithValue(ctx, ctxkey.DepartmentKey, departmentId)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

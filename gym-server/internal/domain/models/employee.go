@@ -5,9 +5,9 @@ type Employee struct {
 	Name       string `db:"name"`
 	SecondName string `db:"second_name"`
 	Surname    string `db:"surname"`
-	Age        uint   `db:"age"`
+	Age        int64   `db:"age"`
 	Sex        bool   `db:"sex"`
-	Number     string `db:"number"`
+	Phone      string `db:"number"`
 	Department string `db:"department"`
 	Post       string `db:"post"` // Должность
 	Email      string `db:"email"`
