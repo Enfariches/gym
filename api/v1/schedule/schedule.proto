@@ -90,8 +90,8 @@ message Schedule {
     // Активно расписание или нет.
     bool is_active = 3;
 
-    // ID видео, которое необходимо воспроизвести по расписанию.
-    int64 video_id = 4;
+    // ID медиа, которое необходимо воспроизвести по расписанию.
+    int64 media_id = 4;
 
     // ID админа, который создал расписание.
     int64 admin_id = 5 [(google.api.field_behavior) = OUTPUT_ONLY];

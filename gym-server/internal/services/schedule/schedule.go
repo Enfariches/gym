@@ -43,7 +43,7 @@ func (s *Schedule) CreateSchedules(ctx context.Context, schedules []*models.Sche
 	}
 
 	// Обновление задачи планировщика
-	s.jobScheduler.UpdateScheduler(schedules)
+	//s.jobScheduler.UpdateScheduler(schedules)
 
 	return schedules, nil
 }
@@ -72,7 +72,7 @@ func (s *Schedule) UpdateSchedule(ctx context.Context, schedule_id int64, update
 	}
 
 	// Обновление задачи планировщика
-	s.jobScheduler.UpdateScheduler([]*models.Schedule{schedule})
+	//s.jobScheduler.UpdateScheduler([]*models.Schedule{schedule})
 
 	return schedule, nil
 }
@@ -81,14 +81,14 @@ func (s *Schedule) DeleteSchedule(ctx context.Context, schedule_id int64) error 
 	const op = "schedule.DeleteSchedule"
 	log := s.log.With("op", op)
 
-	schedule, err := s.scheduleManager.DeleteSchedule(ctx, schedule_id)
+	_, err := s.scheduleManager.DeleteSchedule(ctx, schedule_id)
 	if err != nil {
 		log.Error("failed to delete schedule", sl.Err(err))
 		return err
 	}
 
 	// Удаление задачи планировщика
-	s.jobScheduler.UpdateScheduler([]*models.Schedule{schedule})
+	//s.jobScheduler.UpdateScheduler([]*models.Schedule{schedule})
 
 	return nil
 }

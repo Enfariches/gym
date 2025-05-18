@@ -1,31 +1,47 @@
+CREATE TABLE IF NOT EXISTS departments (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR NOT NULL DEFAULT ''
+);
+
 CREATE TABLE IF NOT EXISTS admins (
     id SERIAL PRIMARY KEY,
-    name TEXT DEFAULT '',
-    surname TEXT DEFAULT '',
-    email TEXT NOT NULL UNIQUE,
-    departament TEXT DEFAULT '',
-    passhash TEXT NOT NULL
+    name VARCHAR(64) DEFAULT '',
+    surname VARCHAR(64) DEFAULT '',
+    email VARCHAR NOT NULL UNIQUE,
+    department_id INTEGER NOT NULL,
+    passhash TEXT NOT NULL,
+    CONSTRAINT department_id_fk FOREIGN KEY (department_id) REFERENCES departments(id)
 );
 
 CREATE TABLE IF NOT EXISTS employees (
     id SERIAL PRIMARY KEY,
-    name TEXT DEFAULT '',
-    second_name TEXT DEFAULT '',
-    surname TEXT DEFAULT '',
-    age INTEGER DEFAULT 0,
+    name VARCHAR(64) DEFAULT '',
+    second_name VARCHAR(64) DEFAULT '',
+    surname VARCHAR(64) DEFAULT '',
+    age INTEGER DEFAULT 18,
     sex BOOLEAN DEFAULT FALSE,
-    phone TEXT UNIQUE DEFAULT '',
+    phone VARCHAR(20) UNIQUE DEFAULT '',
     email TEXT NOT NULL UNIQUE,
-    departament TEXT DEFAULT '',
-    post TEXT DEFAULT '',
-    passhash TEXT NOT NULL
+    department_id INTEGER DEFAULT 1,
+    post VARCHAR DEFAULT '',
+    passhash TEXT NOT NULL,
+    CONSTRAINT department_id_fk FOREIGN KEY (department_id) REFERENCES departments(id)
 );
 
 CREATE TABLE IF NOT EXISTS schedules (
     id SERIAL PRIMARY KEY,
-    cron_expression TEXT NOT NULL,
-    is_active BOOLEAN DEFAULT TRUE,
-    video_id INTEGER NOT NULL,
+    cron_expression VARCHAR(11) NOT NULL,
+    is_active BOOLEAN DEFAULT FALSE,
+    media_id INTEGER NOT NULL,
     admin_id INTEGER NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT now(),
+    CONSTRAINT admin_id_fk FOREIGN KEY (admin_id) REFERENCES admins(id)
+);
+
+CREATE TABLE IF NOT EXISTS mediafiles (
+    id SERIAL PRIMARY KEY,
+    admin_id INTEGER NOT NULL,
+    department_id INTEGER NOT NULL,
+    created_at TIMESTAMP DEFAULT now(),
+    CONSTRAINT admin_id_fk FOREIGN KEY (admin_id) REFERENCES admins(id)
 );

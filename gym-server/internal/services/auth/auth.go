@@ -9,7 +9,6 @@ import (
 	"health/internal/storage"
 	"health/lib/jwt"
 	"health/lib/logger/sl"
-	"health/lib/smtp"
 	"log/slog"
 	"time"
 
@@ -17,9 +16,8 @@ import (
 )
 
 type Auth struct {
-	log          *slog.Logger
-	userProvider UserProvider
-	userManager  UserManager
+	log         *slog.Logger
+	userManager UserManager
 
 	smtpConfig   config.SMTPConfig
 	tokenTTL     time.Duration
@@ -27,12 +25,10 @@ type Auth struct {
 }
 
 type UserManager interface {
+	User(ctx context.Context, email, source string) (*models.AuthUser, error)
 	SaveUser(ctx context.Context, authUser *models.AuthUser) error
 	CheckUser(ctx context.Context, authUser *models.AuthUser) error
 	UpdateUserPassword(ctx context.Context, authUser *models.AuthUser) error
-}
-type UserProvider interface {
-	User(ctx context.Context, email, source string) (*models.AuthUser, error)
 }
 
 var (
@@ -43,12 +39,11 @@ var (
 )
 
 // New возвращает инстанс Auth сервиса
-func New(log *slog.Logger, userProvider UserProvider, userManager UserManager,
+func New(log *slog.Logger, userManager UserManager,
 	smtpConfig config.SMTPConfig, tokenTTL, authTokenTTL time.Duration) *Auth {
 	return &Auth{
-		log:          log,
-		userManager:  userManager,
-		userProvider: userProvider,
+		log:         log,
+		userManager: userManager,
 
 		smtpConfig:   smtpConfig,
 		tokenTTL:     tokenTTL,
@@ -90,11 +85,11 @@ func (a *Auth) RegisterNewUser(ctx context.Context, email, password, source stri
 		return "", fmt.Errorf("%s: %w", op, err)
 	}
 
-	err = smtp.SendAuthMail(a.smtpConfig, authToken, email)
-	if err != nil {
-		log.Error("failed to send email", sl.Err(err))
-		return "", fmt.Errorf("%s: %w", op, err)
-	}
+	// err = smtp.SendAuthMail(a.smtpConfig, authToken, email)
+	// if err != nil {
+	// 	log.Error("failed to send email", sl.Err(err))
+	// 	return "", fmt.Errorf("%s: %w", op, err)
+	// }
 
 	return authToken, nil
 }
@@ -108,7 +103,7 @@ func (a *Auth) Login(ctx context.Context, email, password, source string) (strin
 
 	log := a.log.With(slog.String("op", op), slog.String("email", email))
 
-	user, err := a.userProvider.User(ctx, email, source)
+	user, err := a.userManager.User(ctx, email, source)
 	if err != nil {
 		if errors.Is(err, storage.ErrUserNotFound) {
 			log.Warn(storage.ErrUserNotFound.Error(), sl.Err(err))
@@ -181,11 +176,11 @@ func (a *Auth) ChangePassword(ctx context.Context, email, source string) (string
 		return "", fmt.Errorf("%s: %w", op, err)
 	}
 
-	err = smtp.SendResetMail(a.smtpConfig, resetToken, email)
-	if err != nil {
-		log.Error("failed to send email", sl.Err(err))
-		return "", fmt.Errorf("%s: %w", op, err)
-	}
+	// err = smtp.SendResetMail(a.smtpConfig, resetToken, email)
+	// if err != nil {
+	// 	log.Error("failed to send email", sl.Err(err))
+	// 	return "", fmt.Errorf("%s: %w", op, err)
+	// }
 
 	return resetToken, nil
 }

@@ -37,11 +37,11 @@ func (s *AdminServerManagmentApi) GetAdmin(ctx context.Context, _ *emptypb.Empty
 	}
 
 	return &pb.Admin{
-		Id:          admin.ID,
-		Name:        admin.Name,
-		Surname:     admin.Surname,
-		Email:       admin.Email,
-		Departament: admin.Departament,
+		Id:         admin.ID,
+		Name:       admin.Name,
+		Surname:    admin.Surname,
+		Email:      admin.Email,
+		Department: admin.Department,
 	}, nil
 }
 
@@ -69,7 +69,7 @@ func (s *AdminServerManagmentApi) UpdateAdmin(ctx context.Context, r *pb.UpdateA
 		Name:        updatedAdmin.Name,
 		Surname:     updatedAdmin.Surname,
 		Email:       updatedAdmin.Email,
-		Departament: updatedAdmin.Departament,
+		Department: updatedAdmin.Department,
 	}, nil
 }
 
@@ -82,8 +82,8 @@ func applyFieldMask(req *pb.Admin, mask *fieldmaskpb.FieldMask) (map[string]any,
 			updateMap[path] = req.Name
 		case "surname":
 			updateMap[path] = req.Surname
-		case "departament":
-			updateMap[path] = req.Departament
+		case "department":
+			updateMap[path] = req.Department
 		default:
 			return nil, status.Errorf(codes.InvalidArgument, "incorrect fields: %s", path)
 		}

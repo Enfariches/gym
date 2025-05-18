@@ -61,7 +61,7 @@ message Employee {
     string number = 8;
 
     // Отдел пользователя.
-    string departament = 9;
+    string department = 9;
 
     // Должность пользователя.
     string post = 10;

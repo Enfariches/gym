@@ -5,6 +5,7 @@ import (
 	"health/internal/domain/models"
 	"health/lib/ctxkey"
 	pb "health/protogen/v1/schedule"
+	"time"
 
 	"github.com/mennanov/fmutils"
 	"github.com/robfig/cron/v3"
@@ -69,9 +70,9 @@ func (s *ScheduleServerManagmentApi) GetSchedule(ctx context.Context, r *pb.GetS
 		Id:             schedule.ID,
 		CronExpression: schedule.CronExpression,
 		IsActive:       schedule.IsActive,
-		VideoId:        schedule.VideoID,
+		MediaId:        schedule.MediaID,
 		AdminId:        schedule.AdminID,
-		CreatedAt:      schedule.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
+		CreatedAt:      schedule.CreatedAt.Format(time.RFC3339),
 	}, nil
 }
 
@@ -103,9 +104,9 @@ func (s *ScheduleServerManagmentApi) UpdateSchedule(ctx context.Context, r *pb.U
 		Id:             updatedSchedule.ID,
 		CronExpression: updatedSchedule.CronExpression,
 		IsActive:       updatedSchedule.IsActive,
-		VideoId:        updatedSchedule.VideoID,
+		MediaId:        updatedSchedule.MediaID,
 		AdminId:        updatedSchedule.AdminID,
-		CreatedAt:      updatedSchedule.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
+		CreatedAt:      updatedSchedule.CreatedAt.Format(time.RFC3339),
 	}, nil
 }
 
@@ -151,8 +152,8 @@ func applyFieldMask(req *pb.Schedule, mask *fieldmaskpb.FieldMask) (map[string]a
 			updateMap[path] = req.CronExpression
 		case "is_active":
 			updateMap[path] = req.IsActive
-		case "video_id":
-			updateMap[path] = req.VideoId
+		case "media_id":
+			updateMap[path] = req.MediaId
 		default:
 			return nil, status.Errorf(codes.InvalidArgument, "incorrect fields: %s", path)
 		}
@@ -174,8 +175,8 @@ func makeModelsSchedules(pbSchedules []*pb.Schedule) ([]*models.Schedule, error)
 			return nil, status.Errorf(codes.InvalidArgument, "cron_expression is required")
 		}
 
-		if s.VideoId == 0 {
-			return nil, status.Errorf(codes.InvalidArgument, "video_id is required")
+		if s.MediaId == 0 {
+			return nil, status.Errorf(codes.InvalidArgument, "media_id is required")
 		}
 
 		_, err := cron.ParseStandard(s.CronExpression)
@@ -186,7 +187,7 @@ func makeModelsSchedules(pbSchedules []*pb.Schedule) ([]*models.Schedule, error)
 		modelsSchedules = append(modelsSchedules, &models.Schedule{
 			CronExpression: s.CronExpression,
 			IsActive:       s.IsActive,
-			VideoID:        s.VideoId,
+			MediaID:        s.MediaId,
 		})
 	}
 
@@ -201,9 +202,9 @@ func makePbSchedules(savedSchedule []*models.Schedule) []*pb.Schedule {
 			Id:             schedule.ID,
 			CronExpression: schedule.CronExpression,
 			IsActive:       schedule.IsActive,
-			VideoId:        schedule.VideoID,
+			MediaId:        schedule.MediaID,
 			AdminId:        schedule.AdminID,
-			CreatedAt:      schedule.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
+			CreatedAt:      schedule.CreatedAt.Format(time.RFC3339),
 		})
 	}
 

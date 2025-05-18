@@ -12,12 +12,35 @@ import (
 func (s *Storage) SaveUser(ctx context.Context, authUser *models.AuthUser) error {
 	const op = "postgres.SaveUser"
 
-	query, args, _ := goqu.Insert(authUser.Source).
-		Cols("email", "passhash").
-		Vals(goqu.Vals{authUser.Email, authUser.PassHash}).
-		ToSQL()
+	var (
+		query string
+		args  []any
+		err   error
+	)
 
-	_, err := s.db.Exec(query, args...)
+	if authUser.Source == "employees" {
+		query, args, _ = goqu.
+			Insert(authUser.Source).
+			Cols("email", "passhash").
+			Vals(goqu.Vals{authUser.Email, authUser.PassHash}).
+			ToSQL()
+	} else {
+		cteQuery := goqu.
+			Insert("departments").
+			Rows(goqu.Record{"name": ""}).
+			Returning("id")
+
+		query, args, _ = goqu.
+			Insert(authUser.Source).
+			Cols("email", "passhash", "department_id").
+			Vals(goqu.Vals{authUser.Email, authUser.PassHash, goqu.L("(SELECT id FROM new_department)")}).
+			With("new_department", cteQuery).
+			ToSQL()
+	}
+
+	fmt.Println(query, args)
+
+	_, err = s.db.Exec(query, args...)
 	if err != nil {
 		return fmt.Errorf("%s: %w", op, HandleDBError(err))
 	}

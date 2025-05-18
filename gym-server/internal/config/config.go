@@ -15,11 +15,17 @@ type Config struct {
 	AuthTokenTTL time.Duration `yaml:"auth_token_ttl" env-required:"true"`
 	SMTP         SMTPConfig    `yaml:"smtp" env-required:"true"`
 	GRPC         GRPCConfig    `yaml:"grpc" env-required:"true"`
+	HTTP         HTTPConfig    `yaml:"http" env-required:"true"`
+	Minio        MinioConfig   `yaml:"minio" env-required:"true"`
 }
 
 type GRPCConfig struct {
 	Port    int           `yaml:"port"`
 	Timeout time.Duration `yaml:"timeout"`
+}
+
+type HTTPConfig struct {
+	Port int `yaml:"address"`
 }
 
 type SMTPConfig struct {
@@ -28,6 +34,15 @@ type SMTPConfig struct {
 	Username      string `yaml:"username"`
 	Host          string `yaml:"host"`
 	Port          int    `yaml:"port"`
+}
+
+type MinioConfig struct {
+	Endpoint   string `yaml:"endpoint"`
+	AccessKey  string `yaml:"access_key"`
+	SecretKey  string `yaml:"secret_key"`
+	UseSSL     bool   `yaml:"use_ssl"`
+	BucketName string `yaml:"bucket_name"`
+	Location   string `yaml:"location"`
 }
 
 var cfg Config
