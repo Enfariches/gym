@@ -1,88 +1,126 @@
 <template>
   <div class="content">
     <h1 class="page-title">Статистика просмотров</h1>
-    
+
     <div class="filter-bar">
       <div class="filter-group">
         <span class="filter-label">Период:</span>
-        <select class="filter-select">
-          <option>Эта неделя</option>
-          <option>Этот месяц</option>
-          <option>За 30 дней</option>
-          <option>За 90 дней</option>
-          <option>За все время</option>
+        <select class="filter-select" v-model="selectedDateRange">
+          <option value="week">Эта неделя</option>
+          <option value="month">Этот месяц</option>
+          <option value="30days">За 30 дней</option>
+          <option value="90days">За 90 дней</option>
+          <option value="all">За все время</option>
+          <option value="custom">Выбрать период</option>
         </select>
-        
+
+        <span v-if="selectedDateRange === 'custom'" class="date-picker-container">
+          <q-date
+            v-model="customDateRange"
+            range
+            minimal
+            flat
+            class="date-picker"
+          />
+        </span>
+
         <span class="filter-label">Отдел:</span>
-        <select class="filter-select">
-          <option>Все отделы</option>
-          <option>Отдел разработки</option>
-          <option>Бухгалтерия</option>
-          <option>Маркетинг</option>
-          <option>HR</option>
+        <select class="filter-select" v-model="selectedDepartmentId">
+          <option :value="null">Все отделы</option>
+          <option value="1">Отдел разработки</option>
+          <option value="2">Бухгалтерия</option>
+          <option value="3">Маркетинг</option>
+          <option value="4">HR</option>
         </select>
-        
-        <button class="filter-btn">Применить</button>
+
+        <button class="filter-btn" @click="applyFilters">Применить</button>
       </div>
-      
-      <button class="export-btn">Экспорт в Excel</button>
+
+      <button class="export-btn" @click="exportToExcel">Экспорт в Excel</button>
     </div>
-    
+
     <div class="stats-container">
-      <SmallCard title="Всего просмотров" value="3,842" icon="visibility" />
-      <SmallCard title="Просмотрено до конца" value="76%" icon="check_circle" />
-      <SmallCard title="Уникальных пользователей" value="945" icon="people" />
-      <SmallCard title="Среднее время просмотра" value="8:24" icon="timer" />
+      <SmallCard
+        title="Всего просмотров"
+        :value="statisticsStore.statisticsSummary.totalViews.toString()"
+        icon="visibility"
+      />
+      <SmallCard
+        title="Просмотрено до конца"
+        :value="`${statisticsStore.statisticsSummary.completedPercentage}%`"
+        icon="check_circle"
+      />
+      <SmallCard
+        title="Уникальных пользователей"
+        :value="statisticsStore.statisticsSummary.uniqueUsers.toString()"
+        icon="people"
+      />
+      <SmallCard
+        title="Среднее время просмотра"
+        :value="statisticsStore.statisticsSummary.averageViewTime"
+        icon="timer"
+      />
     </div>
-    
+
     <div class="dashboard-row">
       <div class="dashboard-card">
         <h2 class="card-title">Динамика просмотров</h2>
         <div class="chart-container">
-          <StatisticsChartComponent :view-type="state.activeState" />
+          <StatisticsChartComponent :view-type="mapStoreViewModeToChartViewType(statisticsStore.viewMode)" />
         </div>
       </div>
     </div>
-    
+
     <div class="dashboard-card">
       <div class="tab-nav">
-        <div class="tab-item" 
-          v-for="option in selectableOptions" 
+        <div class="tab-item"
+          v-for="option in selectableOptions"
           :key="option.type"
-          :class="{ active: option.type === state.activeState }"
-          @click="state.activeState = option.type"
+          :class="{ active: statisticsStore.viewMode === option.storeType }"
+          @click="statisticsStore.setViewMode(option.storeType)"
         >
           {{ option.label }}
         </div>
       </div>
-      
-      <h2 class="card-title">Статистика просмотров по видео</h2>
-      
-      <div class="table-container">
+
+      <h2 class="card-title">Статистика просмотров</h2>
+
+      <div v-if="statisticsStore.loading" class="loading-container">
+        <q-spinner size="50px" color="primary" />
+        <div class="loading-text">Загрузка данных...</div>
+      </div>
+
+      <div v-else-if="!statisticsStore.filteredStatistics.length" class="empty-data-message">
+        Нет данных для отображения
+      </div>
+
+      <div v-else class="table-container">
         <table>
           <thead>
             <tr>
               <th>Название видео</th>
-              <th>Продолжительность</th>
-              <th>Всего просмотров</th>
-              <th>Завершено</th>
-              <th>Процент завершения</th>
-              <th>Ср. время просмотра</th>
+              <th>Сотрудник</th>
+              <th>Дата просмотра</th>
+              <th>Статус</th>
+              <th>Процент просмотра</th>
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>Разминка для рук и плеч</td>
-              <td>5:20</td>
-              <td>842</td>
-              <td>721</td>
+            <tr v-for="(stat, index) in statisticsStore.filteredStatistics" :key="stat.id?.toString() || index">
+              <td>{{ stat.mediaTitle }}</td>
+              <td>{{ stat.employeeName }} {{ stat.employeeSurname }}</td>
+              <td>{{ formatDate(stat.createdAt) }}</td>
+              <td>
+                <span :class="getProgressClass(stat.progress)">
+                  {{ getProgressLabel(stat.progress) }}
+                </span>
+              </td>
               <td>
                 <div class="progress-bar">
-                  <div class="progress-fill" style="width: 85%;"></div>
+                  <div class="progress-fill" :style="`width: ${Number(stat.percentageView)}%;`"></div>
                 </div>
-                85.6%
+                {{ stat.percentageView?.toString() }}%
               </td>
-              <td>4:55</td>
             </tr>
           </tbody>
         </table>
@@ -92,28 +130,149 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
-import StatisticsChartComponent from 'src/components/statPage/StatisticsChartComponent.vue'
-import SmallCard from '../components/SmallCard.vue'
+import { ref, onMounted } from 'vue';
+import StatisticsChartComponent from 'src/components/statPage/StatisticsChartComponent.vue';
+import SmallCard from '../components/SmallCard.vue';
+import { useStatisticsStore } from '../stores/statisticsStore';
+import { MediaProgress } from '../../protogen/v1/statistics/statistics';
+import type { Timestamp } from '../../protogen/google/protobuf/timestamp';
 
-interface errorWithMessage {
-  isError: boolean
-  errorMessage: string
-}
+const statisticsStore = useStatisticsStore();
+const selectedDateRange = ref('all');
+const customDateRange = ref({ from: '', to: '' });
+const selectedDepartmentId = ref<number | null>(null);
 
-const state = ref({
-  activeState: 'full',
-  selectedStartDate: '',
-  selectedEndDate: '',
-  dateRangeError: { isError: false, errorMessage: '' } as errorWithMessage
-})
-
+// Маппинг типов представления
 const selectableOptions = [
-  { type: 'full', label: 'По видео' },
-  { type: 'half', label: 'По отделам' },
-  { type: 'declined', label: 'По сотрудникам' },
-  { type: 'time', label: 'По времени дня' }
-]
+  { storeType: 'media', type: 'full', label: 'По видео' },
+  { storeType: 'department', type: 'half', label: 'По отделам' },
+  { storeType: 'employee', type: 'declined', label: 'По сотрудникам' },
+  { storeType: 'time', type: 'time', label: 'По времени дня' }
+];
+
+// Маппинг из типа представления стора в тип для компонента диаграммы
+const mapStoreViewModeToChartViewType = (storeViewMode: string) => {
+  const option = selectableOptions.find(opt => opt.storeType === storeViewMode);
+  return option ? option.type : 'full';
+};
+
+// Получение класса стиля в зависимости от статуса прогресса
+const getProgressClass = (progress: MediaProgress) => {
+  switch (progress) {
+    case MediaProgress.COMPLETED:
+      return 'status-completed';
+    case MediaProgress.INCOMPLETE:
+      return 'status-incomplete';
+    case MediaProgress.SKIPPED:
+      return 'status-skipped';
+    default:
+      return '';
+  }
+};
+
+// Получение текстовой метки в зависимости от статуса прогресса
+const getProgressLabel = (progress: MediaProgress) => {
+  switch (progress) {
+    case MediaProgress.COMPLETED:
+      return 'Завершено';
+    case MediaProgress.INCOMPLETE:
+      return 'Не завершено';
+    case MediaProgress.SKIPPED:
+      return 'Пропущено';
+    default:
+      return 'Не определено';
+  }
+};
+
+// Форматирование даты для отображения
+const formatDate = (timestamp?: Timestamp) => {
+  if (!timestamp) return '-';
+
+  const date = new Date(Number(timestamp.seconds) * 1000);
+  return date.toLocaleDateString('ru-RU', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+};
+
+// Применение фильтров
+const applyFilters = () => {
+  let startDate: Date | null = null;
+  let endDate: Date | null = null;
+
+  const now = new Date();
+
+  switch (selectedDateRange.value) {
+    case 'week': {
+      // Начало текущей недели (понедельник)
+      const day = now.getDay();
+      const diff = now.getDate() - day + (day === 0 ? -6 : 1);
+      startDate = new Date(now.setDate(diff));
+      startDate.setHours(0, 0, 0, 0);
+      endDate = new Date();
+      break;
+    }
+    case 'month': {
+      // Начало текущего месяца
+      startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+      endDate = new Date();
+      break;
+    }
+    case '30days': {
+      // 30 дней назад
+      startDate = new Date();
+      startDate.setDate(startDate.getDate() - 30);
+      endDate = new Date();
+      break;
+    }
+    case '90days': {
+      // 90 дней назад
+      startDate = new Date();
+      startDate.setDate(startDate.getDate() - 90);
+      endDate = new Date();
+      break;
+    }
+    case 'custom': {
+      // Пользовательский период
+      if (customDateRange.value.from) {
+        startDate = new Date(customDateRange.value.from);
+      }
+      if (customDateRange.value.to) {
+        endDate = new Date(customDateRange.value.to);
+        endDate.setHours(23, 59, 59, 999); // До конца дня
+      }
+      break;
+    }
+    default: {
+      // За все время
+      startDate = null;
+      endDate = null;
+    }
+  }
+
+  // Применяем фильтры к стору
+  statisticsStore.setDateRange({
+    startDate,
+    endDate
+  });
+
+  statisticsStore.setDepartmentFilter(selectedDepartmentId.value);
+};
+
+// Экспорт в Excel (заглушка)
+const exportToExcel = () => {
+  // В реальном приложении здесь бы была логика экспорта в Excel
+  console.log('Экспорт в Excel');
+  alert('Функция экспорта в Excel будет реализована позднее');
+};
+
+onMounted(async () => {
+  // Загружаем статистику при монтировании компонента
+  await statisticsStore.fetchDepartmentStatistics();
+});
 </script>
 
 <style scoped>
@@ -170,6 +329,22 @@ const selectableOptions = [
   color: rgba(90,92,105,1);
   background-color: white;
   min-width: 150px;
+}
+
+.date-picker-container {
+  position: relative;
+  display: inline-block;
+}
+
+.date-picker {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 10;
+  background: white;
+  box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.15);
+  border-radius: 6px;
+  min-width: 300px;
 }
 
 .filter-btn {
@@ -295,6 +470,29 @@ const selectableOptions = [
   border-bottom: 2px solid rgba(78,115,223,1);
 }
 
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+}
+
+.loading-text {
+  margin-top: 16px;
+  color: #666;
+  font-size: 14px;
+}
+
+.empty-data-message {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+  font-size: 16px;
+  background-color: #f8f9fc;
+  border-radius: 6px;
+}
+
 .table-container {
   width: 100%;
   margin-top: 15px;
@@ -340,20 +538,35 @@ td {
   transition: width 0.3s ease;
 }
 
+.status-completed {
+  color: rgba(28,200,138,1);
+  font-weight: bold;
+}
+
+.status-incomplete {
+  color: rgba(246,194,62,1);
+  font-weight: bold;
+}
+
+.status-skipped {
+  color: rgba(231,74,59,1);
+  font-weight: bold;
+}
+
 @media (max-width: 768px) {
   .content {
     padding: 15px;
   }
-  
+
   .filter-group {
     flex-direction: column;
     align-items: stretch;
   }
-  
+
   .filter-select {
     width: 100%;
   }
-  
+
   .stats-container {
     grid-template-columns: 1fr;
   }

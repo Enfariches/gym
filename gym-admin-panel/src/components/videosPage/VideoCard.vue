@@ -4,7 +4,7 @@
       <div class="video-duration">00:00</div>
     </div>
     <div class="video-info">
-      <div class="video-title">{{ video.Name || 'Без названия' }}</div>
+      <div class="video-title">{{ video.title }}</div>
       <div class="video-meta">
         <span>Просмотры: 0</span>
         <span>Добавлено: сегодня</span>
@@ -27,7 +27,7 @@ import { defineProps, defineEmits } from 'vue';
 const props = defineProps<{
   video: {
     ID: number;
-    Name: string;
+    title: string;
     pressignedUrl?: string;
   };
 }>();

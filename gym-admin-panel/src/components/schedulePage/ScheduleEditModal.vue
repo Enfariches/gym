@@ -3,13 +3,13 @@
     <q-card class="edit-modal">
       <h3 class="modal-title">{{ scheduleId ? 'Редактировать расписание' : 'Добавить расписание' }}</h3>
       <div class="form-group">
-        <label>Выберите видео (ID)</label>
+        <label>Выберите видео (название)</label>
         <q-select
-          v-model="selectedVideoId"
+          v-model="selectedVideoTitle"
           class="video-select"
-          :options="videos.map(el => el.ID)"
+          :options="videos.map(el => el.title)"
           @update:model-value="onSelectedVideoChange"
-          :display-value="selectedVideoId || 'Выберите видео'"
+          :display-value="selectedVideoTitle || 'Выберите видео'"
         />
       </div>
       <div class="form-group">
@@ -37,8 +37,7 @@
 import { ref, watch } from 'vue';
 
 interface Video {
-  ID: string;
-  Name: string;
+  title: string;
 }
 
 const props = defineProps<{
@@ -52,19 +51,19 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'update:isOpen', value: boolean): void;
-  (e: 'save', data: { videoId: string; time: string; dayOrder: string; scheduleId?: string }): void;
+  (e: 'save', data: { videoTitle: string; time: string; dayOrder: string; scheduleId?: string }): void;
 }>();
 
 const localIsOpen = ref(props.isOpen);
 
-const selectedVideoId = ref('');
+const selectedVideoTitle = ref('');
 const time = ref(props.initialTime || '');
 const timeError = ref('');
 
 watch(() => props.isOpen, (newValue) => {
   localIsOpen.value = newValue;
   if (newValue) {
-    selectedVideoId.value = props.initialVideoName || '';
+    selectedVideoTitle.value = props.initialVideoName || '';
     time.value = props.initialTime || '';
     timeError.value = '';
   }
@@ -82,7 +81,7 @@ const validateTime = () => {
 };
 
 const onSelectedVideoChange = (newValue: string) => {
-  selectedVideoId.value = newValue;
+  selectedVideoTitle.value = newValue;
 };
 
 const closeModal = () => {
@@ -92,9 +91,9 @@ const closeModal = () => {
 
 const onSave = () => {
   if (timeError.value) return;
-  if (!selectedVideoId.value) return;
+  if (!selectedVideoTitle.value) return;
   emit('save', {
-    videoId: selectedVideoId.value,
+    videoTitle: selectedVideoTitle.value,
     time: time.value,
     dayOrder: props.dayOrder,
     ...(props.scheduleId ? { scheduleId: props.scheduleId } : {})

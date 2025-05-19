@@ -34,7 +34,7 @@
       v-model:isOpen="isModalOpen"
       :videos="videos"
       :scheduleId="scheduleId"
-      :initialVideoName="initialVideoId"
+      :initialVideoTitle="initialVideoTitle"
       :initialTime="initialTime"
       :dayOrder="selectedDayOrder"
       @save="onSave"
@@ -58,7 +58,7 @@ const mediaStore = useMediaStore()
 // Переменные для работы с модальным окном добавления/редактирования расписания
 const isModalOpen = ref(false)
 const selectedDayOrder = ref('')
-const initialVideoId = ref('')
+const initialVideoTitle = ref('')
 const initialTime = ref('')
 const scheduleId = ref('')
 const isEditing = ref(false)
@@ -81,8 +81,7 @@ onMounted(async () => {
 })
 
 const videos = computed(() => mediaStore.getVideos.map(v => ({
-  ID: v.ID.toString(),
-  Name: v.Name
+  title: v.title
 })))
 
 const schedules = computed(() => scheduleStore.getSchedules)
@@ -90,7 +89,7 @@ const schedules = computed(() => scheduleStore.getSchedules)
 interface ScheduleItem {
   ID: string;
   Time: string;
-  VideoID: string;
+  VideoTitle: string;
   schedule: Schedule;
 }
 
@@ -115,7 +114,7 @@ const days = computed(() => {
           day.items.push({
             ID: sch.id?.toString() ?? '',
             Time: `${cron[1]?.padStart(2, '0') ?? '00'}:${cron[0]?.padStart(2, '0') ?? '00'}`,
-            VideoID: sch.mediaId?.toString() ?? '',
+            VideoTitle: mediaStore.getVideos.find(v => v.id?.toString() === sch.mediaId?.toString())?.title ?? '',
             schedule: sch
           });
         }
@@ -131,9 +130,8 @@ const _removeSchedule = async (scheduleId: string) => {
 
 // Реализуем логику открытия модалки для добавления расписания
 const onAdd = (dayOrder: number) => {
-  // Устанавливаем значения для создания нового расписания
   selectedDayOrder.value = dayOrder.toString()
-  initialVideoId.value = ''
+  initialVideoTitle.value = ''
   initialTime.value = ''
   scheduleId.value = ''
   isEditing.value = false
@@ -141,51 +139,48 @@ const onAdd = (dayOrder: number) => {
 }
 
 // Реализуем логику открытия модалки для редактирования
-const onEdit = ({ videoId, scheduleId: schedId, dayOrder }: { videoName: string; videoId: string; scheduleId: string; dayOrder: number }) => {
-  // Находим расписание по ID
+const onEdit = ({ videoName, scheduleId: schedId, dayOrder }: { videoName: string; scheduleId: string; dayOrder: number }) => {
   const schedule = schedules.value?.find(s => s.id?.toString() === schedId);
   if (schedule) {
-    // Извлекаем время из cron-выражения
     const cron = schedule.cronExpression?.split(' ') || [];
     if (cron.length === 5) {
       const hours = cron[1]?.padStart(2, '0') || '00';
       const minutes = cron[0]?.padStart(2, '0') || '00';
       initialTime.value = `${hours}:${minutes}`;
     }
-
-    // Устанавливаем значения для редактирования
     selectedDayOrder.value = dayOrder.toString();
-    initialVideoId.value = videoId;
+    initialVideoTitle.value = videoName;
     scheduleId.value = schedId;
     isEditing.value = true;
     isModalOpen.value = true;
-}
+  }
 }
 
 // Реализуем логику сохранения расписания после модалки
-const onSave = async (data: { videoId: string; time: string; dayOrder: string; scheduleId?: string }) => {
-  // Формируем cronExpression из времени и дня недели
+const onSave = async (data: { videoTitle: string; time: string; dayOrder: string; scheduleId?: string }) => {
   const [hh, mm] = data.time.split(':')
   const cronExpression = `${mm} ${hh} * * ${Number(data.dayOrder) + 1}`
 
+  // Находим ID медиа по его названию
+  const video = mediaStore.getVideos.find(v => v.title === data.videoTitle);
+  const mediaId = video?.id ?? BigInt(0);
+
   if (data.scheduleId) {
-    // Редактирование существующего расписания
     const schedule: Schedule = {
       id: BigInt(data.scheduleId),
       cronExpression,
       isActive: true,
-      mediaId: BigInt(data.videoId),
+      mediaId: mediaId,
       adminId: BigInt(0),
       createdAt: ''
     }
     await scheduleStore.updateSchedule(schedule, ['cron_expression', 'media_id'])
   } else {
-    // Создание нового расписания
     const schedule: Schedule = {
       id: BigInt(0),
       cronExpression,
       isActive: true,
-      mediaId: BigInt(data.videoId),
+      mediaId: mediaId,
       adminId: BigInt(0),
       createdAt: ''
     }

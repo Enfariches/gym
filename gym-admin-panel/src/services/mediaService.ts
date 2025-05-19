@@ -162,7 +162,14 @@ export const listMediaGrpc = async (): Promise<Media[]> => {
   try {
     const options = createAuthOptions();
     const call = await client.listMedia(Empty.create(), options);
-    return call.response.medias ?? [];
+    return (call.response.medias ?? []).map(m => ({
+      id: m.id,
+      title: m.title,
+      pressignedUrl: m.pressignedUrl,
+      createdAt: m.createdAt,
+      adminId: m.adminId,
+      departmentId: m.departmentId
+    }));
   } catch (error) {
     console.error('Ошибка при получении списка медиа (gRPC):', error);
     throw new Error('Не удалось получить список медиа');

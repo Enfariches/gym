@@ -10,8 +10,8 @@
       </select>
       <select class="btn btn-outline" @change="$emit('videoChange', ($event.target as HTMLInputElement).value)">
         <option value="">Все видео</option>
-        <option v-for="video in videos" :key="video.ID" :value="video.ID">
-          {{ video.Name }}
+        <option v-for="video in videos" :key="video.title" :value="video.title">
+          {{ video.title }}
         </option>
       </select>
     </div>
@@ -21,8 +21,7 @@
 <script lang="ts" setup>
 defineProps<{
   videos: Array<{
-    ID: string;
-    Name: string;
+    title: string;
   }>;
 }>();
 
@@ -49,4 +48,4 @@ select.btn-outline {
   background-color: white;
   min-width: 200px;
 }
-</style> 
+</style>
