@@ -36,6 +36,14 @@ http://localhost:8080/ - frontend (основная точка входа)
 
 http://localhost:9001/ - minio (основная точка входа)
 
+## Структура проекта
+
+- `api/` - Прото файлы для генерации
+- `docs/` - Документация
+- `envoyproxy/` - Прокси для gRPC-web
+- `gym-admin-panel/` - Frontend административная панель
+- `gym-server/` - Backend сервер
+
 
 ## Ошибки
 
