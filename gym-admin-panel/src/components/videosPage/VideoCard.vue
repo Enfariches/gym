@@ -4,7 +4,7 @@
       <div class="video-duration">00:00</div>
     </div>
     <div class="video-info">
-      <div class="video-title">{{ video.Name }}</div>
+      <div class="video-title">{{ video.Name || 'Без названия' }}</div>
       <div class="video-meta">
         <span>Просмотры: 0</span>
         <span>Добавлено: сегодня</span>
@@ -13,9 +13,6 @@
         <span class="tag">Видео</span>
       </div>
       <div class="video-actions">
-        <button class="action-btn edit" @click="$emit('edit', video.ID)">
-          Редактировать
-        </button>
         <button class="action-btn delete" @click="$emit('delete', video.ID)">
           Удалить
         </button>
@@ -31,10 +28,11 @@ const props = defineProps<{
   video: {
     ID: number;
     Name: string;
+    pressignedUrl?: string;
   };
 }>();
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const emit = defineEmits(['edit', 'delete']);
+const emit = defineEmits(['delete']);
 </script>
 
 <style scoped>
@@ -114,13 +112,8 @@ const emit = defineEmits(['edit', 'delete']);
   flex: 1;
 }
 
-.action-btn.edit {
-  background-color: rgba(78,115,223,1);
-  color: white;
-}
-
 .action-btn.delete {
   background-color: rgba(231,74,59,1);
   color: white;
 }
-</style> 
+</style>

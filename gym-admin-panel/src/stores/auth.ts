@@ -11,8 +11,6 @@ import type {
   RegisterResponse,
   LoginResponse,
   ChangePasswordResponse,
-  VerifyRegisterResponse,
-  VerifyChangePasswordResponse
 } from '../../protogen/v1/auth/auth';
 
 export const useAuthStore = defineStore('auth', {
@@ -56,7 +54,7 @@ export const useAuthStore = defineStore('auth', {
     },
 
     // Подтверждение сброса пароля
-    async changePassword(resetToken: string, newPassword: string): Promise<VerifyChangePasswordResponse> {
+    async changePassword(resetToken: string, newPassword: string) {
       try {
         const response = await changePassword(resetToken, newPassword);
         return response;
@@ -66,7 +64,7 @@ export const useAuthStore = defineStore('auth', {
     },
 
     // Подтверждение регистрации
-    async verifyRegister(authToken: string): Promise<VerifyRegisterResponse> {
+    async verifyRegister(authToken: string) {
       try {
         const response = await verifyRegister(authToken);
         this.isAuthenticated = true;

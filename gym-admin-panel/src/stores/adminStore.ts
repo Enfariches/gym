@@ -11,12 +11,12 @@ export const useAdminStore = defineStore('admin', {
 
   actions: {
     // Получить информацию об администраторе
-    async fetchAdmin(adminId: number) {
+    async fetchAdmin() {
       this.loading = true;
       this.error = null;
 
       try {
-        const admin = await getAdmin(adminId);
+        const admin = await getAdmin();
         this.currentAdmin = admin;
       } catch (error) {
         this.error = error instanceof Error ? error.message : 'Не удалось загрузить данные администратора';
@@ -27,34 +27,29 @@ export const useAdminStore = defineStore('admin', {
     },
 
     // Обновить данные администратора
-    async updateAdmin(adminData: Partial<Admin>, fieldsToUpdate: string[]) {
+    async updateAdmin(fieldsToUpdate: string[]) {
       if (!this.currentAdmin) {
-        this.error = 'Нет данных администратора для обновления';
-        return;
+        throw new Error('Администратор не загружен');
       }
-
-      // Создаем обновленный объект администратора
-      const updatedAdmin: Admin = {
-        ...this.currentAdmin,
-        ...adminData,
-        // Преобразуем id в bigint, если он был предоставлен как number
-        id: adminData.id ? BigInt(adminData.id.toString()) : this.currentAdmin.id
-      };
 
       this.loading = true;
       this.error = null;
 
       try {
-        const admin = await updateAdmin(updatedAdmin, fieldsToUpdate);
-        this.currentAdmin = admin;
-        return admin;
+        const updatedAdmin = await updateAdmin(this.currentAdmin, fieldsToUpdate);
+        this.currentAdmin = updatedAdmin;
       } catch (error) {
         this.error = error instanceof Error ? error.message : 'Не удалось обновить данные администратора';
         console.error('Error updating admin:', error);
-        throw error;
       } finally {
         this.loading = false;
       }
+    },
+
+    // Очистить данные администратора
+    clearAdmin() {
+      this.currentAdmin = null;
+      this.error = null;
     },
   },
 

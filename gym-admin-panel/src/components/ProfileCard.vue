@@ -53,7 +53,7 @@
         </div>
         <div class="row items-center">
           <div class="col-3 text-subtitle1 text-weight-medium">Отдел:</div>
-          <div class="col-9">{{ admin?.departament || 'Не указано' }}</div>
+            <div class="col-9">{{ admin?.department || 'Не указано' }}</div>
         </div>
       </div>
 
@@ -82,7 +82,7 @@
           readonly
         />
         <q-input
-          v-model="formData.departament"
+          v-model="formData.department"
           label="Отдел"
           outlined
           dense
@@ -112,7 +112,7 @@ const formData = ref({
   name: '',
   surname: '',
   email: '',
-  departament: ''
+  department: ''
 });
 
 // Обновляем форму при изменении данных администратора
@@ -122,7 +122,7 @@ watch(() => props.admin, (newAdmin) => {
       name: newAdmin.name,
       surname: newAdmin.surname,
       email: newAdmin.email,
-      departament: newAdmin.departament
+      department: newAdmin.department
     };
   }
 }, { immediate: true });
