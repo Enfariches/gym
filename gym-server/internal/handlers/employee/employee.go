@@ -43,6 +43,7 @@ func (s *EmployeeServerManagmentApi) GetEmployee(ctx context.Context, _ *emptypb
 		Id:         employee.ID,
 		Name:       employee.Name,
 		Surname:    employee.Surname,
+		SecondName: employee.SecondName,
 		Email:      employee.Email,
 		Age:        employee.Age,
 		Sex:        employee.Sex,
@@ -74,6 +75,7 @@ func (s *EmployeeServerManagmentApi) UpdateEmployee(ctx context.Context, r *pb.U
 		Id:         updatedEmployee.ID,
 		Name:       updatedEmployee.Name,
 		Surname:    updatedEmployee.Surname,
+		SecondName: updatedEmployee.SecondName,
 		Email:      updatedEmployee.Email,
 		Age:        updatedEmployee.Age,
 		Sex:        updatedEmployee.Sex,
@@ -114,7 +116,7 @@ func applyFieldMask(req *pb.Employee, mask *fieldmaskpb.FieldMask) (map[string]a
 		switch path {
 		case "name":
 			updateMap[path] = req.Name
-		case "secondName":
+		case "second_name":
 			updateMap[path] = req.SecondName
 		case "surname":
 			updateMap[path] = req.Surname

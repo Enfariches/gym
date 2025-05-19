@@ -1,18 +1,25 @@
 import { MediaServiceClient } from '../../protogen/v1/media/media.client';
-import type { GetMediaRequest } from '../../protogen/v1/media/media';
-import type { RpcTransport } from '@protobuf-ts/runtime-rpc';
+import type { GetMediaRequest, Media, DeleteMediaRequest } from '../../protogen/v1/media/media';
+import { Empty } from '../../protogen/google/protobuf/empty';
+import { GrpcWebFetchTransport } from '@protobuf-ts/grpcweb-transport';
+import type { RpcOptions } from '@protobuf-ts/runtime-rpc';
 
 // API URL configuration
-const API_URL = process.env.QUASAR_API_URL || 'http://localhost:8083/api/v1';
 const UPLOAD_URL = 'http://localhost:3000/api/upload';
+const GRPC_URL = 'http://localhost:8085';
 
-/**
- * Создает клиент для gRPC-сервиса MediaService
- */
-const createGrpcClient = () => {
-  // Здесь должна быть корректная инициализация транспорта для gRPC
-  const transport = { /* ... */ } as RpcTransport;
-  return new MediaServiceClient(transport);
+const createTransport = () => {
+  const token = localStorage.getItem('auth_token');
+  return new GrpcWebFetchTransport({
+    baseUrl: GRPC_URL,
+    headers: token ? { 'Authorization': `Bearer ${token}` } : undefined,
+  });
+};
+
+const createAuthOptions = (): RpcOptions => {
+  const token = localStorage.getItem('auth_token');
+  if (!token) throw new Error('Требуется авторизация для доступа к API');
+  return { meta: { 'Authorization': `Bearer ${token}` } };
 };
 
 /**
@@ -101,21 +108,6 @@ export const uploadMedia = async (
 };
 
 /**
- * Получает список всех видео
- */
-export const fetchVideos = async (): Promise<{ID: number, Name: string}[]> => {
-  const response = await fetch(`${API_URL}/videos`, {
-    method: 'GET',
-  });
-
-  if (!response.ok) {
-    throw new Error('Не удалось получить список видео');
-  }
-
-  return await response.json();
-};
-
-/**
  * Получает пресайн URL для видео с использованием gRPC
  */
 export const getVideoPresignedUrl = async (
@@ -123,64 +115,18 @@ export const getVideoPresignedUrl = async (
   departmentId: number,
   expirySeconds: number = 3600
 ): Promise<string> => {
-  const client = createGrpcClient();
-
+  const client = new MediaServiceClient(createTransport());
   const request: GetMediaRequest = {
     mediaId: BigInt(mediaId),
-    departamentId: BigInt(departmentId),
+    departmentId: BigInt(departmentId),
     expiry: { seconds: BigInt(expirySeconds), nanos: 0 }
   };
-
   try {
-    const { response } = await client.getMedia(request);
+    const { response } = await client.getMedia(request, createAuthOptions());
     return response.pressignedUrl;
   } catch (error) {
     console.error('Error fetching presigned URL:', error);
     throw new Error('Не удалось получить ссылку для просмотра видео');
-  }
-};
-
-/**
- * Изменяет название видео
- */
-export const changeVideoName = async (videoId: number, newName: string): Promise<void> => {
-  const token = localStorage.getItem('auth_token');
-  if (!token) {
-    throw new Error('Требуется авторизация. Пожалуйста, войдите в систему.');
-  }
-
-  const response = await fetch(`${API_URL}/videos/${videoId}`, {
-    method: 'PUT',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ name: newName })
-  });
-
-  if (!response.ok) {
-    throw new Error('Не удалось изменить название видео');
-  }
-};
-
-/**
- * Удаляет видео
- */
-export const deleteVideo = async (videoId: number): Promise<void> => {
-  const token = localStorage.getItem('auth_token');
-  if (!token) {
-    throw new Error('Требуется авторизация. Пожалуйста, войдите в систему.');
-  }
-
-  const response = await fetch(`${API_URL}/videos/${videoId}`, {
-    method: 'DELETE',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-    }
-  });
-
-  if (!response.ok) {
-    throw new Error('Не удалось удалить видео');
   }
 };
 
@@ -205,4 +151,36 @@ export const validateVideoFile = (file: File): { isValid: boolean; error?: strin
   }
 
   return { isValid: true };
+};
+
+/**
+ * Получить список всех медиа через gRPC
+ */
+export const listMediaGrpc = async (): Promise<Media[]> => {
+  const transport = createTransport();
+  const client = new MediaServiceClient(transport);
+  try {
+    const options = createAuthOptions();
+    const call = await client.listMedia(Empty.create(), options);
+    return call.response.medias ?? [];
+  } catch (error) {
+    console.error('Ошибка при получении списка медиа (gRPC):', error);
+    throw new Error('Не удалось получить список медиа');
+  }
+};
+
+/**
+ * Удалить медиа через gRPC
+ */
+export const deleteMediaGrpc = async (mediaId: number): Promise<void> => {
+  const transport = createTransport();
+  const client = new MediaServiceClient(transport);
+  const request: DeleteMediaRequest = { mediaId: BigInt(mediaId) };
+  try {
+    const options = createAuthOptions();
+    await client.deleteMedia(request, options);
+  } catch (error) {
+    console.error('Ошибка при удалении медиа (gRPC):', error);
+    throw new Error('Не удалось удалить медиа');
+  }
 };
