@@ -63,7 +63,6 @@ func (s *Storage) UpdateEmployee(ctx context.Context, updateFields map[string]an
 		}
 		return employee, nil
 	}
-
 	query, args, _ := goqu.
 		Update("employees").
 		Set(updateFields).
@@ -83,6 +82,7 @@ func (s *Storage) UpdateEmployee(ctx context.Context, updateFields map[string]an
 	if err != nil {
 		return &models.Employee{}, fmt.Errorf("%s: %w", op, err)
 	}
+
 
 	return updatedEmployee, nil
 }

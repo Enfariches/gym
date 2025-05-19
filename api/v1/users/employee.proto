@@ -45,7 +45,7 @@ message Employee {
     string name = 2;
 
     // Отчество пользователя.
-    string secondName = 3;
+    string second_name = 3;
 
     // Фамилия пользователя.
     string surname = 4;

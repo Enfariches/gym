@@ -45,6 +45,7 @@ func (s *MediaServerManagmentApi) GetMedia(ctx context.Context, r *pb.GetMediaRe
 
 	return &pb.Media{
 		Id:            media.ID,
+		Title:         media.Title,
 		PressignedUrl: media.PressignedUrl,
 		AdminId:       media.AdminID,
 		DepartmentId:  media.DepartmentID,
@@ -85,7 +86,9 @@ func makePbMedias(savedMedia []*models.Media) []*pb.Media {
 
 	for _, m := range savedMedia {
 		responseMedias = append(responseMedias, &pb.Media{
-			Id:            m.ID,
+			Id:    m.ID,
+			Title: m.Title,
+			// Выставляем ссылку на временный объект, который мы храним в БД
 			// Ссылка всегда пустая, так как мы не храним в БД временные ссылки для передачи клиенту
 			PressignedUrl: "",
 			AdminId:       m.AdminID,
