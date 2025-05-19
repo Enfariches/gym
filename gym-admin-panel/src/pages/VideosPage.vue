@@ -2,7 +2,6 @@
   <div>
     <div class="content">
       <h1 class="page-title">Управление видео</h1>
-
       <div class="upload-section">
         <h2 style="font-size: 32px; color: rgba(90,92,105,1); margin-bottom: 20px;">Загрузить новое видео</h2>
         <div class="upload-area" @click="handleContainerClick" :class="{ 'drag-over': isDragging }">
@@ -83,37 +82,17 @@
         <VideoCard
           v-for="video in videos"
           :key="video.ID"
-          :video="video"
+          :video="{
+            ID: video.ID,
+            Name: video.Name || video.pressignedUrl || 'Без названия',
+            pressignedUrl: video.pressignedUrl ?? ''
+          }"
           @edit="isModalChangeNameVideo = true; index = $event"
           @delete="index = $event; removeVideo()"
         />
       </div>
     </div>
   </div>
-
-  <q-dialog v-model="isModalChangeNameVideo">
-    <q-card class="edit-modal">
-      <div class="form-group">
-        <label>Название видео</label>
-        <input
-          v-model="newVideoName"
-          type="text"
-          placeholder="Введите новое название видео"
-        />
-      </div>
-      <div class="modal-actions">
-        <button class="btn btn-outline" @click="isModalChangeNameVideo = false">
-          Отмена
-        </button>
-        <button
-          class="btn btn-primary"
-          @click="changeVideoName(index); isModalChangeNameVideo = false"
-        >
-          Сохранить
-        </button>
-      </div>
-    </q-card>
-  </q-dialog>
 </template>
 
 <script lang="ts">
@@ -133,11 +112,8 @@ export default defineComponent({
     const fileInput = ref<HTMLInputElement | null>(null);
     const errorMessage = ref<string>('');
     const isModalChangeNameVideo = ref(false);
-    const newVideoName = ref('');
     const index = ref(0);
     const isDragging = ref(false);
-
-    // Используем медиа-стор
     const mediaStore = useMediaStore();
     const {
       videos,
@@ -155,7 +131,6 @@ export default defineComponent({
 
     /** Обработка клика по контейнеру */
     const handleContainerClick = (event: MouseEvent) => {
-      /** Проверяем, что клик не был на кнопке "Отправить" или на крестике */
       if (event.target instanceof HTMLElement && !event.target.closest('.uploaded-file')) {
         triggerFileInput();
       }
@@ -188,107 +163,34 @@ export default defineComponent({
         errorMessage.value = 'Пожалуйста, выберите файл для загрузки.';
         return;
       }
-
       try {
         const success = await mediaStore.uploadFile();
-
         if (success) {
-          // Показать уведомление об успехе
-          $q.notify({
-            type: 'positive',
-            message: 'Видео успешно загружено',
-            position: 'top',
-            timeout: 2000
-          });
-
+          $q.notify({ type: 'positive', message: 'Видео успешно загружено', position: 'top', timeout: 2000 });
           errorMessage.value = '';
         } else if (mediaStore.error) {
           errorMessage.value = mediaStore.error;
-
-          $q.notify({
-            type: 'negative',
-            message: mediaStore.error,
-            position: 'top',
-            timeout: 3000
-          });
+          $q.notify({ type: 'negative', message: mediaStore.error, position: 'top', timeout: 3000 });
         }
       } catch (error) {
         console.error('Ошибка при загрузке видео:', error);
         const errorMsg = error instanceof Error ? error.message : 'Ошибка при загрузке файла';
         errorMessage.value = errorMsg;
-
-        $q.notify({
-          type: 'negative',
-          message: errorMsg,
-          position: 'top',
-          timeout: 3000
-        });
-      }
-    };
-
-    const changeVideoName = async (videoId: number) => {
-      if (!newVideoName.value) return;
-
-      try {
-        const success = await mediaStore.changeVideoName(videoId, newVideoName.value);
-
-        if (success) {
-          $q.notify({
-            type: 'positive',
-            message: 'Название видео успешно изменено',
-            position: 'top',
-            timeout: 2000
-          });
-
-          newVideoName.value = '';
-        } else if (mediaStore.error) {
-          $q.notify({
-            type: 'negative',
-            message: mediaStore.error,
-            position: 'top',
-            timeout: 3000
-          });
-        }
-      } catch (error) {
-        console.error('Ошибка при изменении названия:', error);
-
-        $q.notify({
-          type: 'negative',
-          message: 'Не удалось изменить название видео',
-          position: 'top',
-          timeout: 3000
-        });
+        $q.notify({ type: 'negative', message: errorMsg, position: 'top', timeout: 3000 });
       }
     };
 
     const removeVideo = async () => {
       try {
         const success = await mediaStore.deleteVideo(index.value);
-
         if (success) {
-          $q.notify({
-            type: 'positive',
-            message: 'Видео успешно удалено',
-            position: 'top',
-            timeout: 2000
-          });
+          $q.notify({ type: 'positive', message: 'Видео успешно удалено', position: 'top', timeout: 2000 });
         } else if (mediaStore.error) {
-          $q.notify({
-            type: 'negative',
-            message: mediaStore.error,
-            position: 'top',
-            timeout: 3000
-          });
+          $q.notify({ type: 'negative', message: mediaStore.error, position: 'top', timeout: 3000 });
         }
       } catch (error) {
         console.error('Ошибка при удалении видео:', error);
-
-        $q.notify({
-          type: 'negative',
-          message: 'Не удалось удалить видео',
-          position: 'top',
-          timeout: 3000
-        });
+        $q.notify({ type: 'negative', message: 'Не удалось удалить видео', position: 'top', timeout: 3000 });
       }
     };
 
@@ -297,25 +199,14 @@ export default defineComponent({
       event.preventDefault();
       isDragging.value = true;
     };
-
-    const handleDragLeave = () => {
-      isDragging.value = false;
-    };
-
+    const handleDragLeave = () => { isDragging.value = false; };
     const handleDrop = (event: DragEvent) => {
       event.preventDefault();
       isDragging.value = false;
-
       const dataTransfer = event.dataTransfer;
-      if (!dataTransfer?.files || dataTransfer.files.length === 0) {
-        return;
-      }
-
+      if (!dataTransfer?.files || dataTransfer.files.length === 0) return;
       const file = dataTransfer.files[0];
-      if (!file) {
-        return;
-      }
-
+      if (!file) return;
       const success = mediaStore.addFile(file);
       if (!success && mediaStore.error) {
         errorMessage.value = mediaStore.error;
@@ -324,11 +215,9 @@ export default defineComponent({
       }
     };
 
-    // Добавляем слушатели для Drag and Drop
-    onMounted(() => {
-      // Загружаем список видео
-      mediaStore.loadVideos();
 
+    onMounted(() => {
+      mediaStore.loadVideos();
       const uploadArea = document.querySelector('.upload-area');
       if (uploadArea) {
         uploadArea.addEventListener('dragover', (event: Event) => {
@@ -356,11 +245,10 @@ export default defineComponent({
       handleContainerClick,
       videos,
       isModalChangeNameVideo,
-      newVideoName,
-      changeVideoName,
       index,
       removeVideo,
-      isDragging
+      isDragging,
+      mediaStore,
     };
   },
 });

@@ -8,10 +8,10 @@
         <div>Нет видео на этот день</div>
       </div>
       <div v-else class="body__list">
-        <div 
-          v-for="(schedule, idx) in items" 
-          :key="idx" 
-          class="schedule-item" 
+        <div
+          v-for="(schedule, idx) in items"
+          :key="idx"
+          class="schedule-item"
           :class="{'schedule-item-odd': idx % 2 !== 0}"
         >
           <div class="schedule-item__content">
@@ -24,36 +24,36 @@
               <span>{{ schedule.Time }}</span>
             </div>
             <div class="schedule-item__actions">
-              <button 
-                class="action-btn edit" 
+              <button
+                class="action-btn edit"
                 title="Редактировать"
-                @click="$emit('edit', { 
+                @click="$emit('edit', {
                   videoName: getVideoName(schedule.VideoID),
                   videoId: schedule.VideoID,
                   scheduleId: schedule.ID,
                   dayOrder: dayOrder
                 })"
               >
-                <i class="fas fa-edit"></i>
+                <q-icon name="edit" color="primary" />
                 <span class="action-tooltip">Редактировать</span>
               </button>
-              <button 
-                class="action-btn delete" 
+              <button
+                class="action-btn delete"
                 title="Удалить"
                 @click="$emit('delete', schedule.ID)"
               >
-                <i class="fas fa-trash"></i>
+                <q-icon name="delete" color="negative" />
                 <span class="action-tooltip">Удалить</span>
               </button>
             </div>
           </div>
         </div>
       </div>
-      <button 
+      <button
         class="btn btn-primary add-schedule"
         @click="$emit('add', dayOrder)"
       >
-        <i class="fas fa-plus"></i> Добавить видео
+        <q-icon name="add" color="primary" /> Добавить видео
       </button>
     </div>
   </div>
@@ -80,7 +80,7 @@ const props = defineProps<{
 
 const getVideoName = (videoId: string): string => {
   const video = props.videos.find(v => v.ID === videoId);
-  return video ? video.Name : 'Неизвестное видео';
+  return video ? video.ID : 'Неизвестное видео';
 };
 
 defineEmits<{
@@ -179,4 +179,4 @@ defineEmits<{
   width: 100%;
   margin-top: 15px;
 }
-</style> 
+</style>
