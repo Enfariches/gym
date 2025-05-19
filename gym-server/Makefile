@@ -19,7 +19,7 @@ export CONFIG_PATH
 
 # Set variables based on shell type
 ifeq ($(SHELL_TYPE),windows)
-PROTO_FILES = ../api/v1/auth/auth.proto ../api/v1/users/admin.proto ../api/v1/users/employee.proto ../api/v1/schedule/schedule.proto
+PROTO_FILES = ../api/v1/auth/auth.proto ../api/v1/users/admin.proto ../api/v1/users/employee.proto ../api/v1/schedule/schedule.proto ../api/v1/media/media.proto
 MAKE_DIR = mkdir protogen
 RM_CMD = if exist protogen rmdir /s /q protogen
 PROTOC_CMD = npx protoc -I ../api $(PROTO_FILES) \

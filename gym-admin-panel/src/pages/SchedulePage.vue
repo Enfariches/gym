@@ -31,53 +31,39 @@
     </div>
 
     <ScheduleEditModal
-      v-model:isOpen="isEditModalOpen"
+      v-model:isOpen="isModalOpen"
       :videos="videos"
-      :scheduleId="index"
-      :initialVideoName="newVideoName"
-      :initialTime="timeWithSeconds"
-      :dayOrder="videoToSchedule.dayofweek"
+      :scheduleId="scheduleId"
+      :initialVideoName="initialVideoId"
+      :initialTime="initialTime"
+      :dayOrder="selectedDayOrder"
       @save="onSave"
     />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, computed } from 'vue'
 import ScheduleFilters from '../components/schedulePage/ScheduleFilters.vue'
 import ScheduleSidebar from '../components/schedulePage/ScheduleSidebar.vue'
 import ScheduleCard from '../components/schedulePage/ScheduleCard.vue'
 import ScheduleEditModal from '../components/schedulePage/ScheduleEditModal.vue'
+import { useScheduleStore } from '../stores/scheduleStore'
+import { useMediaStore } from '../stores/mediaStore'
+import type { Schedule } from '../../protogen/v1/schedule/schedule'
 
-const mondayVideos: { ID: string, Time: string, VideoID: string, Name: string }[] = []
-const tuesdayVideos: { ID: string, Time: string, VideoID: string, Name: string }[] = []
-const wednesdayVideos: { ID: string, Time: string, VideoID: string, Name: string }[] = []
-const thursdayVideos: { ID: string, Time: string, VideoID: string, Name: string }[] = []
-const fridayVideos: { ID: string, Time: string, VideoID: string, Name: string }[] = []
-const saturdayVideos: { ID: string, Time: string, VideoID: string, Name: string }[] = []
-const sundayVideos: { ID: string, Time: string, VideoID: string, Name: string }[] = []
+const scheduleStore = useScheduleStore()
+const mediaStore = useMediaStore()
 
-const days = ref([
-  { items: mondayVideos, name: "Понедельник", bg: 'bg-primary', order:0 },
-  { items: tuesdayVideos, name: "Вторник", bg: 'bg-primary',order:1 },
-  { items: wednesdayVideos, name: "Среда", bg: 'bg-primary',order:2 },
-  { items: thursdayVideos, name: "Четверг", bg: 'bg-primary',order:3 },
-  { items: fridayVideos, name: "Пятница", bg: 'bg-primary',order:4 },
-  { items: saturdayVideos, name: "Суббота", bg: 'bg-primary',order:5 },
-  { items: sundayVideos, name: "Воскресенье", bg: 'bg-primary',order:6 },
-])
-const videos = ref()
-const index = ref()
-const isEditModalOpen = ref(false)
-const newVideoName = ref('')
-const timeWithSeconds = ref('')
-const videoToSchedule = ref({
-  dayofweek: '',
-  time: '',
-  videoid: ''
-})
-const timeError = ref('')
+// Переменные для работы с модальным окном добавления/редактирования расписания
+const isModalOpen = ref(false)
+const selectedDayOrder = ref('')
+const initialVideoId = ref('')
+const initialTime = ref('')
+const scheduleId = ref('')
+const isEditing = ref(false)
 
+// Остальные переменные от департаментов и фильтров
 const departments = ref([
   { id: 'all', name: 'Все отделы', checked: true },
   { id: 'dev', name: 'Разработчики', checked: false },
@@ -89,120 +75,122 @@ const departments = ref([
 const selectedVideos = ref<string[]>([])
 const allVideosChecked = ref(true)
 
-const API_URL = process.env.QUASAR_API_URL || 'http://localhost:8083/api/v1'
-
-const init = () => {
-  const token = localStorage.getItem('token');
-
-  days.value.forEach(async (day, idx) => {
-    setTimeout(async () => {
-      await fetch(`${API_URL}/schedule/${idx}`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-        }).then(async (res) => {
-          const response = await res.json()
-          day.items = response
-        })
-    }, idx * 50)
-  })
-}
-
 onMounted(async () => {
-  init()
-  await fetch(`${API_URL}/videos`, {
-    method: 'GET',
-  }).then(async (res) => {
-    if (res.ok) {
-      const response = await res.json()
-      videos.value = response;
-    }
-  })
+  await mediaStore.loadVideos()
+  await scheduleStore.loadSchedules()
 })
 
-const _removeSchedule = async () => {
-  const token = localStorage.getItem('token');
-  await fetch(`${API_URL}/schedule/${index.value}`, {
-    method: 'DELETE',
-    headers: {
-      'Authorization': `Bearer ${token}`,
+const videos = computed(() => mediaStore.getVideos.map(v => ({
+  ID: v.ID.toString(),
+  Name: v.Name
+})))
+
+const schedules = computed(() => scheduleStore.getSchedules)
+
+interface ScheduleItem {
+  ID: string;
+  Time: string;
+  VideoID: string;
+  schedule: Schedule;
+}
+
+const days = computed(() => {
+  const daysArr = [
+    { items: [] as ScheduleItem[], name: "Понедельник", bg: 'bg-primary', order: 0 },
+    { items: [] as ScheduleItem[], name: "Вторник", bg: 'bg-primary', order: 1 },
+    { items: [] as ScheduleItem[], name: "Среда", bg: 'bg-primary', order: 2 },
+    { items: [] as ScheduleItem[], name: "Четверг", bg: 'bg-primary', order: 3 },
+    { items: [] as ScheduleItem[], name: "Пятница", bg: 'bg-primary', order: 4 },
+    { items: [] as ScheduleItem[], name: "Суббота", bg: 'bg-primary', order: 5 },
+    { items: [] as ScheduleItem[], name: "Воскресенье", bg: 'bg-primary', order: 6 },
+  ];
+  const schList = schedules.value ?? [];
+  schList.forEach(sch => {
+    const cron = sch.cronExpression.split(' ');
+    if (cron.length === 5) {
+      const dayOfWeek = Number(cron[4]) - 1; // 1=Пн, 7=Вс
+      if (dayOfWeek >= 0 && dayOfWeek < 7) {
+        const day = daysArr[dayOfWeek];
+        if (day) {
+          day.items.push({
+            ID: sch.id?.toString() ?? '',
+            Time: `${cron[1]?.padStart(2, '0') ?? '00'}:${cron[0]?.padStart(2, '0') ?? '00'}`,
+            VideoID: sch.mediaId?.toString() ?? '',
+            schedule: sch
+          });
+        }
+      }
     }
-  }).then(async (res) => {
-    if (res.ok) {
-      init()
-    }
-  })
+  });
+  return daysArr;
+})
+
+const _removeSchedule = async (scheduleId: string) => {
+  await scheduleStore.deleteSchedule(BigInt(scheduleId))
 }
 
-const updateSchedule = async () =>{
-  const token = localStorage.getItem('token');
-
-  if(videoToSchedule.value.videoid === '' || videoToSchedule.value.time === '' || videoToSchedule.value.dayofweek === '')
-    return
-
-  await fetch(`${API_URL}/schedule`, {
-    method: 'PUT',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-    },
-    body: JSON.stringify({
-      dayofweek: Number(videoToSchedule.value.dayofweek),
-      time: videoToSchedule.value.time,
-      videoid: Number(videoToSchedule.value.videoid)
-    }),
-  }).then(async (res) => {
-    if (res.ok) {
-      init()
-    }
-  })
-}
-
-const validateTime = () => {
-  const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/
-
-  if (!timeWithSeconds.value) {
-    timeError.value = 'Время не может быть пустым'
-    return false
-  }
-
-  if (!timeRegex.test(timeWithSeconds.value)) {
-    timeError.value = 'Неверный формат времени. Используйте формат ЧЧ:ММ (например, 09:00)'
-    return false
-  }
-
-  timeError.value = ''
-  videoToSchedule.value.time = timeWithSeconds.value
-  return true
-}
-
-const onSave = () => {
-  if (!validateTime()) return
-  updateSchedule().then(
-    () => onDecline()
-  )
-}
-
-const onDecline = () => {
-  videoToSchedule.value.dayofweek =''
-  videoToSchedule.value.time =''
-  videoToSchedule.value.videoid =''
-  isEditModalOpen.value = false
-  newVideoName.value=''
-  timeWithSeconds.value = ''
-}
-
-const onEdit = ({ videoName, videoId, scheduleId, dayOrder }: { videoName: string; videoId: string; scheduleId: string; dayOrder: number }) => {
-  newVideoName.value = videoName;
-  videoToSchedule.value.videoid = videoId;
-  videoToSchedule.value.dayofweek = dayOrder.toString();
-  index.value = scheduleId;
-  isEditModalOpen.value = true;
-}
-
+// Реализуем логику открытия модалки для добавления расписания
 const onAdd = (dayOrder: number) => {
-  videoToSchedule.value.dayofweek = dayOrder.toString();
-  isEditModalOpen.value = true;
+  // Устанавливаем значения для создания нового расписания
+  selectedDayOrder.value = dayOrder.toString()
+  initialVideoId.value = ''
+  initialTime.value = ''
+  scheduleId.value = ''
+  isEditing.value = false
+  isModalOpen.value = true
+}
+
+// Реализуем логику открытия модалки для редактирования
+const onEdit = ({ videoId, scheduleId: schedId, dayOrder }: { videoName: string; videoId: string; scheduleId: string; dayOrder: number }) => {
+  // Находим расписание по ID
+  const schedule = schedules.value?.find(s => s.id?.toString() === schedId);
+  if (schedule) {
+    // Извлекаем время из cron-выражения
+    const cron = schedule.cronExpression?.split(' ') || [];
+    if (cron.length === 5) {
+      const hours = cron[1]?.padStart(2, '0') || '00';
+      const minutes = cron[0]?.padStart(2, '0') || '00';
+      initialTime.value = `${hours}:${minutes}`;
+    }
+
+    // Устанавливаем значения для редактирования
+    selectedDayOrder.value = dayOrder.toString();
+    initialVideoId.value = videoId;
+    scheduleId.value = schedId;
+    isEditing.value = true;
+    isModalOpen.value = true;
+}
+}
+
+// Реализуем логику сохранения расписания после модалки
+const onSave = async (data: { videoId: string; time: string; dayOrder: string; scheduleId?: string }) => {
+  // Формируем cronExpression из времени и дня недели
+  const [hh, mm] = data.time.split(':')
+  const cronExpression = `${mm} ${hh} * * ${Number(data.dayOrder) + 1}`
+
+  if (data.scheduleId) {
+    // Редактирование существующего расписания
+    const schedule: Schedule = {
+      id: BigInt(data.scheduleId),
+      cronExpression,
+      isActive: true,
+      mediaId: BigInt(data.videoId),
+      adminId: BigInt(0),
+      createdAt: ''
+    }
+    await scheduleStore.updateSchedule(schedule, ['cron_expression', 'media_id'])
+  } else {
+    // Создание нового расписания
+    const schedule: Schedule = {
+      id: BigInt(0),
+      cronExpression,
+      isActive: true,
+      mediaId: BigInt(data.videoId),
+      adminId: BigInt(0),
+      createdAt: ''
+    }
+    await scheduleStore.addSchedules([schedule])
+  }
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -229,7 +217,6 @@ const onVideoToggle = (id: string) => {
 const onAllVideosToggle = () => {
   // Логика переключения всех видео
 }
-
 </script>
 
 <style scoped>

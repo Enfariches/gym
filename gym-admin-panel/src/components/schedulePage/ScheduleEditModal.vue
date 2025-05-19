@@ -3,13 +3,13 @@
     <q-card class="edit-modal">
       <h3 class="modal-title">{{ scheduleId ? 'Редактировать расписание' : 'Добавить расписание' }}</h3>
       <div class="form-group">
-        <label>Выберите видео</label>
+        <label>Выберите видео (ID)</label>
         <q-select
-          v-model="selectedVideoName"
+          v-model="selectedVideoId"
           class="video-select"
-          :options="videos.map(el => el.Name)"
+          :options="videos.map(el => el.ID)"
           @update:model-value="onSelectedVideoChange"
-          :display-value="selectedVideoName || 'Выберите видео'"
+          :display-value="selectedVideoId || 'Выберите видео'"
         />
       </div>
       <div class="form-group">
@@ -52,19 +52,19 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'update:isOpen', value: boolean): void;
-  (e: 'save', data: { videoId: string; time: string; dayOrder: string; scheduleId: string | undefined }): void;
+  (e: 'save', data: { videoId: string; time: string; dayOrder: string; scheduleId?: string }): void;
 }>();
 
 const localIsOpen = ref(props.isOpen);
 
-const selectedVideoName = ref(props.initialVideoName || '');
+const selectedVideoId = ref('');
 const time = ref(props.initialTime || '');
 const timeError = ref('');
 
 watch(() => props.isOpen, (newValue) => {
   localIsOpen.value = newValue;
   if (newValue) {
-    selectedVideoName.value = props.initialVideoName || '';
+    selectedVideoId.value = props.initialVideoName || '';
     time.value = props.initialTime || '';
     timeError.value = '';
   }
@@ -72,7 +72,9 @@ watch(() => props.isOpen, (newValue) => {
 
 const validateTime = () => {
   const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
-  if (!timeRegex.test(time.value)) {
+  if (!time.value) {
+    timeError.value = 'Время не может быть пустым';
+  } else if (!timeRegex.test(time.value)) {
     timeError.value = 'Неверный формат времени. Используйте формат ЧЧ:ММ';
   } else {
     timeError.value = '';
@@ -80,7 +82,7 @@ const validateTime = () => {
 };
 
 const onSelectedVideoChange = (newValue: string) => {
-  selectedVideoName.value = newValue;
+  selectedVideoId.value = newValue;
 };
 
 const closeModal = () => {
@@ -90,17 +92,13 @@ const closeModal = () => {
 
 const onSave = () => {
   if (timeError.value) return;
-
-  const video = props.videos.find(v => v.Name === selectedVideoName.value);
-  if (!video) return;
-
+  if (!selectedVideoId.value) return;
   emit('save', {
-    videoId: video.ID,
+    videoId: selectedVideoId.value,
     time: time.value,
     dayOrder: props.dayOrder,
-    scheduleId: props.scheduleId || undefined
+    ...(props.scheduleId ? { scheduleId: props.scheduleId } : {})
   });
-
   closeModal();
 };
 </script>
@@ -173,4 +171,4 @@ const onSave = () => {
   background: #ccc;
   cursor: not-allowed;
 }
-</style> 
+</style>

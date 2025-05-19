@@ -8,11 +8,11 @@ https://github.com/RO1T/gym-client
 
 ## Stack
 
-Server: Golang
+Server: Golang / MINIO
 
 Frontend: Vue/Quasar
 
-Protocol: GRPc
+Protocol: GRPc / HTTP for media
 
 ## Запуск веб приложения
 
@@ -33,6 +33,16 @@ http://localhost:8085/ - envoy
 http://localhost:9090/ - server
 
 http://localhost:8080/ - frontend (основная точка входа)
+
+http://localhost:9001/ - minio (основная точка входа)
+
+## Структура проекта
+
+- `api/` - Прото файлы для генерации
+- `docs/` - Документация
+- `envoyproxy/` - Прокси для gRPC-web
+- `gym-admin-panel/` - Frontend административная панель
+- `gym-server/` - Backend сервер
 
 
 ## Ошибки
