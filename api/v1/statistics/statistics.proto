@@ -1,0 +1,104 @@
+syntax="proto3";
+
+package statistics;
+option go_package = "github.com/Enfariches/gym/protogen";
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+import "google/api/field_behavior.proto";
+
+service StatisticsService {
+    // Создание статистики, полученная от клиента.
+    rpc CreateStatistics (CreateStatisticsRequest) returns (google.protobuf.Empty);
+
+    // Вся статистика конкретнного сотрудника по конкретнному видео.
+    rpc GetEmployeeStatistics (GetEmployeeStatisticsRequest) returns (Statistic);
+
+    // Вся статистика по всем сотрудникам для конкретнного медиа.
+    rpc ListMediaStatistics (ListMediaStatisticsRequest) returns (ListStatisticsResponse);
+
+    // Вся статистика сотрудника по всем видео.
+    rpc ListEmployeeStatistics (ListEmployeeStatisticsRequest) returns (ListStatisticsResponse);
+
+    // Вся статистика по отделу (по всем сотрудникам и всем видео).
+    rpc ListDepartmentStatistics (google.protobuf.Empty) returns (ListStatisticsResponse);
+}
+
+// Запрос на занесения статистики пользователя в базу.
+message CreateStatisticsRequest {
+    // Прогресс просмотра медиа.
+    MediaProgress progress = 1;
+
+    // Продолжительность в процентах (skipped=0; incomplete=x; complete=100)
+    int64 percentage_view = 2;
+ 
+    // Идентификатор медиа.
+    int64 media_id = 3 [(google.api.field_behavior) = OPTIONAL];
+}
+
+// Ответ на List-запросы статистики.
+message ListStatisticsResponse {
+    // Статистика сотрудников.
+    repeated Statistic statistics = 1;
+}
+
+// Запрос на статистику по конкретному сотруднику и медиа.
+message GetEmployeeStatisticsRequest {
+    // Идентификатор сотрудника.
+    int64 employee_id = 1;
+
+    // Идентификатор медиа.
+    int64 media_id = 2;
+}
+
+// Запрос на статистику по конкретному медиа.
+message ListMediaStatisticsRequest {
+    // Идентификатор медиа.
+    int64 media_id = 1;
+}
+
+// Запрос на статистику по конкретному сотруднику.
+message ListEmployeeStatisticsRequest {
+    // Идентификатор медиа.
+    int64 employee_id = 1;
+}
+
+// Структура статистики.
+message Statistic {
+    // Идентификатор.
+    int64 id = 1 [(google.api.field_behavior) = OUTPUT_ONLY];
+
+    // Прогресс просмотра медиа.
+    MediaProgress progress = 2;
+
+    // Продолжительность в процентах (skipped=0; incomplete=x; complete=100)
+    int64 percentage_view = 3;
+
+    // Имя сотрудника.
+    string employee_name = 4;
+
+    // Фамилия сотрудника.
+    string employee_surname = 5;
+
+    // Идентификатор медиа.
+    string media_title = 6;
+
+    // Дата создания статистики.
+    google.protobuf.Timestamp created_at = 7 [(google.api.field_behavior) = OUTPUT_ONLY];
+}
+
+
+enum MediaProgress {
+    // Не указано
+    MEDIA_PROGRESS_UNSPECIFIED = 0;
+    
+    // Отклонён просмотр (например, пользователь закрыл вкладку)
+    SKIPPED = 1;    
+    
+    // Просмотр не завершён (начал смотреть, но не до конца)
+    INCOMPLETE = 2; 
+
+    // Просмотр завершён полностью
+    COMPLETED = 3; 
+  }
+

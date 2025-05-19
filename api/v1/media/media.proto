@@ -44,15 +44,18 @@ message Media {
     // Идентификатор.
     int64 id = 1;
 
+    // Названия медиа.
+    string title = 2;
+
     // Ссылка на загрузку медиа.
-    string pressigned_url = 2;
+    string pressigned_url = 3;
 
     // Идентификатор админа, который загрузил медиа.
-    int64 admin_id = 3;
+    int64 admin_id = 4;
 
     // Идентификатор отдела.
-    int64 department_id = 4;
+    int64 department_id = 5;
 
     // Дата создания медиа.
-    string created_at = 5;
+    string created_at = 6;
 }

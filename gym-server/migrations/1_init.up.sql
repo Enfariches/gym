@@ -40,8 +40,21 @@ CREATE TABLE IF NOT EXISTS schedules (
 
 CREATE TABLE IF NOT EXISTS mediafiles (
     id SERIAL PRIMARY KEY,
+    title TEXT,
     admin_id INTEGER NOT NULL,
     department_id INTEGER NOT NULL,
     created_at TIMESTAMP DEFAULT now(),
     CONSTRAINT admin_id_fk FOREIGN KEY (admin_id) REFERENCES admins(id)
 );
+
+CREATE TABLE IF NOT EXISTS statistics (
+    id SERIAL PRIMARY KEY,
+    progress VARCHAR(50),
+    percentage_view INTEGER,
+    employee_id INTEGER NOT NULL,
+    department_id INTEGER NOT NULL,
+    media_id INTEGER NOT NULL,
+    created_at TIMESTAMP DEFAULT now(),
+    CONSTRAINT employee_id_fk FOREIGN KEY (employee_id) REFERENCES employees(id),
+    CONSTRAINT deparment_id_fk FOREIGN KEY (department_id) REFERENCES departments(id)
+)

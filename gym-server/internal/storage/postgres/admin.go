@@ -10,6 +10,8 @@ import (
 	"github.com/doug-martin/goqu/v9"
 )
 
+var employeeFieldsTable = []interface{}{"id", "name", "second_name", "surname", "age", "sex", "phone", "email", "post"}
+
 func (s *Storage) Admin(ctx context.Context, admin_id int64) (*models.Admin, error) {
 	const op = "postgres.Admin"
 
@@ -83,6 +85,38 @@ func (s *Storage) UpdateAdmin(ctx context.Context, updateFields map[string]any) 
 	}
 
 	return updatedAdmin, nil
+}
+
+func (s *Storage) ListAdminEmployees(ctx context.Context, department_id int64) ([]*models.Employee, error) {
+	const op = "postgres.ListAdminEmployees"
+
+	query, args, _ := goqu.
+		From("employees").
+		Select(employeeFieldsTable...).
+		Where(goqu.C("department_id").Eq(department_id)).
+		ToSQL()
+
+	rows, err := s.db.Query(query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+	defer rows.Close()
+
+	departmentName, err := s.GetDepNameByDepID(department_id)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get department by employee id: %w", err)
+	}
+
+	var resultEmployees []*models.Employee
+	for rows.Next() {
+		employee, err := scanEmployee(rows, func(s *models.Employee) { s.Department = departmentName })
+		if err != nil {
+			return nil, fmt.Errorf("%s: %w", op, err)
+		}
+		resultEmployees = append(resultEmployees, employee)
+	}
+
+	return resultEmployees, nil
 }
 
 func (s *Storage) GetDepNameByDepID(department_id int64) (string, error) {

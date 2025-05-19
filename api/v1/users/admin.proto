@@ -7,6 +7,8 @@ import "google/protobuf/field_mask.proto";
 import "google/api/field_behavior.proto";
 import "google/protobuf/empty.proto";
 
+import "v1/users/employee.proto";
+
 // Сервис для управления администраторами.
 service AdminService {
     // Получает администратора, по его ID, которое передается в контексте.
@@ -14,6 +16,9 @@ service AdminService {
 
     // Обновляет администратора.
     rpc UpdateAdmin (UpdateAdminRequest) returns (Admin);
+
+    // Получает всех сотрудников своего отдела
+    rpc ListAdminEmployees (google.protobuf.Empty) returns (ListAdminEmployeesResponse);
 }
 
 // Запрос на обновление администратора.
@@ -23,6 +28,11 @@ message UpdateAdminRequest {
 
     // Маска полей, которые будут обновлены.
     google.protobuf.FieldMask field_mask = 2;
+}
+
+message ListAdminEmployeesResponse {
+    // Список сотрудников.
+    repeated employee.Employee employees = 1;
 }
 
 

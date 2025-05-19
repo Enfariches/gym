@@ -16,6 +16,7 @@ type Admin struct {
 type AdminManager interface {
 	Admin(ctx context.Context, admin_id int64) (*models.Admin, error)
 	UpdateAdmin(ctx context.Context, updateFields map[string]any) (*models.Admin, error)
+	ListAdminEmployees(ctx context.Context, department_id int64) ([]*models.Employee, error)
 }
 
 func New(log *slog.Logger, adminManager AdminManager) *Admin {
@@ -49,4 +50,17 @@ func (a *Admin) UpdateAdmin(ctx context.Context, updateFields map[string]any) (*
 	}
 
 	return updatedAdmin, nil
+}
+
+func (a *Admin) ListAdminEmployees(ctx context.Context, department_id int64) ([]*models.Employee, error) {
+	const op = "admin.ListAdminEmployees"
+    log := a.log.With("op", op)
+
+    employees, err := a.adminManager.ListAdminEmployees(ctx, department_id)
+    if err != nil {
+        log.Error("failed to list admin employees", sl.Err(err))
+        return nil, fmt.Errorf("%s: %w", op, err)
+    }
+
+    return employees, nil
 }

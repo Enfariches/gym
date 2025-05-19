@@ -81,7 +81,7 @@ func scanAdmin(s Scanner, opts ...func(s *models.Admin)) (*models.Admin, error) 
 func scanMedia(s Scanner, opts...func(s *models.Media)) (*models.Media, error) {
 	media := &models.Media{}
 
-    err := s.Scan(&media.ID, &media.AdminID, &media.DepartmentID, &media.CreatedAt)
+    err := s.Scan(&media.ID, &media.Title, &media.AdminID, &media.DepartmentID, &media.CreatedAt)
     if err != nil {
         return nil, fmt.Errorf("failed to scan row: %w", err)
     }
@@ -121,4 +121,19 @@ func scanDepartment(s Scanner, opts...func(s *models.Department)) (*models.Depar
     }
 
     return department, nil
+}
+
+func scanStatistics(s Scanner, opts...func(s *models.Statistics)) (*models.Statistics, error) {
+	statistics := &models.Statistics{}
+
+    err := s.Scan(&statistics.ID, &statistics.Progress, &statistics.PercentageView, &statistics.CreatedAt)
+    if err != nil {
+        return nil, fmt.Errorf("failed to scan row: %w", err)
+    }
+
+    for _, opt := range opts {
+        opt(statistics)
+    }
+
+    return statistics, nil
 }

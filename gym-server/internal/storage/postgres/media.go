@@ -9,12 +9,13 @@ import (
 	"github.com/doug-martin/goqu/v9"
 )
 
-func (s *Storage) SaveMediaPostgres(admin_id, departmentId int64) (int64, error) {
+func (s *Storage) SaveMediaPostgres(admin_id, departmentId int64, mediaTitle string) (int64, error) {
 	const op = "postgres.SaveMediaPostgres"
 
-	query, args, _ := goqu.Insert("mediafiles").
-		Cols("admin_id", "department_id").
-		Vals(goqu.Vals{admin_id, departmentId}).
+	query, args, _ := goqu.
+		Insert("mediafiles").
+		Cols("title", "admin_id", "department_id").
+		Vals(goqu.Vals{mediaTitle, admin_id, departmentId}).
 		Returning("id").
 		ToSQL()
 
@@ -33,7 +34,7 @@ func (s *Storage) Media(ctx context.Context, media_id int64) (*models.Media, err
 
 	query, args, _ := goqu.
 		From("mediafiles").
-		Select("id", "admin_id", "department_id", "created_at").
+		Select("id", "title", "admin_id", "department_id", "created_at").
 		Where(goqu.C("id").Eq(media_id)).
 		ToSQL()
 
@@ -51,7 +52,7 @@ func (s *Storage) ListMedia(ctx context.Context, admin_id int64) ([]*models.Medi
 
 	query, args, _ := goqu.
 		From("mediafiles").
-		Select("id", "admin_id", "department_id", "created_at").
+		Select("id", "title", "admin_id", "department_id", "created_at").
 		Where(goqu.C("admin_id").Eq(admin_id)).
 		ToSQL()
 
