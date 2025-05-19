@@ -1,9 +1,14 @@
 gym-admin-panel/.env
 gym-admin-panel/protogen
 gym-admin-panel/node_modules
+
 gym-server/protogen
 gym-server/main
 gym-server/migrate
+gym-server/.DS_Store
+gym-server/lib/.DS_Store
+
 .idea
 .database
 .env
+.DS_Store

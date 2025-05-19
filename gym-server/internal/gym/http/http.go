@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"health/internal/services/media"
+	"health/internal/services/statistics"
 	"health/internal/storage/minio"
 	"health/internal/storage/postgres"
 	"health/lib/jwt"
@@ -45,6 +46,7 @@ func (g *GymHTTP) Run() error {
 	g.router.Use(jwt.JWTMiddleware)
 
 	g.router.Post("/api/upload", media.UploadMedia(log, g.pgStorage, g.minioStorage))
+	g.router.Get("/api/export", statistics.ExportStatistics(log, g.pgStorage))
 	log.Info("http server is running", slog.String("addr", g.httpServer.Addr))
 
 	if err := g.httpServer.ListenAndServe(); err != nil {
