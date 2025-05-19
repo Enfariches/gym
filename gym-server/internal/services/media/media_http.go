@@ -43,6 +43,13 @@ func UploadMedia(log *slog.Logger, mediaSaverPg MediaSaverPostgres, mediaSaverMi
 			return
 		}
 
+		// 40 потому что кириллица в utf-8 состовляет 2 байта на символ
+		if len(fileHeader.Filename) > 40 {
+			log.Error("mediafile name > 20 characters")
+			http.Error(w, "mediafile name too long (max 20 characters)", http.StatusBadRequest)
+			return
+		}
+
 		contentType := fileHeader.Header.Get("Content-Type")
 
 		if contentType != "video/mp4" {

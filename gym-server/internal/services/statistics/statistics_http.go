@@ -2,6 +2,7 @@ package statistics
 
 import (
 	"context"
+	"fmt"
 	"health/internal/domain/models"
 	"health/lib/ctxkey"
 	"health/lib/logger/sl"
@@ -46,6 +47,14 @@ func ExportStatistics(log *slog.Logger, pgProvider PgStatsProvider) http.Handler
 		}
 
 		stats, err := pgProvider.ListDepartmentStatistics(ctx, department_id)
+		if err != nil {
+            log.Error("failed to list department statistics", sl.Err(err))
+            http.Error(w, "failed to list department statistics", http.StatusInternalServerError)
+            return
+        }
+
+		// Перевод статуса на русский язык
+		stats = translateProgress(stats)
 
 		pdfFile := pdf.ExportToPDF(stats, adminName, adminPosition, departmentName)
 
@@ -56,4 +65,21 @@ func ExportStatistics(log *slog.Logger, pgProvider PgStatsProvider) http.Handler
 			return
 		}
 	}
+}
+
+func translateProgress(stats []*models.Statistics) []*models.Statistics {
+	for _, s := range stats {
+		fmt.Println(s.Progress)
+		switch s.Progress {
+		case "incomplete":
+			s.Progress = "Не полностью"
+		case "completed":
+			s.Progress = "Завершено"
+		case "skipped":
+			s.Progress = "Пропущено"
+		default:
+			s.Progress = "Неизвестно"
+		}
+	}
+	return stats
 }

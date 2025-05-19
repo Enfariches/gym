@@ -89,8 +89,6 @@ func (s *Statistics) ListDepartmentStatistics(ctx context.Context, department_id
 		log.Error("failed to list department statistics", sl.Err(err))
 		return nil, err
 	}
-
-	// Тут логика для экспорта в пдф.
-
+	
 	return stats, nil
 }

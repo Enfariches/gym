@@ -152,11 +152,11 @@ func (s *StatisticsServerManagmentApi) ListDepartmentStatistics(ctx context.Cont
 func progressFromProto(pbProgress pb.MediaProgress) (string, error) {
 	switch pbProgress {
 	case pb.MediaProgress_SKIPPED:
-		return "Пропуск", nil
+		return "skipped", nil
 	case pb.MediaProgress_INCOMPLETE:
-		return "Не полностью", nil
+		return "incomplete", nil
 	case pb.MediaProgress_COMPLETED:
-		return "Завершено", nil
+		return "completed", nil
 	default:
 		return "", fmt.Errorf("unknown media progress: %v", pbProgress)
 	}
@@ -164,11 +164,11 @@ func progressFromProto(pbProgress pb.MediaProgress) (string, error) {
 
 func progressToProto(progress string) (pb.MediaProgress, error) {
 	switch progress {
-	case "Пропуск":
+	case "skipped":
 		return pb.MediaProgress_SKIPPED, nil
-	case "Не полностью":
+	case "incomplete":
 		return pb.MediaProgress_INCOMPLETE, nil
-	case "Завершено":
+	case "completed":
 		return pb.MediaProgress_COMPLETED, nil
 	default:
 		return 0, fmt.Errorf("unknown parse media progress to pb: %v", progress)

@@ -13,8 +13,8 @@ func ExportToPDF(stats []*models.Statistics, adminName, adminSurname, depTitle s
 	pdf.AddPage()
 
 	// Шрифты
-	pdf.AddUTF8Font("timesnrcyrmt", "", "/gym-server/lib/pdf/timesnrcyrmt.ttf")
-	pdf.AddUTF8Font("timesnrcyrmt", "B", "/gym-server/lib/pdf/timesnrcyrmt_bold.ttf")
+	pdf.AddUTF8Font("timesnrcyrmt", "", "lib/pdf/timesnrcyrmt.ttf")
+	pdf.AddUTF8Font("timesnrcyrmt", "B", "lib/pdf/timesnrcyrmt_bold.ttf")
 
 	depName := fmt.Sprintf("Статистика выполнения гимнастики. Отдел: %v", depTitle)
 	adminInfo := fmt.Sprintf("Руководитель отдела: %v %v", adminName, adminSurname)
