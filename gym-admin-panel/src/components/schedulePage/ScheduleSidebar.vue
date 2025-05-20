@@ -4,8 +4,8 @@
     <div class="department-list">
       <div class="department-item" v-for="dept in departments" :key="dept.id">
         <label class="checkbox-container">
-          <input 
-            type="checkbox" 
+          <input
+            type="checkbox"
             :checked="dept.checked"
             @change="$emit('departmentToggle', dept.id)"
           >
@@ -14,13 +14,13 @@
         </label>
       </div>
     </div>
-    
+
     <h3 class="sidebar-title">Видео</h3>
     <div class="department-list">
       <div class="department-item">
         <label class="checkbox-container">
-          <input 
-            type="checkbox" 
+          <input
+            type="checkbox"
             :checked="allVideosChecked"
             @change="$emit('allVideosToggle')"
           >
@@ -28,15 +28,15 @@
           <span class="department-name">Все видео</span>
         </label>
       </div>
-      <div v-for="video in videos" :key="video.ID" class="department-item">
+      <div v-for="video in videos" :key="video.title" class="department-item">
         <label class="checkbox-container">
-          <input 
+          <input
             type="checkbox"
-            :checked="selectedVideos.includes(video.ID)"
-            @change="$emit('videoToggle', video.ID)"
+            :checked="selectedVideos.includes(video.title)"
+            @change="$emit('videoToggle', video.title)"
           >
           <span class="checkmark"></span>
-          <span class="department-name">{{ video.Name }}</span>
+          <span class="department-name">{{ video.title }}</span>
         </label>
       </div>
     </div>
@@ -51,8 +51,7 @@ defineProps<{
     checked: boolean;
   }>;
   videos: Array<{
-    ID: string;
-    Name: string;
+    title: string;
   }>;
   selectedVideos: string[];
   allVideosChecked: boolean;
@@ -105,4 +104,4 @@ defineEmits<{
 .checkmark {
   margin-right: 8px;
 }
-</style> 
+</style>

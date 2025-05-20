@@ -81,10 +81,10 @@
       <div class="video-grid" v-if="videos.length">
         <VideoCard
           v-for="video in videos"
-          :key="video.ID"
+          :key="video.title"
           :video="{
-            ID: video.ID,
-            Name: video.Name || video.pressignedUrl || 'Без названия',
+            ID: Number(video.id || 0),
+            title: video.title,
             pressignedUrl: video.pressignedUrl ?? ''
           }"
           @edit="isModalChangeNameVideo = true; index = $event"

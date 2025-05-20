@@ -17,7 +17,7 @@
           <div class="schedule-item__content">
             <div class="schedule-item__title">
               <div class="video__label">Видео</div>
-              <span>{{ getVideoName(schedule.VideoID) }}</span>
+              <span>{{ schedule.VideoTitle }}</span>
             </div>
             <div class="schedule-item__time">
               <div class="time__label">Время</div>
@@ -28,8 +28,7 @@
                 class="action-btn edit"
                 title="Редактировать"
                 @click="$emit('edit', {
-                  videoName: getVideoName(schedule.VideoID),
-                  videoId: schedule.VideoID,
+                  videoName: schedule.VideoTitle,
                   scheduleId: schedule.ID,
                   dayOrder: dayOrder
                 })"
@@ -63,28 +62,22 @@
 interface ScheduleItem {
   ID: string;
   Time: string;
-  VideoID: string;
+  VideoTitle: string;
 }
 
 interface Video {
-  ID: string;
-  Name: string;
+  title: string;
 }
 
-const props = defineProps<{
+defineProps<{
   dayName: string;
   dayOrder: number;
   items: ScheduleItem[];
   videos: Video[];
 }>();
 
-const getVideoName = (videoId: string): string => {
-  const video = props.videos.find(v => v.ID === videoId);
-  return video ? video.ID : 'Неизвестное видео';
-};
-
 defineEmits<{
-  (e: 'edit', data: { videoName: string; videoId: string; scheduleId: string; dayOrder: number }): void;
+  (e: 'edit', data: { videoName: string; scheduleId: string; dayOrder: number }): void;
   (e: 'delete', id: string): void;
   (e: 'add', dayOrder: number): void;
 }>();

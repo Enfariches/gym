@@ -1,10 +1,17 @@
 <template>
   <div>
-        <!-- Диаграмма -->
+    <!-- Диаграмма -->
     <div class="col-12 col-sm-6" style="width: 80%">
       <q-card flat bordered style="min-height: 300px">
         <q-card-section style="min-height: 300px">
-          <canvas ref="canvasRef" style="margin: 0 auto; height: 250px"/>
+          <div v-if="statisticsStore.loading" class="loading-container">
+            <q-spinner size="50px" color="primary" />
+            <div class="loading-text">Загрузка данных...</div>
+          </div>
+          <div v-else-if="!chartData.length" class="no-data-container">
+            <div class="no-data-text">Нет данных для отображения</div>
+          </div>
+          <canvas v-else ref="canvasRef" style="margin: 0 auto; height: 250px"/>
         </q-card-section>
       </q-card>
     </div>
@@ -12,140 +19,180 @@
 </template>
 
 <script setup lang="ts">
+import { nextTick, onMounted, ref, watch, computed, shallowRef } from 'vue';
+import { Chart, registerables } from 'chart.js';
+import { useStatisticsStore } from 'src/stores/statisticsStore';
 
-import {nextTick, onMounted, ref, watch, shallowRef } from 'vue'
-import { Chart, registerables } from 'chart.js'
-import { getStatisticByViewType } from 'src/helpers/StatisticsApi'
+export interface StatisticChartComponentProps {
+  viewType: string;
+  dateStart?: string;
+  dateEnd?: string;
+}
 
-  export interface StatisticChartComponentProps {
-    viewType: string;
-    dateStart?: string;
-    dateEnd?: string;
-  }
-  interface ChartDataObject{
-    xValue: string,
-    yValue: number,
-  }
-  interface ResponseItem{
-    created_at: string,
-    id: number,
-    type: string,
-    user_id: number,
-    video_id: number
-  }
-  const props = withDefaults(defineProps<StatisticChartComponentProps>(), {
-    viewType:'half'
-  });
+const props = withDefaults(defineProps<StatisticChartComponentProps>(), {
+  viewType: 'full'
+});
 
-  const canvasRef = ref<HTMLCanvasElement | null>(null)
-  const chartInstance = shallowRef<Chart | null>(null);
-  const dataset = ref<Array<ChartDataObject> | null>(null)
+const canvasRef = ref<HTMLCanvasElement | null>(null);
+const chartInstance = shallowRef<Chart | null>(null);
+const statisticsStore = useStatisticsStore();
 
-  onMounted(async () => {
-    watch(
-      () => props.viewType, async () => {
-        await prepareDataSet().then((data:Array<ChartDataObject> | null) => {
-          if(chartInstance.value && data){
+// Маппинг viewType из props в viewMode стора
+const viewModeMap = {
+  'full': 'media',
+  'half': 'department',
+  'declined': 'employee',
+  'time': 'time'
+};
 
-            const chart = chartInstance.value.data
-            chart.labels = data.map((data) => data.xValue)
-            if(chart.datasets[0])
-              chart.datasets[0].data = data.map((data) => data.yValue)
-            chartInstance.value.update()
-          }
-        })
-      }
-    );
-    dataset.value = await prepareDataSet()
-    await createChart()
-  })
+// Данные для графика из стора
+const chartData = computed(() => {
+  return statisticsStore.chartData;
+});
 
-  const prepareDataSet = async (): Promise<Array<ChartDataObject> | null> => {
-    const data = await getStatisticByViewType(props.viewType)
-    const map = new Map()
-    const arr: Array<ChartDataObject> = []
+// Наблюдаем за изменением типа представления
+watch(() => props.viewType, async (newType) => {
+  const storeViewMode = viewModeMap[newType as keyof typeof viewModeMap] || 'media';
+  statisticsStore.setViewMode(storeViewMode);
+  await nextTick();
+  updateOrCreateChart();
+}, { immediate: false });
 
-    data?.forEach((el:ResponseItem)=>{
-        const date = new Date(el.created_at)
-        const formattedDate = date.toLocaleDateString("ru-RU", {
-          day: "2-digit",
-          month: "2-digit"
-        })
+// Наблюдаем за изменениями данных в сторе
+watch(() => chartData.value, () => {
+  updateOrCreateChart();
+}, { deep: true });
 
-        if(map.has(formattedDate)){
-          const current = map.get(formattedDate)
-          map.set(formattedDate, current + 1)
-        }
-        else{
-          map.set(formattedDate, 1)
-        }
-    })
+onMounted(async () => {
+  // При монтировании компонента загружаем данные по умолчанию (статистика по отделу)
+  const storeViewMode = viewModeMap[props.viewType as keyof typeof viewModeMap] || 'media';
+  await statisticsStore.fetchDepartmentStatistics();
+  statisticsStore.setViewMode(storeViewMode);
+  await nextTick();
+  updateOrCreateChart();
+});
 
-    map.forEach((value, key) => {
-      arr.push({
-        xValue:key,
-        yValue:value,
-      })
-    })
+// Обновляем или создаем график
+const updateOrCreateChart = async () => {
+  await nextTick();
 
-    return arr
-  }
-
-  const createChart = async () => {
-    await nextTick(); // Ждём, пока Vue обновит DOM
-
-    if (!canvasRef.value) {
-      console.error("Canvas not found!");
-      return;
-    }
-
-    const ctx = canvasRef.value.getContext("2d");
-
+  if (chartData.value.length === 0) {
     if (chartInstance.value) {
       chartInstance.value.destroy();
-      chartInstance.value = null; // Очищаем ссылку, чтобы избежать конфликтов
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      chartInstance.value = null;
     }
-    if (!ctx) {
-      console.error("Failed to get 2D context!");
-      return;
-    }
+    return;
+  }
 
-    if(!dataset.value) return
+  if (!canvasRef.value) {
+    console.error("Canvas not found!");
+    return;
+  }
 
-    Chart.register(...registerables)
+  const ctx = canvasRef.value.getContext("2d");
 
-    chartInstance.value = new Chart(ctx,{
-      type: 'line',
-      data: {
-        labels: dataset.value.map((data) => data.xValue),
-        datasets: [
-          {
-            label: 'Просмотры',
-            backgroundColor: '#1976D2',
-            data: dataset.value.map((data) => data.yValue),
-          },
-        ],
+  if (!ctx) {
+    console.error("Failed to get 2D context!");
+    return;
+  }
+
+  if (chartInstance.value) {
+    chartInstance.value.destroy();
+    chartInstance.value = null;
+    await new Promise((resolve) => setTimeout(resolve, 50));
+  }
+
+  Chart.register(...registerables);
+
+  const labels = chartData.value.map(item => item.date);
+  const data = chartData.value.map(item => item.count);
+
+  const yAxisTitle = statisticsStore.viewMode === 'time'
+    ? 'Просмотры по часам суток'
+    : 'Количество просмотров';
+
+  const xAxisTitle = statisticsStore.viewMode === 'time'
+    ? 'Время суток'
+    : 'Даты';
+
+  chartInstance.value = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Просмотры',
+          backgroundColor: '#1976D2',
+          borderColor: '#1976D2',
+          borderWidth: 2,
+          pointBackgroundColor: '#1976D2',
+          data,
+          tension: 0.4,
+          fill: false,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: true,
+          position: 'top'
+        },
+        tooltip: {
+          mode: 'index',
+          intersect: false,
+        },
       },
-      options: {
-        scales: {
-          y: {
-            beginAtZero: true,
-            title: {
-              display: true,
-              text: 'Количество просмотров',
-            },
+      scales: {
+        y: {
+          beginAtZero: true,
+          title: {
+            display: true,
+            text: yAxisTitle,
           },
-          x: {
-            title: {
-              display: true,
-              text: 'Дни недели',
-            },
+        },
+        x: {
+          title: {
+            display: true,
+            text: xAxisTitle,
           },
         },
       },
-    })
-  }
-
-
+    },
+  });
+};
 </script>
+
+<style scoped>
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  min-height: 250px;
+}
+
+.loading-text {
+  margin-top: 16px;
+  color: #666;
+  font-size: 14px;
+}
+
+.no-data-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  min-height: 250px;
+  background-color: #f8f9fc;
+  border-radius: 4px;
+}
+
+.no-data-text {
+  color: #666;
+  font-size: 16px;
+}
+</style>

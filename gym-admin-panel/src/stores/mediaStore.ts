@@ -8,12 +8,13 @@ import {
 } from '../services/mediaService';
 
 export interface Video {
-  ID: number;
-  Name: string;
+  id?: bigint;
+  title: string;
   previewUrl?: string;
-  id?: bigint; // для gRPC
-  pressignedUrl?: string; // для gRPC
-  createdAt?: string; // для gRPC
+  pressignedUrl?: string;
+  createdAt?: string;
+  adminId?: bigint;
+  departmentId?: bigint;
 }
 
 export const useMediaStore = defineStore('media', {
@@ -34,11 +35,12 @@ export const useMediaStore = defineStore('media', {
       try {
         const grpcVideos = await listMediaGrpc();
         this.videos = grpcVideos.map(v => ({
-          ID: Number(v.id),
-          Name: v.pressignedUrl || '', // или другое поле, если есть имя
           id: v.id,
+          title: v.title || '',
           pressignedUrl: v.pressignedUrl,
-          createdAt: v.createdAt
+          createdAt: v.createdAt,
+          adminId: v.adminId,
+          departmentId: v.departmentId
         }));
       } catch (error) {
         this.error = error instanceof Error ? error.message : 'Не удалось загрузить список видео';
@@ -63,7 +65,7 @@ export const useMediaStore = defineStore('media', {
     // Получение пресайн URL для превью видео (gRPC)
     async getVideoPreview(videoId: number) {
       try {
-        const videoIndex = this.videos.findIndex(v => v.ID === videoId);
+        const videoIndex = this.videos.findIndex(v => v.title === videoId.toString());
         if (videoIndex === -1) return;
         const video = this.videos[videoIndex];
         if (!video) return;
