@@ -4,7 +4,8 @@ import {
   getEmployeeStatistics,
   listMediaStatistics,
   listEmployeeStatistics,
-  listDepartmentStatistics
+  listDepartmentStatistics,
+  exportStatisticsToPDF
 } from '../services/statisticsService';
 import { MediaProgress, type Statistic } from '../../protogen/v1/statistics/statistics';
 
@@ -133,6 +134,37 @@ export const useStatisticsStore = defineStore('statistics', {
         this.error = error instanceof Error ? error.message : 'Ошибка при получении статистики отдела';
         console.error('Ошибка при получении статистики отдела:', error);
         return [];
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    // Экспортировать статистику в PDF
+    async exportToPDF() {
+      this.error = null;
+      this.loading = true;
+      try {
+        const blob = await exportStatisticsToPDF(
+          this.filters.dateRange.startDate,
+          this.filters.dateRange.endDate,
+          this.filters.departmentId
+        );
+
+        // Создаем ссылку на PDF и скачиваем его
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `statistics-export-${new Date().toISOString().split('T')[0]}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+
+        return true;
+      } catch (error) {
+        this.error = error instanceof Error ? error.message : 'Ошибка при экспорте статистики в PDF';
+        console.error('Ошибка при экспорте статистики в PDF:', error);
+        return false;
       } finally {
         this.loading = false;
       }

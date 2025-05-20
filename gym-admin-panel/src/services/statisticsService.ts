@@ -13,6 +13,7 @@ import type { RpcOptions } from '@protobuf-ts/runtime-rpc';
 
 // API URL configuration
 const GRPC_URL = 'http://localhost:8085';
+const HTTP_URL = 'http://localhost:3000';
 
 const createTransport = () => {
   const token = localStorage.getItem('auth_token');
@@ -135,5 +136,54 @@ export const listDepartmentStatistics = async (): Promise<Statistic[]> => {
   } catch (error) {
     console.error('Ошибка при получении статистики отдела:', error);
     throw new Error('Не удалось получить статистику отдела');
+  }
+};
+
+/**
+ * Экспорт статистики в PDF формат
+ */
+export const exportStatisticsToPDF = async (
+  startDate?: Date | null,
+  endDate?: Date | null,
+  departmentId?: number | null
+): Promise<Blob> => {
+  try {
+    const token = localStorage.getItem('auth_token');
+    if (!token) throw new Error('Требуется авторизация для доступа к API');
+
+    let url = `${HTTP_URL}/api/export`;
+    const params = new URLSearchParams();
+
+    if (startDate) {
+      params.append('startDate', startDate.toISOString());
+    }
+
+    if (endDate) {
+      params.append('endDate', endDate.toISOString());
+    }
+
+    if (departmentId) {
+      params.append('departmentId', departmentId.toString());
+    }
+
+    if (params.toString()) {
+      url += `?${params.toString()}`;
+    }
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    return await response.blob();
+  } catch (error) {
+    console.error('Ошибка при экспорте статистики в PDF:', error);
+    throw new Error('Не удалось экспортировать статистику в PDF');
   }
 };

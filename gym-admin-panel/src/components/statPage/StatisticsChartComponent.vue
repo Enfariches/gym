@@ -1,9 +1,9 @@
 <template>
   <div>
     <!-- Диаграмма -->
-    <div class="col-12 col-sm-6" style="width: 80%">
-      <q-card flat bordered style="min-height: 300px">
-        <q-card-section style="min-height: 300px">
+    <div class="chart-wrapper">
+      <q-card flat bordered style="min-height: 300px; width: 100%">
+        <q-card-section style="min-height: 300px; position: relative;">
           <div v-if="statisticsStore.loading" class="loading-container">
             <q-spinner size="50px" color="primary" />
             <div class="loading-text">Загрузка данных...</div>
@@ -11,7 +11,9 @@
           <div v-else-if="!chartData.length" class="no-data-container">
             <div class="no-data-text">Нет данных для отображения</div>
           </div>
-          <canvas v-else ref="canvasRef" style="margin: 0 auto; height: 250px"/>
+          <div v-else class="canvas-container">
+            <canvas ref="canvasRef" />
+          </div>
         </q-card-section>
       </q-card>
     </div>
@@ -19,7 +21,7 @@
 </template>
 
 <script setup lang="ts">
-import { nextTick, onMounted, ref, watch, computed, shallowRef } from 'vue';
+import { nextTick, onMounted, ref, watch, computed, shallowRef, onBeforeUnmount } from 'vue';
 import { Chart, registerables } from 'chart.js';
 import { useStatisticsStore } from 'src/stores/statisticsStore';
 
@@ -36,6 +38,7 @@ const props = withDefaults(defineProps<StatisticChartComponentProps>(), {
 const canvasRef = ref<HTMLCanvasElement | null>(null);
 const chartInstance = shallowRef<Chart | null>(null);
 const statisticsStore = useStatisticsStore();
+const chartUpdatePending = ref(false);
 
 // Маппинг viewType из props в viewMode стора
 const viewModeMap = {
@@ -54,28 +57,52 @@ const chartData = computed(() => {
 watch(() => props.viewType, async (newType) => {
   const storeViewMode = viewModeMap[newType as keyof typeof viewModeMap] || 'media';
   statisticsStore.setViewMode(storeViewMode);
-  await nextTick();
-  updateOrCreateChart();
 }, { immediate: false });
 
 // Наблюдаем за изменениями данных в сторе
 watch(() => chartData.value, () => {
-  updateOrCreateChart();
+  if (!chartUpdatePending.value && chartData.value.length > 0) {
+    chartUpdatePending.value = true;
+    nextTick(() => {
+      updateOrCreateChart();
+      chartUpdatePending.value = false;
+    });
+  }
 }, { deep: true });
 
 onMounted(async () => {
   // При монтировании компонента загружаем данные по умолчанию (статистика по отделу)
   const storeViewMode = viewModeMap[props.viewType as keyof typeof viewModeMap] || 'media';
-  await statisticsStore.fetchDepartmentStatistics();
+
+  if (statisticsStore.statistics.length === 0) {
+    await statisticsStore.fetchDepartmentStatistics();
+  }
+
   statisticsStore.setViewMode(storeViewMode);
-  await nextTick();
-  updateOrCreateChart();
+  window.addEventListener('resize', handleResize);
 });
+
+onBeforeUnmount(() => {
+  // Уничтожаем график перед удалением компонента
+  if (chartInstance.value) {
+    chartInstance.value.destroy();
+    chartInstance.value = null;
+  }
+  window.removeEventListener('resize', handleResize);
+});
+
+const handleResize = () => {
+  if (!chartUpdatePending.value) {
+    chartUpdatePending.value = true;
+    setTimeout(() => {
+      updateOrCreateChart();
+      chartUpdatePending.value = false;
+    }, 200);
+  }
+};
 
 // Обновляем или создаем график
 const updateOrCreateChart = async () => {
-  await nextTick();
-
   if (chartData.value.length === 0) {
     if (chartInstance.value) {
       chartInstance.value.destroy();
@@ -84,8 +111,10 @@ const updateOrCreateChart = async () => {
     return;
   }
 
+  await nextTick();
+
   if (!canvasRef.value) {
-    console.error("Canvas not found!");
+    // Если canvas не найден, не пытаемся обновить график
     return;
   }
 
@@ -115,57 +144,73 @@ const updateOrCreateChart = async () => {
     ? 'Время суток'
     : 'Даты';
 
-  chartInstance.value = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels,
-      datasets: [
-        {
-          label: 'Просмотры',
-          backgroundColor: '#1976D2',
-          borderColor: '#1976D2',
-          borderWidth: 2,
-          pointBackgroundColor: '#1976D2',
-          data,
-          tension: 0.4,
-          fill: false,
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          display: true,
-          position: 'top'
-        },
-        tooltip: {
-          mode: 'index',
-          intersect: false,
-        },
+  try {
+    chartInstance.value = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          {
+            label: 'Просмотры',
+            backgroundColor: '#1976D2',
+            borderColor: '#1976D2',
+            borderWidth: 2,
+            pointBackgroundColor: '#1976D2',
+            data,
+            tension: 0.4,
+            fill: false,
+          },
+        ],
       },
-      scales: {
-        y: {
-          beginAtZero: true,
-          title: {
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+          legend: {
             display: true,
-            text: yAxisTitle,
+            position: 'top'
+          },
+          tooltip: {
+            mode: 'index',
+            intersect: false,
           },
         },
-        x: {
-          title: {
-            display: true,
-            text: xAxisTitle,
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: yAxisTitle,
+            },
+          },
+          x: {
+            title: {
+              display: true,
+              text: xAxisTitle,
+            },
           },
         },
       },
-    },
-  });
+    });
+  } catch (error) {
+    console.error("Error creating chart:", error);
+  }
 };
 </script>
 
 <style scoped>
+.chart-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.canvas-container {
+  position: relative;
+  width: 100%;
+  height: 250px;
+}
+
 .loading-container {
   display: flex;
   flex-direction: column;

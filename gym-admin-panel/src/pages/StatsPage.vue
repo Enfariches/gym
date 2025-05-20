@@ -36,7 +36,7 @@
         <button class="filter-btn" @click="applyFilters">Применить</button>
       </div>
 
-      <button class="export-btn" @click="exportToExcel">Экспорт в Excel</button>
+      <button class="export-btn" @click="exportToPDF">Экспорт в PDF</button>
     </div>
 
     <div class="stats-container">
@@ -262,11 +262,9 @@ const applyFilters = () => {
   statisticsStore.setDepartmentFilter(selectedDepartmentId.value);
 };
 
-// Экспорт в Excel (заглушка)
-const exportToExcel = () => {
-  // В реальном приложении здесь бы была логика экспорта в Excel
-  console.log('Экспорт в Excel');
-  alert('Функция экспорта в Excel будет реализована позднее');
+// Экспорт в PDF
+const exportToPDF = async () => {
+  await statisticsStore.exportToPDF();
 };
 
 onMounted(async () => {
@@ -366,7 +364,7 @@ onMounted(async () => {
 .export-btn {
   padding: 8px 15px;
   font-size: 14px;
-  background-color: rgba(28,200,138,1);
+  background-color: rgba(231,74,59,1);
   color: white;
   border: none;
   border-radius: 6px;
@@ -376,7 +374,7 @@ onMounted(async () => {
 }
 
 .export-btn:hover {
-  background-color: rgba(28,200,138,0.8);
+  background-color: rgba(231,74,59,0.8);
 }
 
 .stats-container {
