@@ -40,5 +40,40 @@ npm run format
 quasar build
 ```
 
+### Test the app
+
+```bash
+# Run tests
+npm run test
+
+# Run unit tests
+npm run test:unit
+
+# Run tests with coverage
+npm run test:coverage
+
+# Watch for changes and run tests
+npm run test:watch
+```
+
+## Test Coverage
+
+The application includes unit tests for key components:
+
+- Components with 100% coverage:
+  - SmallCard
+  - BigCard
+  - MainPage (except for one branch)
+
+- Components with partial coverage:
+  - StatisticsChartComponent (36.3%)
+  - statisticsStore (42.85%)
+
+To improve test coverage, additional tests can be added for:
+- Services
+- Stores
+- Other components
+- Pages
+
 ### Customize the configuration
 See [Configuring quasar.config.js](https://v2.quasar.dev/quasar-cli-vite/quasar-config-js).

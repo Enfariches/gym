@@ -4,10 +4,10 @@
       <h1 class="page-title">Обзор системы</h1>
 
       <div class="stats-container">
-        <SmallCard title="Всего пользователей" value="1,247" icon="people" />
-        <SmallCard title="Просмотров сегодня" value="382" icon="visibility" />
-        <SmallCard title="Завершено просмотров" value="76%" icon="check_circle" />
-        <SmallCard title="Активных видео" value="24" icon="play_circle" />
+        <SmallCard title="Всего пользователей" :value="statisticsStore.statisticsSummary.uniqueUsers.toString()" icon="people" />
+        <SmallCard title="Просмотров сегодня" :value="todayViews.toString()" icon="visibility" />
+        <SmallCard title="Завершено просмотров" :value="`${statisticsStore.statisticsSummary.completedPercentage}%`" icon="check_circle" />
+        <SmallCard title="Активных видео" :value="activeVideos.toString()" icon="play_circle" />
       </div>
 
       <div class="dashboard-row">
@@ -36,9 +36,11 @@
 
         <BigCard title="Статистика просмотров" icon="insert_chart">
           <div class="chart-container">
-            <!-- Add your chart component here -->
-            <q-icon name="show_chart" size="100px" color="primary" class="q-mb-md" />
-            <div class="text-grey-7">График просмотров видео по дням недели</div>
+            <template v-if="!statisticsLoaded">
+              <q-spinner size="50px" color="primary" />
+              <div class="loading-text">Загрузка данных...</div>
+            </template>
+            <StatisticsChartComponent v-else view-type="full" />
           </div>
         </BigCard>
       </div>
@@ -86,8 +88,40 @@
 
 <script setup lang="ts">
 import { QPage } from 'quasar';
+import { onMounted, computed, ref } from 'vue';
 import SmallCard from '../components/SmallCard.vue';
 import BigCard from 'src/components/mainPage/BigCard.vue';
+import StatisticsChartComponent from 'src/components/statPage/StatisticsChartComponent.vue';
+import { useStatisticsStore } from 'src/stores/statisticsStore';
+import { useMediaStore } from 'src/stores/mediaStore';
+
+const statisticsStore = useStatisticsStore();
+const mediaStore = useMediaStore();
+const statisticsLoaded = ref(false);
+
+// Вычисляемые значения для карточек статистики
+const activeVideos = computed(() => mediaStore.videos.length);
+const todayViews = computed(() => {
+  // Вычисляем просмотры за сегодня
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  return statisticsStore.filteredStatistics.filter(stat => {
+    if (!stat.createdAt) return false;
+    const statDate = new Date(Number(stat.createdAt.seconds) * 1000);
+    return statDate >= today;
+  }).length;
+});
+
+onMounted(async () => {
+  // Загружаем данные при загрузке страницы
+  if (mediaStore.videos.length === 0) {
+    await mediaStore.loadVideos();
+  }
+
+  await statisticsStore.fetchDepartmentStatistics();
+  statisticsLoaded.value = true;
+});
 </script>
 
 <style scoped>
@@ -140,11 +174,18 @@ import BigCard from 'src/components/mainPage/BigCard.vue';
 }
 
 .chart-container {
+  width: 100%;
   height: 300px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   color: rgba(108,117,125,1);
+}
+
+.loading-text {
+  margin-top: 16px;
+  color: #666;
+  font-size: 14px;
 }
 </style>
