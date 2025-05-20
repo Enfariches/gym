@@ -25,6 +25,8 @@ require (
 	gopkg.in/mail.v2 v2.3.1
 )
 
+require github.com/brianvoe/gofakeit v3.18.0+incompatible
+
 require (
 	github.com/BurntSushi/toml v1.2.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
