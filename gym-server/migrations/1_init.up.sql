@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS schedules (
 
 CREATE TABLE IF NOT EXISTS mediafiles (
     id SERIAL PRIMARY KEY,
-    title TEXT,
+    title VARCHAR(40),
     admin_id INTEGER NOT NULL,
     department_id INTEGER NOT NULL,
     created_at TIMESTAMP DEFAULT now(),

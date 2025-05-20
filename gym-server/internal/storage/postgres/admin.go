@@ -138,6 +138,26 @@ func (s *Storage) GetDepNameByDepID(department_id int64) (string, error) {
 	return departmentName, nil
 }
 
+func (s *Storage) GetAdminInfo(ctx context.Context, admin_id int64) (string, string, error) {
+	const op = "postgres.GetAdminInfo"
+
+	query, args, _ := goqu.
+		From("admins").
+		Select("name", "surname").
+		Where(goqu.C("id").Eq(admin_id)).
+		ToSQL()
+
+	var name, second_name string
+
+	err := s.db.QueryRow(query, args...).Scan(&name, &second_name)
+	if err != nil {
+		return "", "", fmt.Errorf("%s: %w", op, err)
+	}
+
+	return name, second_name, nil
+
+}
+
 func (s *Storage) updateDepNameByDepID(department_id int64, deptName string) error {
 	const op = "postgres.updateDepNameByDepID"
 

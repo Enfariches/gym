@@ -18,6 +18,7 @@ COPY --from=builder /gym-server/migrate .
 
 COPY config ./config
 COPY migrations ./migrations
+COPY lib/pdf ./lib/pdf
 
 COPY entrypoint.sh ./
 RUN chmod +x entrypoint.sh

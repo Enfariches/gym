@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"health/internal/services/media"
+	"health/internal/services/statistics"
 	"health/internal/storage/minio"
 	"health/internal/storage/postgres"
 	"health/lib/jwt"
@@ -45,6 +46,7 @@ func (g *GymHTTP) Run() error {
 	g.router.Use(middleware.Logger)
 	g.router.Use(middleware.Recoverer)
 
+
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:8080", "http://localhost:3000"},
 		AllowedMethods:   []string{http.MethodGet, http.MethodPost, http.MethodDelete, http.MethodPut, http.MethodOptions, http.MethodPatch},
@@ -56,6 +58,7 @@ func (g *GymHTTP) Run() error {
 	g.router.Group(func(r chi.Router) {
 		r.Use(jwt.JWTMiddleware)
 		r.Post("/api/upload", media.UploadMedia(log, g.pgStorage, g.minioStorage))
+    r.Get("/api/export", statistics.ExportStatistics(log, g.pgStorage))
 	})
 
 	log.Info("http server is running", slog.String("addr", g.httpServer.Addr))

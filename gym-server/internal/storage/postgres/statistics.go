@@ -48,17 +48,17 @@ func (s *Storage) GetEmployeeStatistics(ctx context.Context, employee_id, media_
 
 	employeeName, employeeSurname, err := s.getInfoEmployee(employee_id)
 	if err != nil {
-        return nil, fmt.Errorf("%s: %w", op, err)
-    }
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
 
 	mediaTitle, err := s.getTitleMedia(media_id)
 	if err != nil {
-        return nil, fmt.Errorf("%s: %w", op, err)
-    }
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
 
 	stat, err := scanStatistics(row, func(s *models.Statistics) {
 		s.EmployeeName = employeeName
-        s.EmployeeSurname = employeeSurname
+		s.EmployeeSurname = employeeSurname
 		s.MediaTitle = mediaTitle
 	})
 
@@ -70,6 +70,147 @@ func (s *Storage) GetEmployeeStatistics(ctx context.Context, employee_id, media_
 	}
 
 	return stat, nil
+}
+
+func (s *Storage) ListMediaStatistics(ctx context.Context, media_id int64) ([]*models.Statistics, error) {
+	const op = "postgres.ListMediaStatistics"
+
+	query, args, _ := goqu.
+		From("statistics").
+		Select("id", "progress", "percentage_view", "employee_id", "created_at").
+		Where(goqu.C("media_id").Eq(media_id)).
+		ToSQL()
+
+	rows, err := s.db.Query(query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", op, HandleDBError(err))
+	}
+	defer rows.Close()
+
+	mediaTitle, err := s.getTitleMedia(media_id)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	var stats []*models.Statistics
+
+	for rows.Next() {
+
+		statistics := &models.Statistics{}
+		var employee_id int64
+
+		err := rows.Scan(&statistics.ID, &statistics.Progress, &statistics.PercentageView, &employee_id, &statistics.CreatedAt)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan row: %w", err)
+		}
+
+		employeeName, employeeSurname, err := s.getInfoEmployee(employee_id)
+		if err != nil {
+			return nil, fmt.Errorf("%s: %w", op, err)
+		}
+
+		statistics.MediaTitle = mediaTitle
+		statistics.EmployeeName = employeeName
+		statistics.EmployeeSurname = employeeSurname
+
+		stats = append(stats, statistics)
+	}
+
+	return stats, nil
+}
+
+func (s *Storage) ListEmployeeStatistics(ctx context.Context, employee_id int64) ([]*models.Statistics, error) {
+	const op = "postgres.ListEmployeeStatistics"
+
+	query, args, _ := goqu.
+		From("statistics").
+		Select("id", "progress", "percentage_view", "media_id", "created_at").
+		Where(goqu.C("employee_id").Eq(employee_id)).
+		ToSQL()
+
+	rows, err := s.db.Query(query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", op, HandleDBError(err))
+	}
+	defer rows.Close()
+
+	employeeName, employeeSurname, err := s.getInfoEmployee(employee_id)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	var stats []*models.Statistics
+
+	for rows.Next() {
+
+		statistics := &models.Statistics{}
+		var media_id int64
+
+		err := rows.Scan(&statistics.ID, &statistics.Progress, &statistics.PercentageView, &media_id, &statistics.CreatedAt)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan row: %w", err)
+		}
+
+		mediaTitle, err := s.getTitleMedia(media_id)
+		if err != nil {
+			return nil, fmt.Errorf("%s: %w", op, err)
+		}
+
+		statistics.MediaTitle = mediaTitle
+		statistics.EmployeeName = employeeName
+		statistics.EmployeeSurname = employeeSurname
+
+		stats = append(stats, statistics)
+	}
+
+	return stats, nil
+}
+
+func (s *Storage) ListDepartmentStatistics(ctx context.Context, department_id int64) ([]*models.Statistics, error) {
+	const op = "postgres.ListDepartmentStatistics"
+
+	query, args, _ := goqu.
+		From("statistics").
+		Select("id", "progress", "percentage_view", "employee_id", "media_id", "created_at").
+		Where(goqu.C("department_id").Eq(department_id)).
+		ToSQL()
+
+	rows, err := s.db.Query(query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", op, HandleDBError(err))
+	}
+	defer rows.Close()
+
+	var stats []*models.Statistics
+
+	for rows.Next() {
+
+		statistics := &models.Statistics{}
+		var media_id, employee_id int64
+
+		err := rows.Scan(&statistics.ID, &statistics.Progress, &statistics.PercentageView, &employee_id, &media_id, &statistics.CreatedAt)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan row: %w", err)
+		}
+
+		mediaTitle, err := s.getTitleMedia(media_id)
+		if err != nil {
+			return nil, fmt.Errorf("%s: %w", op, err)
+		}
+
+		employeeName, employeeSurname, err := s.getInfoEmployee(employee_id)
+		if err != nil {
+			return nil, fmt.Errorf("%s: %w", op, err)
+		}
+
+		statistics.MediaTitle = mediaTitle
+		statistics.EmployeeName = employeeName
+		statistics.EmployeeSurname = employeeSurname
+
+		stats = append(stats, statistics)
+	}
+
+	return stats, nil
 }
 
 func (s *Storage) checkMediaId(media_id int64) error {
@@ -121,22 +262,22 @@ func (s *Storage) getInfoEmployee(employee_id int64) (string, string, error) {
 func (s *Storage) getTitleMedia(media_id int64) (string, error) {
 	const op = "postgres.getTitleMedia"
 
-    query, args, _ := goqu.
-        From("mediafiles").
-        Select("title").
-        Where(goqu.C("id").Eq(media_id)).
-        ToSQL()
+	query, args, _ := goqu.
+		From("mediafiles").
+		Select("title").
+		Where(goqu.C("id").Eq(media_id)).
+		ToSQL()
 
-    row := s.db.QueryRow(query, args...)
+	row := s.db.QueryRow(query, args...)
 
-    var title string
-    err := row.Scan(&title)
-    if err != nil {
-        if err == sql.ErrNoRows {
-            return "", fmt.Errorf("%s: %w", op, err)
-        }
-        return "", fmt.Errorf("%s: %w", op, HandleDBError(err))
-    }
+	var title string
+	err := row.Scan(&title)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return "", fmt.Errorf("%s: %w", op, err)
+		}
+		return "", fmt.Errorf("%s: %w", op, HandleDBError(err))
+	}
 
-    return title, nil
+	return title, nil
 }
