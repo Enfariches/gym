@@ -65,6 +65,16 @@ func MustLoad() *Config {
 	return &cfg
 }
 
+func MustLoadPath(configPath string) *Config {
+	var cfg Config
+
+	if err := cleanenv.ReadConfig(configPath, &cfg); err != nil {
+		panic("cannot read config: " + err.Error())
+	}
+
+	return &cfg
+}
+
 func fetchConfigPath() string {
 	var path string
 
