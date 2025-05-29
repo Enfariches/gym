@@ -9,7 +9,6 @@ import (
 	"health/internal/storage"
 	"health/lib/jwt"
 	"health/lib/logger/sl"
-	"health/lib/smtp"
 	"log/slog"
 	"time"
 
@@ -86,11 +85,11 @@ func (a *Auth) RegisterNewUser(ctx context.Context, email, password, source stri
 		return "", fmt.Errorf("%s: %w", op, err)
 	}
 
-	err = smtp.SendAuthMail(a.smtpConfig, authToken, email)
-	if err != nil {
-		log.Error("failed to send email", sl.Err(err))
-		return "", fmt.Errorf("%s: %w", op, err)
-	}
+	// err = smtp.SendAuthMail(a.smtpConfig, authToken, email)
+	// if err != nil {
+	// 	log.Error("failed to send email", sl.Err(err))
+	// 	return "", fmt.Errorf("%s: %w", op, err)
+	// }
 
 	return authToken, nil
 }
@@ -177,11 +176,11 @@ func (a *Auth) ChangePassword(ctx context.Context, email, source string) (string
 		return "", fmt.Errorf("%s: %w", op, err)
 	}
 
-	err = smtp.SendResetMail(a.smtpConfig, resetToken, email)
-	if err != nil {
-		log.Error("failed to send email", sl.Err(err))
-		return "", fmt.Errorf("%s: %w", op, err)
-	}
+	// err = smtp.SendResetMail(a.smtpConfig, resetToken, email)
+	// if err != nil {
+	// 	log.Error("failed to send email", sl.Err(err))
+	// 	return "", fmt.Errorf("%s: %w", op, err)
+	// }
 
 	return resetToken, nil
 }
