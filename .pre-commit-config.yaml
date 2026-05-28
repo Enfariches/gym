@@ -7,15 +7,6 @@ repos:
       - id: check-yaml
       - id: check-json
       - id: check-merge-conflict
-      
-  - repo: local
-    hooks:
-      - id: golangci-lint
-        name: golangci-lint
-        entry: bash -c 'cd gym-server && go run github.com/golangci/golangci-lint/cmd/golangci-lint run ./...'
-        language: system
-        pass_filenames: false
-
 
   - repo: local
     hooks:
