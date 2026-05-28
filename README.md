@@ -8,7 +8,7 @@ https://github.com/RO1T/gym-client
 
 ## Stack
 
-Server: Golang / MINIO
+Server: Golang / MINIO123
 
 Frontend: Vue/Quasar
 
