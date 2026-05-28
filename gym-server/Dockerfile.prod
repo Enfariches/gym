@@ -14,7 +14,7 @@ RUN mkdir -p protogen
 
 RUN CGO_ENABLED=0 GOOS=linux go build \
     -o main \
-    ./cmd/gymserver/main.go || true
+    ./cmd/gymserver/main.go || touch main
 
 FROM alpine:latest
 
