@@ -12,9 +12,10 @@ repos:
     hooks:
       - id: golangci-lint
         name: golangci-lint
-        entry: bash -c 'cd gym-server && ../bin/golangci-lint run ./...'
+        entry: bash -c 'cd gym-server && go run github.com/golangci/golangci-lint/cmd/golangci-lint run ./...'
         language: system
         pass_filenames: false
+
 
   - repo: local
     hooks:
