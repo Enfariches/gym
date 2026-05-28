@@ -13,10 +13,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        working-directory: backend
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -32,11 +28,12 @@ jobs:
           path: |
             ~/.cache/go-build
             ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('backend/go.sum') }}
+          key: ${{ runner.os }}-go-${{ hashFiles('gym-server/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
 
       - name: Install dependencies
+        working-directory: ./gym-server
         run: go mod tidy
 
       - name: Install pre-commit
@@ -44,27 +41,31 @@ jobs:
 
       - name: Run pre-commit hooks
         run: pre-commit run --all-files
-        working-directory: ..
 
-      - name: Run golangci-lint
+      - name: Install golangci-lint
         run: |
           curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s latest
-          ./bin/golangci-lint run ./...
+
+      - name: Run golangci-lint
+        working-directory: ./gym-server
+        run: ../bin/golangci-lint run ./...
 
       - name: Run unit tests
+        working-directory: ./gym-server
         run: go test ./... -v
 
       - name: Run security scan (gosec)
+        working-directory: ./gym-server
         run: |
           go install github.com/securego/gosec/v2/cmd/gosec@latest
           ~/go/bin/gosec ./...
 
       - name: Build application
+        working-directory: ./gym-server
         run: go build ./...
 
       - name: Send Telegram Notification
         if: always()
-        working-directory: ..
         run: |
           STATUS="✅ All checks passed"
 
