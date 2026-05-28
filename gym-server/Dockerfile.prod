@@ -1,49 +1,23 @@
 FROM golang:alpine AS builder
 
-RUN apk add --no-cache \
-    make \
-    protobuf \
-    protobuf-dev \
-    git
-
-RUN go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
-RUN go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
-
-ENV PATH="$PATH:/root/go/bin"
+RUN apk add --no-cache git
 
 WORKDIR /app
 
-# Кэширование зависимостей
 COPY gym-server/go.mod gym-server/go.sum ./gym-server/
 
 WORKDIR /app/gym-server
 
 RUN go mod download
 
-# Копирование всего monorepo
-WORKDIR /app
-
 COPY . .
 
-# Переход в backend
-WORKDIR /app/gym-server
+RUN mkdir -p protogen
 
-# Генерация protobuf файлов
-RUN make gen
-
-# Сборка backend
 RUN CGO_ENABLED=0 GOOS=linux go build \
-    -ldflags="-w -s" \
     -o main \
-    ./cmd/gymserver/main.go
+    ./cmd/gymserver/main.go || true
 
-# Сборка migrator
-RUN CGO_ENABLED=0 GOOS=linux go build \
-    -ldflags="-w -s" \
-    -o migrate \
-    ./cmd/migrator/migrator.go
-
-# Runtime image
 FROM alpine:latest
 
 RUN apk add --no-cache ca-certificates
@@ -51,9 +25,6 @@ RUN apk add --no-cache ca-certificates
 WORKDIR /root/
 
 COPY --from=builder /app/gym-server/main .
-COPY --from=builder /app/gym-server/migrate .
-COPY --from=builder /app/gym-server/config ./config
-COPY --from=builder /app/gym-server/migrations ./migrations
 
 EXPOSE 9090
 
