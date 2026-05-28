@@ -19,7 +19,7 @@ add_entry() {
 if [[ "$OSTYPE" == "linux-gnu"* ]] || [[ "$OSTYPE" == "darwin"* ]]; then
     # Linux or macOS
     HOSTS_FILE="/etc/hosts"
-    
+
     if check_entry_exists "$HOSTS_FILE"; then
         echo "Host entry already exists in $HOSTS_FILE"
     else
@@ -27,22 +27,22 @@ if [[ "$OSTYPE" == "linux-gnu"* ]] || [[ "$OSTYPE" == "darwin"* ]]; then
         sudo bash -c "echo '127.0.0.1 minio' >> $HOSTS_FILE"
         echo "Entry added successfully"
     fi
-    
+
 elif [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "cygwin" ]] || [[ -n "$WINDIR" ]]; then
     # Windows
     HOSTS_FILE="$WINDIR/System32/drivers/etc/hosts"
-    
+
     if [[ ! -n "$WINDIR" ]]; then
         HOSTS_FILE="C:/Windows/System32/drivers/etc/hosts"
     fi
-    
+
     if check_entry_exists "$HOSTS_FILE"; then
         echo "Host entry already exists in $HOSTS_FILE"
     else
         echo "Adding entry to $HOSTS_FILE (requires administrator privileges)"
         echo "Please run the following command as administrator in PowerShell:"
         echo "Add-Content -Path \"$HOSTS_FILE\" -Value \"127.0.0.1 minio\" -Force"
-        
+
         # Try to add automatically if running with admin privileges
         if command -v powershell.exe &> /dev/null; then
             powershell.exe -Command "Start-Process powershell -Verb RunAs -ArgumentList '-Command Add-Content -Path \"$HOSTS_FILE\" -Value \"127.0.0.1 minio\" -Force'"
@@ -53,4 +53,4 @@ else
     exit 1
 fi
 
-echo "Done! To test, try to ping minio: ping minio" 
+echo "Done! To test, try to ping minio: ping minio"

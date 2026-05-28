@@ -54,13 +54,13 @@ func (a *Admin) UpdateAdmin(ctx context.Context, updateFields map[string]any) (*
 
 func (a *Admin) ListAdminEmployees(ctx context.Context, department_id int64) ([]*models.Employee, error) {
 	const op = "admin.ListAdminEmployees"
-    log := a.log.With("op", op)
+	log := a.log.With("op", op)
 
-    employees, err := a.adminManager.ListAdminEmployees(ctx, department_id)
-    if err != nil {
-        log.Error("failed to list admin employees", sl.Err(err))
-        return nil, fmt.Errorf("%s: %w", op, err)
-    }
+	employees, err := a.adminManager.ListAdminEmployees(ctx, department_id)
+	if err != nil {
+		log.Error("failed to list admin employees", sl.Err(err))
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
 
-    return employees, nil
+	return employees, nil
 }

@@ -83,7 +83,6 @@ func (s *Storage) UpdateEmployee(ctx context.Context, updateFields map[string]an
 		return &models.Employee{}, fmt.Errorf("%s: %w", op, err)
 	}
 
-
 	return updatedEmployee, nil
 }
 

@@ -95,13 +95,13 @@ func (s *Schedule) DeleteSchedule(ctx context.Context, schedule_id int64) error 
 
 func (s *Schedule) ListSchedule(ctx context.Context, admin_id int64) ([]*models.Schedule, error) {
 	const op = "schedule.ListSchedules"
-    log := s.log.With("op", op)
+	log := s.log.With("op", op)
 
-    schedules, err := s.scheduleManager.ListSchedule(ctx, admin_id)
-    if err != nil {
-        log.Error("failed to list schedules", sl.Err(err))
-        return nil, err
-    }
+	schedules, err := s.scheduleManager.ListSchedule(ctx, admin_id)
+	if err != nil {
+		log.Error("failed to list schedules", sl.Err(err))
+		return nil, err
+	}
 
-    return schedules, nil
+	return schedules, nil
 }

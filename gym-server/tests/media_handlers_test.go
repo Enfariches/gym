@@ -105,7 +105,7 @@ func TestMedia_List_And_Delete(t *testing.T) {
 
 	_, err = st.Storage.SaveMediaPostgres(userId, departmentId, "mediaTitle2")
 	require.NoError(t, err)
-	
+
 	listMedia, err := st.MediaClient.ListMedia(ctx, &emptypb.Empty{})
 	require.Len(t, listMedia.Medias, 2)
 	require.NotNil(t, listMedia)

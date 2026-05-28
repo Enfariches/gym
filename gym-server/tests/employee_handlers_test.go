@@ -154,7 +154,7 @@ func TestEmployeeUpdate_And_Delete(t *testing.T) {
 	// require.NoError(t, err)
 }
 
-func TestListDepartments (t *testing.T) {
+func TestListDepartments(t *testing.T) {
 	ctx, st := suite.New(t)
 
 	email := gofakeit.Email()

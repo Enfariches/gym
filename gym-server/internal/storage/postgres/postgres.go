@@ -78,62 +78,62 @@ func scanAdmin(s Scanner, opts ...func(s *models.Admin)) (*models.Admin, error) 
 	return admin, nil
 }
 
-func scanMedia(s Scanner, opts...func(s *models.Media)) (*models.Media, error) {
+func scanMedia(s Scanner, opts ...func(s *models.Media)) (*models.Media, error) {
 	media := &models.Media{}
 
-    err := s.Scan(&media.ID, &media.Title, &media.AdminID, &media.DepartmentID, &media.CreatedAt)
-    if err != nil {
-        return nil, fmt.Errorf("failed to scan row: %w", err)
-    }
+	err := s.Scan(&media.ID, &media.Title, &media.AdminID, &media.DepartmentID, &media.CreatedAt)
+	if err != nil {
+		return nil, fmt.Errorf("failed to scan row: %w", err)
+	}
 
-    for _, opt := range opts {
-        opt(media)
-    }
+	for _, opt := range opts {
+		opt(media)
+	}
 
-    return media, nil
+	return media, nil
 }
 
-func scanEmployee(s Scanner, opts...func(s *models.Employee)) (*models.Employee, error) {
+func scanEmployee(s Scanner, opts ...func(s *models.Employee)) (*models.Employee, error) {
 	employee := &models.Employee{}
 
-    err := s.Scan(&employee.ID, &employee.Name, &employee.SecondName, &employee.Surname, &employee.Age, &employee.Sex, &employee.Phone, &employee.Email, &employee.Post)
-    if err != nil {
-        return nil, fmt.Errorf("failed to scan row: %w", err)
-    }
+	err := s.Scan(&employee.ID, &employee.Name, &employee.SecondName, &employee.Surname, &employee.Age, &employee.Sex, &employee.Phone, &employee.Email, &employee.Post)
+	if err != nil {
+		return nil, fmt.Errorf("failed to scan row: %w", err)
+	}
 
-    for _, opt := range opts {
-        opt(employee)
-    }
+	for _, opt := range opts {
+		opt(employee)
+	}
 
-    return employee, nil
+	return employee, nil
 }
 
-func scanDepartment(s Scanner, opts...func(s *models.Department)) (*models.Department, error) {
+func scanDepartment(s Scanner, opts ...func(s *models.Department)) (*models.Department, error) {
 	department := &models.Department{}
 
-    err := s.Scan(&department.ID, &department.Name)
-    if err != nil {
-        return nil, fmt.Errorf("failed to scan row: %w", err)
-    }
+	err := s.Scan(&department.ID, &department.Name)
+	if err != nil {
+		return nil, fmt.Errorf("failed to scan row: %w", err)
+	}
 
-    for _, opt := range opts {
-        opt(department)
-    }
+	for _, opt := range opts {
+		opt(department)
+	}
 
-    return department, nil
+	return department, nil
 }
 
-func scanStatistics(s Scanner, opts...func(s *models.Statistics)) (*models.Statistics, error) {
+func scanStatistics(s Scanner, opts ...func(s *models.Statistics)) (*models.Statistics, error) {
 	statistics := &models.Statistics{}
 
-    err := s.Scan(&statistics.ID, &statistics.Progress, &statistics.PercentageView, &statistics.CreatedAt)
-    if err != nil {
-        return nil, fmt.Errorf("failed to scan row: %w", err)
-    }
+	err := s.Scan(&statistics.ID, &statistics.Progress, &statistics.PercentageView, &statistics.CreatedAt)
+	if err != nil {
+		return nil, fmt.Errorf("failed to scan row: %w", err)
+	}
 
-    for _, opt := range opts {
-        opt(statistics)
-    }
+	for _, opt := range opts {
+		opt(statistics)
+	}
 
-    return statistics, nil
+	return statistics, nil
 }

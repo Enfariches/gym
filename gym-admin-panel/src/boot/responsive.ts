@@ -15,4 +15,4 @@ export default boot(({ app }) => {
   app.config.globalProperties.$isScreenSize = (size: keyof ScreenSizes): boolean => {
     return Screen[size];
   };
-}); 
+});

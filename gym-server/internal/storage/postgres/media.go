@@ -77,7 +77,7 @@ func (s *Storage) DeleteMedia(ctx context.Context, media_id int64) error {
 	const op = "postgres.DeleteMedia"
 
 	admin_id := ctx.Value(ctxkey.UserKey).(int64)
-	
+
 	if _, err := s.getMediaIDByAdminID(admin_id, media_id); err != nil {
 		return fmt.Errorf("%s: %s", op, "admin does not have such a media_id")
 	}

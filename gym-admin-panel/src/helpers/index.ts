@@ -67,5 +67,3 @@ export const getErrorByPath = (testErrors: Record<string, any>, ...path: any) =>
 
   return err
 }
-
-

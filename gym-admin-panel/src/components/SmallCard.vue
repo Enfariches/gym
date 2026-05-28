@@ -52,4 +52,4 @@ const props = defineProps<{
   opacity: 0.1;
   color: rgba(78,115,223,1);
 }
-</style> 
+</style>

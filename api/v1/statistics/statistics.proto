@@ -31,7 +31,7 @@ message CreateStatisticsRequest {
 
     // Продолжительность в процентах (skipped=0; incomplete=x; complete=100)
     int64 percentage_view = 2;
- 
+
     // Идентификатор медиа.
     int64 media_id = 3 [(google.api.field_behavior) = OPTIONAL];
 }
@@ -91,14 +91,13 @@ message Statistic {
 enum MediaProgress {
     // Не указано
     MEDIA_PROGRESS_UNSPECIFIED = 0;
-    
+
     // Отклонён просмотр (например, пользователь закрыл вкладку)
-    SKIPPED = 1;    
-    
+    SKIPPED = 1;
+
     // Просмотр не завершён (начал смотреть, но не до конца)
-    INCOMPLETE = 2; 
+    INCOMPLETE = 2;
 
     // Просмотр завершён полностью
-    COMPLETED = 3; 
+    COMPLETED = 3;
   }
-

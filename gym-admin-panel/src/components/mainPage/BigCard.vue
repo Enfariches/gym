@@ -34,4 +34,4 @@ const props = defineProps<{
   display: flex;
   align-items: center;
 }
-</style> 
+</style>
