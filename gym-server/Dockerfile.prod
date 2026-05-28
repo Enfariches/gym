@@ -4,13 +4,11 @@ RUN apk add --no-cache git
 
 WORKDIR /app
 
-COPY gym-server/go.mod gym-server/go.sum ./gym-server/
+COPY . .
 
 WORKDIR /app/gym-server
 
-RUN go mod download
-
-COPY . .
+RUN go mod tidy || true
 
 RUN mkdir -p protogen
 
