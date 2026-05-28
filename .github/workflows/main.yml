@@ -1,3 +1,4 @@
+```yaml id="c4v2q1"
 name: Go CI Pipeline
 
 on:
@@ -12,6 +13,10 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: backend
 
     steps:
       - name: Checkout repository
@@ -28,7 +33,7 @@ jobs:
           path: |
             ~/.cache/go-build
             ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          key: ${{ runner.os }}-go-${{ hashFiles('backend/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
 
@@ -40,6 +45,7 @@ jobs:
 
       - name: Run pre-commit hooks
         run: pre-commit run --all-files
+        working-directory: ..
 
       - name: Run golangci-lint
         run: |
@@ -59,6 +65,7 @@ jobs:
 
       - name: Send Telegram Notification
         if: always()
+        working-directory: ..
         run: |
           STATUS="✅ All checks passed"
 
@@ -68,4 +75,5 @@ jobs:
 
           curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
             -d chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
-            -d text="Go CI Pipeline: ${STATUS}%0ARepository: ${{ github.repository }}%0ABranch: ${{ github.ref_name }}%0ACommit: ${{ github.sha }}"
+            -d text="Go CI Pipeline: ${STATUS}%0ARepository: ${{ github.repository }}%0ABranch: ${{ github.ref_name }}"
+```
