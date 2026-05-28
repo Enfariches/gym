@@ -22,7 +22,7 @@ MAKE_DIR = mkdir -p ./protogen
 RM_CMD = rm -rf ./protogen
 endif
 
-# Генерация gRPC TypeScript Интерфейсов. 
+# Генерация gRPC TypeScript Интерфейсов.
 gen:
 	$(RM_CMD)
 	$(MAKE_DIR)
@@ -33,4 +33,3 @@ gen:
 
 clean:
 	$(RM_CMD)
-

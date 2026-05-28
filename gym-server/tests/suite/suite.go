@@ -24,12 +24,12 @@ type Suite struct {
 	Cfg        *config.Config
 	Storage    *postgres.Storage // Конфигурация приложения
 
-	AuthClient     authpb.AuthServiceClient
-	AdminClient    userpb.AdminServiceClient
-	ScheduleClient schedulepb.ScheduleServiceClient
-	MediaClient    mediapb.MediaServiceClient
-	EmployeeClient userpb.EmployeeServiceClient
-	StatisticsClient     statspb.StatisticsServiceClient
+	AuthClient       authpb.AuthServiceClient
+	AdminClient      userpb.AdminServiceClient
+	ScheduleClient   schedulepb.ScheduleServiceClient
+	MediaClient      mediapb.MediaServiceClient
+	EmployeeClient   userpb.EmployeeServiceClient
+	StatisticsClient statspb.StatisticsServiceClient
 }
 
 const (
@@ -71,11 +71,11 @@ func New(t *testing.T) (context.Context, *Suite) {
 		Cfg:     cfg,
 		Storage: pg,
 
-		AuthClient:     authpb.NewAuthServiceClient(cc),
-		AdminClient:    userpb.NewAdminServiceClient(cc),
-		ScheduleClient: schedulepb.NewScheduleServiceClient(cc),
-		MediaClient:    mediapb.NewMediaServiceClient(cc),
-		EmployeeClient: userpb.NewEmployeeServiceClient(cc),
+		AuthClient:       authpb.NewAuthServiceClient(cc),
+		AdminClient:      userpb.NewAdminServiceClient(cc),
+		ScheduleClient:   schedulepb.NewScheduleServiceClient(cc),
+		MediaClient:      mediapb.NewMediaServiceClient(cc),
+		EmployeeClient:   userpb.NewEmployeeServiceClient(cc),
 		StatisticsClient: statspb.NewStatisticsServiceClient(cc),
 	}
 }

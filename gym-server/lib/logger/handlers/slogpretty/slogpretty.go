@@ -1,4 +1,5 @@
 package slogpretty
+
 // Убрать перед релизом, этот логгер для разработки.
 import (
 	"context"

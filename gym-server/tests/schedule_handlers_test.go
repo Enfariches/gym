@@ -139,7 +139,7 @@ func TestSchedule_Get_And_Update(t *testing.T) {
 
 	updatedSchedule, err := st.ScheduleClient.UpdateSchedule(ctx, &schedulepb.UpdateScheduleRequest{
 		Schedule: &schedulepb.Schedule{
-			Id:     scheduleGetm.Id,
+			Id:             scheduleGetm.Id,
 			CronExpression: "1 1 1 1 1",
 			IsActive:       false,
 		},

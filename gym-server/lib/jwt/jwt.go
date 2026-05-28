@@ -16,10 +16,10 @@ const (
 
 func NewToken(user models.AuthUser, duration time.Duration) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"id":     user.ID,
+		"id":            user.ID,
 		"department_id": user.DepartmentID,
-		"source": user.Source,
-		"exp":    time.Now().Add(duration).Unix(),
+		"source":        user.Source,
+		"exp":           time.Now().Add(duration).Unix(),
 	})
 
 	tokenString, err := token.SignedString([]byte(secret))

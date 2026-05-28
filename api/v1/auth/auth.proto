@@ -29,7 +29,7 @@ service AuthService {
 message AuthRequest {
     // Электронная почта пользователя.
     string email = 1;
-    
+
     // Пароль пользователя.
     string password = 2;
 
@@ -82,11 +82,11 @@ message RegisterResponse {
 // Тип приложения, от которого пришёл запрос
 enum AppSource {
     // Неизвестный источник
-    APP_SOURCE_UNSPECIFIED = 0; 
+    APP_SOURCE_UNSPECIFIED = 0;
 
     // Клиентское приложение
     EMPLOYEE = 1;
-    
+
     // Админ-панель
-    ADMIN = 2;      
+    ADMIN = 2;
 }

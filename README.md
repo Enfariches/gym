@@ -47,7 +47,7 @@ http://localhost:9001/ - minio (основная точка входа)
 
 ## Ошибки
 
-### ./entrypoint error 
+### ./entrypoint error
 
 dos2unix gym-server/entrypoint.sh
 

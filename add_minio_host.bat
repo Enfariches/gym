@@ -31,4 +31,4 @@ if %errorlevel% neq 0 (
 :end
 echo.
 echo Done! To test, try: ping minio
-timeout /t 5 
+timeout /t 5

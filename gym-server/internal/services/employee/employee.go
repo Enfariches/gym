@@ -68,13 +68,13 @@ func (e *Employee) DeleteEmployee(ctx context.Context, employee_id int64) error 
 
 func (e *Employee) ListDepartments(ctx context.Context) ([]*models.Department, error) {
 	const op = "employee.ListDepartments"
-    log := e.log.With("op", op)
+	log := e.log.With("op", op)
 
-    departments, err := e.employeeManager.ListDepartments(ctx)
-    if err != nil {
-        log.Error("failed to list departments", sl.Err(err))
-        return nil, err
-    }
+	departments, err := e.employeeManager.ListDepartments(ctx)
+	if err != nil {
+		log.Error("failed to list departments", sl.Err(err))
+		return nil, err
+	}
 
-    return departments, nil
+	return departments, nil
 }
