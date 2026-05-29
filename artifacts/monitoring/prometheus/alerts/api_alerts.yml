@@ -1,0 +1,58 @@
+groups:
+  - name: api_alerts
+
+    rules:
+
+      - alert: HighErrorRate
+
+        expr: |
+          (
+            sum(rate(http_requests_total{status=~"5.."}[5m]))
+            /
+            sum(rate(http_requests_total[5m]))
+          ) * 100 > 5
+
+        for: 5m
+
+        labels:
+          severity: critical
+          team: backend
+
+        annotations:
+          summary: "Высокий уровень ошибок API"
+          description: "Количество ошибок превышает 5%"
+          runbook_url: "https://wiki.local/runbooks/high-error-rate"
+
+      - alert: HighLatency
+
+        expr: |
+          histogram_quantile(
+            0.95,
+            rate(http_request_duration_seconds_bucket[5m])
+          ) > 0.5
+
+        for: 10m
+
+        labels:
+          severity: warning
+          team: backend
+
+        annotations:
+          summary: "Высокая задержка API"
+          description: "Latency выше 500мс"
+          runbook_url: "https://wiki.local/runbooks/high-latency"
+
+      - alert: ServiceDown
+
+        expr: up{job="api"} == 0
+
+        for: 1m
+
+        labels:
+          severity: critical
+          team: backend
+
+        annotations:
+          summary: "API недоступен"
+          description: "Prometheus не может получить метрики"
+          runbook_url: "https://wiki.local/runbooks/service-down"

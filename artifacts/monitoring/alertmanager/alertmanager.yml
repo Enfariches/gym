@@ -1,0 +1,14 @@
+global:
+  resolve_timeout: 5m
+
+route:
+  receiver: email-default
+
+receivers:
+  - name: email-default
+
+    email_configs:
+      - to: team@example.com
+        from: alertmanager@example.com
+        smarthost: smtp.example.com:587
+        require_tls: false
