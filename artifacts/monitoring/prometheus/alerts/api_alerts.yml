@@ -56,3 +56,37 @@ groups:
           summary: "API недоступен"
           description: "Prometheus не может получить метрики"
           runbook_url: "https://wiki.local/runbooks/service-down"
+
+           - alert: SuspiciousErrorSpike
+
+        expr: |
+          (
+            sum(rate(http_requests_total{status=~"5.."}[5m]))
+            /
+            sum(rate(http_requests_total[5m]))
+          ) * 100 > 10
+
+        for: 2m
+
+        labels:
+          severity: critical
+          type: security
+
+        annotations:
+          summary: "Подозрительный рост ошибок"
+          description: "Возможна SQL-инъекция или XSS атака"
+
+      - alert: AbnormalRequestRate
+
+        expr: |
+          sum(rate(http_requests_total[5m])) > 1000
+
+        for: 5m
+
+        labels:
+          severity: warning
+          type: security
+
+        annotations:
+          summary: "Аномально высокий RPS"
+          description: "Возможна DDoS атака"     
